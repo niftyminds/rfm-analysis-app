@@ -93,7 +93,7 @@ export default function FilterPanel({
               Vymazat filtry
             </button>
           )}
-          {isExpanded ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
+          {isExpanded ? <ChevronUp size={20} className="text-gray-700" /> : <ChevronDown size={20} className="text-gray-700" />}
         </div>
       </button>
 
