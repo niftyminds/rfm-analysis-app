@@ -164,19 +164,30 @@ export function processCSVData(data: CSVRow[], mapping: ColumnMapping): Customer
   Object.keys(ordersByEmail).forEach(email => {
     const customer = ordersByEmail[email];
     const orders = Object.values(customer.orders);
-    
+
     const orderCount = orders.length;
     const totalValue = orders.reduce((sum: number, order: any) => sum + order.amount, 0);
-    
-    const validDates = orders.map((o: any) => o.date).filter((d: any) => d !== null);
 
-    // Seřazení dat pro získání první a poslední objednávky
-    const sortedDates = validDates.length > 0
-      ? validDates.sort((a: Date, b: Date) => a.getTime() - b.getTime())
-      : [];
+    // Vytvoření pole detailů objednávek (datum + hodnota)
+    const orderDetails: Array<{ date: Date, amount: number }> = [];
+    orders.forEach((order: any) => {
+      if (order.date) {
+        orderDetails.push({
+          date: order.date,
+          amount: order.amount
+        });
+      }
+    });
 
-    const firstOrderDate = sortedDates.length > 0 ? sortedDates[0] : null;
-    const lastOrderDate = sortedDates.length > 0 ? sortedDates[sortedDates.length - 1] : null;
+    // Seřazení podle data
+    orderDetails.sort((a, b) => a.date.getTime() - b.date.getTime());
+
+    // Extrakce do samostatných polí
+    const orderDates = orderDetails.map(o => o.date);
+    const orderValues = orderDetails.map(o => o.amount);
+
+    const firstOrderDate = orderDates.length > 0 ? orderDates[0] : null;
+    const lastOrderDate = orderDates.length > 0 ? orderDates[orderDates.length - 1] : null;
 
     // Výpočet lifetime (dny od první objednávky)
     const lifetime = firstOrderDate
@@ -206,7 +217,9 @@ export function processCSVData(data: CSVRow[], mapping: ColumnMapping): Customer
       M_Score: 0,
       RFM_Score: '',
       RFM_Total: 0,
-      segment: ''
+      segment: '',
+      orderDates,
+      orderValues
     });
   });
   

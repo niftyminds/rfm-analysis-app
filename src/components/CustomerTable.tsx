@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useMemo, useEffect } from 'react';
-import { ChevronUp, ChevronDown, ChevronRight, Search, Download, Calendar, TrendingUp } from 'lucide-react';
+import { ChevronUp, ChevronDown, ChevronRight, Search, Download, Calendar, TrendingUp, DollarSign } from 'lucide-react';
 import React from 'react';
 import { Customer, AdvancedFilters } from '@/types';
 import { SEGMENT_COLORS } from './SegmentFilter';
@@ -19,6 +19,14 @@ interface CustomerTableProps {
 
 type SortField = 'name' | 'orderCount' | 'totalValue' | 'lastOrderDate' | 'RFM_Total' | 'segment';
 type SortOrder = 'asc' | 'desc';
+
+interface TooltipData {
+  orderNumber: number;
+  date: Date;
+  value: number;
+  daysSincePrevious: number | null;
+  position: { x: number; y: number };
+}
 
 const DEFAULT_ADVANCED_FILTERS: AdvancedFilters = {
   rfmScoreMin: 3,
@@ -46,6 +54,7 @@ export default function CustomerTable({
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
+  const [hoveredOrder, setHoveredOrder] = useState<TooltipData | null>(null);
   const itemsPerPage = 20;
 
   // Reset pagination na stránku 1 při změně filtrů
@@ -61,6 +70,125 @@ export default function CustomerTable({
       newExpanded.add(email);
     }
     setExpandedRows(newExpanded);
+  };
+
+  const renderOrderMarkers = (customer: Customer) => {
+    const orderDates = customer.orderDates || [];
+    const orderValues = customer.orderValues || [];
+    const firstDate = customer.firstOrderDate;
+    const lastDate = customer.lastOrderDate;
+
+    if (!firstDate || !lastDate || orderDates.length === 0) return null;
+
+    const totalDays = customer.lifetime;
+
+    return (
+      <>
+        {orderDates.map((orderDate, index) => {
+          // Vypočítej pozici na timeline (v %)
+          const daysFromStart = Math.floor(
+            (orderDate.getTime() - firstDate.getTime()) / (1000 * 60 * 60 * 24)
+          );
+          const position = (daysFromStart / totalDays) * 100;
+
+          // Vypočítej interval od předchozí objednávky
+          let daysSincePrevious = null;
+          if (index > 0) {
+            const prevDate = orderDates[index - 1];
+            daysSincePrevious = Math.floor(
+              (orderDate.getTime() - prevDate.getTime()) / (1000 * 60 * 60 * 24)
+            );
+          }
+
+          const orderValue = orderValues[index] || 0;
+
+          return (
+            <div
+              key={index}
+              className="absolute top-1/2 transform -translate-y-1/2 -translate-x-1/2 group"
+              style={{ left: `${Math.max(2, Math.min(98, position))}%` }}
+              onMouseEnter={(e) => {
+                const rect = e.currentTarget.getBoundingClientRect();
+                setHoveredOrder({
+                  orderNumber: index + 1,
+                  date: orderDate,
+                  value: orderValue,
+                  daysSincePrevious,
+                  position: { x: rect.left, y: rect.top }
+                });
+              }}
+              onMouseLeave={() => setHoveredOrder(null)}
+            >
+              {/* Order Dot */}
+              <div
+                className="w-2.5 h-2.5 bg-indigo-600 rounded-full border-2 border-white shadow-md
+                           hover:scale-[1.8] hover:bg-indigo-700 hover:shadow-lg
+                           transition-all duration-200 cursor-pointer z-10 relative"
+              ></div>
+
+              {/* Interval Label (zobrazí se jen na hover) */}
+              {daysSincePrevious !== null && (
+                <span className="absolute -bottom-6 left-1/2 transform -translate-x-1/2
+                               text-[10px] text-gray-500 whitespace-nowrap
+                               opacity-0 group-hover:opacity-100 transition-opacity font-medium">
+                  +{daysSincePrevious}d
+                </span>
+              )}
+            </div>
+          );
+        })}
+
+        {/* Tooltip - zobrazí se pro hovered order */}
+        {hoveredOrder && (
+          <div
+            className="absolute z-50 bg-white rounded-lg shadow-xl border border-gray-200 p-3
+                       pointer-events-none transition-opacity"
+            style={{
+              left: '50%',
+              top: '-80px',
+              transform: 'translateX(-50%)',
+              minWidth: '200px'
+            }}
+          >
+            {/* Tooltip Arrow */}
+            <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-full">
+              <div className="border-8 border-transparent border-t-white"></div>
+            </div>
+
+            {/* Tooltip Content */}
+            <div className="space-y-1.5">
+              <p className="text-xs font-bold text-indigo-600">
+                Objednávka #{hoveredOrder.orderNumber}
+              </p>
+              <div className="flex items-center gap-2">
+                <Calendar size={14} className="text-gray-500" />
+                <p className="text-sm font-semibold text-gray-900">
+                  {hoveredOrder.date.toLocaleDateString('cs-CZ', {
+                    day: 'numeric',
+                    month: 'long',
+                    year: 'numeric'
+                  })}
+                </p>
+              </div>
+              <div className="flex items-center gap-2">
+                <DollarSign size={14} className="text-gray-500" />
+                <p className="text-sm font-semibold text-gray-900">
+                  {Math.round(hoveredOrder.value).toLocaleString('cs-CZ')} Kč
+                </p>
+              </div>
+              {hoveredOrder.daysSincePrevious !== null && (
+                <div className="pt-1.5 mt-1.5 border-t border-gray-200">
+                  <p className="text-xs text-gray-600">
+                    <span className="font-medium">{hoveredOrder.daysSincePrevious} dní</span>
+                    {' '}od předchozí objednávky
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+      </>
+    );
   };
 
   const handleSort = (field: SortField) => {
@@ -306,27 +434,59 @@ export default function CustomerTable({
                             </div>
                           </div>
 
-                          {/* Timeline visualization */}
+                          {/* Enhanced Timeline s objednávkami */}
                           {customer.firstOrderDate && customer.lastOrderDate && (
                             <div className="bg-white rounded-lg p-4 border border-indigo-200">
-                              <div className="flex items-center justify-between mb-2">
-                                <span className="text-xs font-semibold text-gray-700">Časová osa zákazníka</span>
-                                <span className="text-xs text-gray-600">
-                                  {customer.orderCount} {customer.orderCount === 1 ? 'objednávka' : customer.orderCount < 5 ? 'objednávky' : 'objednávek'}
-                                </span>
+                              <div className="mb-3 flex justify-between items-center">
+                                <p className="text-xs font-semibold text-gray-700">
+                                  Časová osa zákazníka
+                                </p>
+                                <p className="text-xs text-gray-600">
+                                  {customer.orderCount} {customer.orderCount === 1 ? 'objednávka' :
+                                   customer.orderCount < 5 ? 'objednávky' : 'objednávek'}
+                                </p>
                               </div>
-                              <div className="relative h-8 bg-gradient-to-r from-green-200 via-blue-200 to-purple-200 rounded-full overflow-hidden">
-                                <div className="absolute inset-0 flex items-center justify-between px-3">
-                                  <span className="text-xs font-medium text-gray-700">Start</span>
-                                  <span className="text-xs font-medium text-gray-700">Teď</span>
+
+                              {/* Timeline Container */}
+                              <div className="relative h-16 bg-gradient-to-r from-green-100 via-blue-100 to-purple-100 rounded-lg p-3 pt-6">
+                                {/* Timeline Bar */}
+                                <div className="absolute top-1/2 left-0 right-0 h-1 bg-gradient-to-r from-green-500 via-blue-500 to-purple-500 transform -translate-y-1/2 rounded-full"></div>
+
+                                {/* Start Marker */}
+                                <div className="absolute left-0 top-1/2 transform -translate-y-1/2">
+                                  <div className="w-3 h-3 bg-green-600 rounded-full border-2 border-white shadow-md"></div>
+                                  <span className="absolute top-6 left-0 text-[10px] text-gray-600 whitespace-nowrap font-medium">
+                                    Start
+                                  </span>
                                 </div>
+
+                                {/* End Marker (Dnes) */}
+                                <div className="absolute right-0 top-1/2 transform -translate-y-1/2">
+                                  <div className="w-3 h-3 bg-purple-600 rounded-full border-2 border-white shadow-md"></div>
+                                  <span className="absolute top-6 right-0 text-[10px] text-gray-600 whitespace-nowrap font-medium">
+                                    Dnes
+                                  </span>
+                                </div>
+
+                                {/* Order Markers s Tooltips */}
+                                {renderOrderMarkers(customer)}
                               </div>
-                              <div className="flex items-center justify-between mt-1">
-                                <span className="text-xs text-gray-600">
-                                  {customer.firstOrderDate.toLocaleDateString('cs-CZ')}
+
+                              {/* Legend/Labels */}
+                              <div className="mt-3 flex justify-between text-xs text-gray-600">
+                                <span>
+                                  {customer.firstOrderDate.toLocaleDateString('cs-CZ', {
+                                    day: 'numeric',
+                                    month: 'numeric',
+                                    year: 'numeric'
+                                  })}
                                 </span>
-                                <span className="text-xs text-gray-600">
-                                  {new Date().toLocaleDateString('cs-CZ')}
+                                <span>
+                                  {customer.lastOrderDate.toLocaleDateString('cs-CZ', {
+                                    day: 'numeric',
+                                    month: 'numeric',
+                                    year: 'numeric'
+                                  })}
                                 </span>
                               </div>
                             </div>

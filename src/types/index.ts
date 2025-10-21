@@ -16,6 +16,8 @@ export interface Customer {
   RFM_Score: string;
   RFM_Total: number;
   segment: string;
+  orderDates: Date[];
+  orderValues: number[];
 }
 
 export interface Stats {
