@@ -1,26 +1,112 @@
-import { Customer, CSVRow } from '@/types';
+import { Customer, CSVRow, ColumnMapping } from '@/types';
 
 export function parseCzechDate(dateStr: string): Date | null {
   if (!dateStr) return null;
-  
+
+  // Trim and normalize the string
+  const cleaned = dateStr.toString().trim();
+
   const monthMap: Record<string, number> = {
-    'leden': 0, 'únor': 1, 'březen': 2, 'duben': 3, 'květen': 4, 'červen': 5,
-    'červenec': 6, 'srpen': 7, 'září': 8, 'říjen': 9, 'listopad': 10, 'prosinec': 11
+    'leden': 0, 'ledna': 0,
+    'únor': 1, 'února': 1,
+    'březen': 2, 'března': 2,
+    'duben': 3, 'dubna': 3,
+    'květen': 4, 'května': 4,
+    'červen': 5, 'června': 5,
+    'červenec': 6, 'července': 6,
+    'srpen': 7, 'srpna': 7,
+    'září': 8,
+    'říjen': 9, 'října': 9,
+    'listopad': 10, 'listopadu': 10,
+    'prosinec': 11, 'prosince': 11
   };
-  
-  const match = dateStr.match(/(\d+)\.\s+(\w+)\s+(\d{4})/);
-  if (match) {
-    const day = parseInt(match[1]);
-    const month = monthMap[match[2].toLowerCase()];
-    const year = parseInt(match[3]);
+
+  // Format 1: "7. květen 2024 10:15:05" or "7. květen 2024" (with optional time)
+  // Czech month names with optional time
+  const czechFormat = cleaned.match(/(\d{1,2})\.\s*([a-zěščřžýáíéůú]+)\s+(\d{4})/i);
+  if (czechFormat) {
+    const day = parseInt(czechFormat[1]);
+    const monthName = czechFormat[2].toLowerCase();
+    const year = parseInt(czechFormat[3]);
+    const month = monthMap[monthName];
+
+    if (month !== undefined) {
+      return new Date(year, month, day);
+    }
+  }
+
+  // Format 2: "07.05.2024" or "7.5.2024" (numeric DD.MM.YYYY)
+  const numericDotFormat = cleaned.match(/^(\d{1,2})\.(\d{1,2})\.(\d{4})/);
+  if (numericDotFormat) {
+    const day = parseInt(numericDotFormat[1]);
+    const month = parseInt(numericDotFormat[2]) - 1; // JS months are 0-indexed
+    const year = parseInt(numericDotFormat[3]);
     return new Date(year, month, day);
   }
+
+  // Format 3: "2024-05-07" (ISO format YYYY-MM-DD)
+  const isoFormat = cleaned.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+  if (isoFormat) {
+    const year = parseInt(isoFormat[1]);
+    const month = parseInt(isoFormat[2]) - 1;
+    const day = parseInt(isoFormat[3]);
+    return new Date(year, month, day);
+  }
+
+  // Format 4: "07/05/2024" or "7/5/2024" (DD/MM/YYYY)
+  const slashFormat = cleaned.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+  if (slashFormat) {
+    const day = parseInt(slashFormat[1]);
+    const month = parseInt(slashFormat[2]) - 1;
+    const year = parseInt(slashFormat[3]);
+    return new Date(year, month, day);
+  }
+
+  // Format 5: Try standard Date constructor as fallback
+  try {
+    const date = new Date(cleaned);
+    if (!isNaN(date.getTime())) {
+      return date;
+    }
+  } catch (e) {
+    // Ignore
+  }
+
   return null;
 }
 
 export function parseAmount(amountStr: string): number {
   if (!amountStr) return 0;
-  const cleaned = amountStr.toString().replace(/\s/g, '').replace(',', '.');
+
+  // Convert to string and remove whitespace
+  let cleaned = amountStr.toString().trim().replace(/\s/g, '');
+
+  // Handle different number formats:
+  // European: 2.057,85 or 2 057,85 (comma as decimal)
+  // US: 2,057.85 or 2057.85 (dot as decimal)
+
+  // Check if it's European format (comma as decimal separator)
+  const hasComma = cleaned.includes(',');
+  const hasDot = cleaned.includes('.');
+
+  if (hasComma && hasDot) {
+    // Both present - determine which is decimal separator
+    const lastCommaIndex = cleaned.lastIndexOf(',');
+    const lastDotIndex = cleaned.lastIndexOf('.');
+
+    if (lastCommaIndex > lastDotIndex) {
+      // European format: 2.057,85 - comma is decimal
+      cleaned = cleaned.replace(/\./g, '').replace(',', '.');
+    } else {
+      // US format: 2,057.85 - dot is decimal
+      cleaned = cleaned.replace(/,/g, '');
+    }
+  } else if (hasComma) {
+    // Only comma - assume it's decimal separator (European)
+    cleaned = cleaned.replace(',', '.');
+  }
+  // If only dot or neither, keep as is (US format or integer)
+
   return parseFloat(cleaned) || 0;
 }
 
@@ -47,18 +133,18 @@ export function getCustomerSegment(r: number, f: number, m: number): string {
   return 'Need Attention';
 }
 
-export function processCSVData(data: CSVRow[]): Customer[] {
+export function processCSVData(data: CSVRow[], mapping: ColumnMapping): Customer[] {
   const ordersByEmail: Record<string, any> = {};
-  
+
   // Agregace dat
   data.forEach(row => {
-    const email = (row.Email || '').trim().toLowerCase();
+    const email = (row[mapping.customerEmail] || '').trim().toLowerCase();
     if (!email) return;
-    
-    const orderNum = row['Číslo objednávky'];
-    const date = parseCzechDate(row['Datum pořízení']);
-    const amount = parseAmount(row['Hodnota obj. bez DPH celkem']);
-    const name = (row['Jméno'] || '').trim();
+
+    const orderNum = row[mapping.orderNumber];
+    const date = parseCzechDate(row[mapping.orderDate]);
+    const amount = parseAmount(row[mapping.orderValue]);
+    const name = (row[mapping.customerName] || '').trim();
     
     if (!ordersByEmail[email]) {
       ordersByEmail[email] = { email, name, orders: {} };

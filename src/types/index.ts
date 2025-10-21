@@ -26,10 +26,13 @@ export interface Stats {
 }
 
 export interface CSVRow {
-  'Číslo objednávky': string;
-  'Datum pořízení': string;
-  'Hodnota obj. bez DPH celkem': string;
-  'Jméno': string;
-  'Email': string;
   [key: string]: string;
+}
+
+export interface ColumnMapping {
+  orderNumber: string;
+  orderDate: string;
+  orderValue: string;
+  customerName: string;
+  customerEmail: string;
 }

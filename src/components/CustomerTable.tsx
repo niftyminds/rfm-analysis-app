@@ -3,27 +3,17 @@
 import { useState, useMemo } from 'react';
 import { ChevronUp, ChevronDown, Search } from 'lucide-react';
 import { Customer } from '@/types';
+import { SEGMENT_COLORS } from './SegmentFilter';
 
 interface CustomerTableProps {
   customers: Customer[];
+  selectedSegments?: string[];
 }
 
 type SortField = 'name' | 'orderCount' | 'totalValue' | 'lastOrderDate' | 'RFM_Total' | 'segment';
 type SortOrder = 'asc' | 'desc';
 
-const SEGMENT_COLORS: Record<string, string> = {
-  'Champions': 'bg-green-100 text-green-800 border-green-300',
-  'Loyal Customers': 'bg-blue-100 text-blue-800 border-blue-300',
-  'Potential Loyalists': 'bg-cyan-100 text-cyan-800 border-cyan-300',
-  'New Customers': 'bg-purple-100 text-purple-800 border-purple-300',
-  'Promising': 'bg-yellow-100 text-yellow-800 border-yellow-300',
-  'Need Attention': 'bg-orange-100 text-orange-800 border-orange-300',
-  'At Risk': 'bg-red-100 text-red-800 border-red-300',
-  'Cant Lose Them': 'bg-pink-100 text-pink-800 border-pink-300',
-  'Lost': 'bg-gray-100 text-gray-800 border-gray-300'
-};
-
-export default function CustomerTable({ customers }: CustomerTableProps) {
+export default function CustomerTable({ customers, selectedSegments = [] }: CustomerTableProps) {
   const [sortField, setSortField] = useState<SortField>('totalValue');
   const [sortOrder, setSortOrder] = useState<SortOrder>('desc');
   const [searchTerm, setSearchTerm] = useState('');
@@ -41,13 +31,19 @@ export default function CustomerTable({ customers }: CustomerTableProps) {
 
   const sortedAndFilteredCustomers = useMemo(() => {
     let filtered = customers.filter(c => {
+      // Filter by selected segments
+      const segmentMatch = selectedSegments.length === 0 || selectedSegments.includes(c.segment);
+
+      // Filter by search term
       const searchLower = searchTerm.toLowerCase();
-      return (
+      const searchMatch = (
         c.email.toLowerCase().includes(searchLower) ||
         c.firstName.toLowerCase().includes(searchLower) ||
         c.lastName.toLowerCase().includes(searchLower) ||
         c.segment.toLowerCase().includes(searchLower)
       );
+
+      return segmentMatch && searchMatch;
     });
 
     return filtered.sort((a, b) => {
@@ -71,7 +67,7 @@ export default function CustomerTable({ customers }: CustomerTableProps) {
       if (aVal > bVal) return sortOrder === 'asc' ? 1 : -1;
       return 0;
     });
-  }, [customers, sortField, sortOrder, searchTerm]);
+  }, [customers, sortField, sortOrder, searchTerm, selectedSegments]);
 
   const totalPages = Math.ceil(sortedAndFilteredCustomers.length / itemsPerPage);
   const paginatedCustomers = sortedAndFilteredCustomers.slice(

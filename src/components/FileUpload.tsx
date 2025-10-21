@@ -3,15 +3,14 @@
 import { useCallback, useState } from 'react';
 import { Upload, FileSpreadsheet, AlertCircle } from 'lucide-react';
 import Papa from 'papaparse';
-import { processCSVData } from '@/utils/rfmAnalysis';
-import { Customer, CSVRow } from '@/types';
+import { CSVRow } from '@/types';
 
 interface FileUploadProps {
-  onDataProcessed: (data: Customer[]) => void;
+  onCSVLoaded: (data: CSVRow[], columns: string[]) => void;
   setLoading: (loading: boolean) => void;
 }
 
-export default function FileUpload({ onDataProcessed, setLoading }: FileUploadProps) {
+export default function FileUpload({ onCSVLoaded, setLoading }: FileUploadProps) {
   const [dragActive, setDragActive] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -32,8 +31,22 @@ export default function FileUpload({ onDataProcessed, setLoading }: FileUploadPr
       delimitersToGuess: [',', '\t', '|', ';'],
       complete: (results) => {
         try {
-          const customers = processCSVData(results.data as CSVRow[]);
-          onDataProcessed(customers);
+          const data = results.data as CSVRow[];
+          if (data.length === 0) {
+            setError('CSV soubor je prázdný');
+            setLoading(false);
+            return;
+          }
+
+          const columns = Object.keys(data[0]);
+          if (columns.length === 0) {
+            setError('CSV soubor neobsahuje žádné sloupce');
+            setLoading(false);
+            return;
+          }
+
+          onCSVLoaded(data, columns);
+          setLoading(false);
         } catch (err) {
           setError('Chyba při zpracování souboru. Zkontrolujte formát CSV.');
           setLoading(false);
@@ -44,7 +57,7 @@ export default function FileUpload({ onDataProcessed, setLoading }: FileUploadPr
         setLoading(false);
       }
     });
-  }, [onDataProcessed, setLoading]);
+  }, [onCSVLoaded, setLoading]);
 
   const handleDrag = useCallback((e: React.DragEvent) => {
     e.preventDefault();
@@ -123,14 +136,20 @@ export default function FileUpload({ onDataProcessed, setLoading }: FileUploadPr
         )}
 
         <div className="mt-8 bg-blue-50 border border-blue-200 rounded-lg p-4">
-          <h3 className="font-semibold text-blue-900 mb-2">Požadovaný formát CSV:</h3>
+          <h3 className="font-semibold text-blue-900 mb-2">Požadovaná data v CSV:</h3>
+          <p className="text-sm text-blue-800 mb-2">
+            CSV soubor musí obsahovat následující informace (v dalším kroku namapujete sloupce):
+          </p>
           <ul className="text-sm text-blue-800 space-y-1">
-            <li>• <strong>Číslo objednávky</strong> - ID objednávky</li>
-            <li>• <strong>Datum pořízení</strong> - datum ve formátu "27. prosinec 2023"</li>
-            <li>• <strong>Hodnota obj. bez DPH celkem</strong> - částka objednávky</li>
-            <li>• <strong>Jméno</strong> - jméno zákazníka</li>
-            <li>• <strong>Email</strong> - email zákazníka</li>
+            <li>• <strong>Číslo/ID objednávky</strong> - unikátní identifikátor</li>
+            <li>• <strong>Datum objednávky</strong> - datum vytvoření</li>
+            <li>• <strong>Hodnota objednávky</strong> - částka (ideálně bez DPH)</li>
+            <li>• <strong>Jméno zákazníka</strong> - celé jméno nebo příjmení</li>
+            <li>• <strong>Email zákazníka</strong> - emailová adresa</li>
           </ul>
+          <p className="text-xs text-blue-700 mt-3">
+            💡 Po nahrání budete moci namapovat sloupce z vašeho CSV na požadovaná pole.
+          </p>
         </div>
       </div>
     </div>

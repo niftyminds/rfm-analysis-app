@@ -1,11 +1,12 @@
 'use client';
 
-import { useMemo } from 'react';
-import { Download, RefreshCw, Users, DollarSign, TrendingUp, Calendar } from 'lucide-react';
+import { useMemo, useState } from 'react';
+import { Download, RefreshCw, Users, DollarSign, TrendingUp, Calendar, Filter as FilterIcon } from 'lucide-react';
 import Papa from 'papaparse';
 import { Customer, Stats } from '@/types';
 import SegmentChart from './SegmentChart';
 import CustomerTable from './CustomerTable';
+import SegmentFilter from './SegmentFilter';
 
 interface DashboardProps {
   customers: Customer[];
@@ -13,6 +14,7 @@ interface DashboardProps {
 }
 
 export default function Dashboard({ customers, onReset }: DashboardProps) {
+  const [selectedSegments, setSelectedSegments] = useState<string[]>([]);
   const stats: Stats = useMemo(() => {
     const segments: Record<string, number> = {};
     customers.forEach(c => {
@@ -29,14 +31,26 @@ export default function Dashboard({ customers, onReset }: DashboardProps) {
     };
   }, [customers]);
 
-  const handleExport = () => {
-    const exportData = customers.map(c => ({
+  const availableSegments = useMemo(() => {
+    return Object.keys(stats.segments).sort();
+  }, [stats.segments]);
+
+  const filteredCustomers = useMemo(() => {
+    if (selectedSegments.length === 0) {
+      return customers;
+    }
+    return customers.filter(c => selectedSegments.includes(c.segment));
+  }, [customers, selectedSegments]);
+
+  const handleExport = (customersToExport: Customer[] = customers, filenameSuffix: string = 'analyza') => {
+    const exportData = customersToExport.map(c => ({
       email: c.email,
+      tags: c.segment, // NEW: tags column right after email
       jmeno: c.firstName,
       prijmeni: c.lastName,
       pocet_objednavek: c.orderCount,
       hodnota_objednavek: Math.round(c.totalValue * 100) / 100,
-      datum_posledni_objednavky: c.lastOrderDate 
+      datum_posledni_objednavky: c.lastOrderDate
         ? c.lastOrderDate.toLocaleDateString('cs-CZ')
         : '',
       RFM_skore: c.RFM_Score,
@@ -56,10 +70,21 @@ export default function Dashboard({ customers, onReset }: DashboardProps) {
     const link = document.createElement('a');
     const url = URL.createObjectURL(blob);
     link.setAttribute('href', url);
-    link.setAttribute('download', `RFM_analyza_${new Date().toISOString().split('T')[0]}.csv`);
+    link.setAttribute('download', `RFM_${filenameSuffix}_${new Date().toISOString().split('T')[0]}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+  };
+
+  const handleExportFiltered = () => {
+    if (selectedSegments.length === 0) {
+      alert('Vyberte alespoň jeden segment pro export.');
+      return;
+    }
+
+    const segmentNames = selectedSegments.join('_').replace(/\s+/g, '-');
+    const suffix = `export_${segmentNames}`;
+    handleExport(filteredCustomers, suffix);
   };
 
   return (
@@ -80,11 +105,21 @@ export default function Dashboard({ customers, onReset }: DashboardProps) {
               Nový soubor
             </button>
             <button
-              onClick={handleExport}
+              onClick={handleExportFiltered}
+              disabled={selectedSegments.length === 0}
+              className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg font-semibold transition-colors shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-gray-400"
+              title={selectedSegments.length === 0 ? 'Vyberte alespoň jeden segment' : 'Exportovat vybrané segmenty'}
+            >
+              <FilterIcon size={18} />
+              <Download size={20} />
+              Exportovat vybrané ({selectedSegments.length})
+            </button>
+            <button
+              onClick={() => handleExport()}
               className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-lg font-semibold transition-colors shadow-lg"
             >
               <Download size={20} />
-              Exportovat CSV
+              Exportovat vše
             </button>
           </div>
         </div>
@@ -132,8 +167,17 @@ export default function Dashboard({ customers, onReset }: DashboardProps) {
       {/* Segment Chart */}
       <SegmentChart segments={stats.segments} total={stats.total} />
 
+      {/* Segment Filter */}
+      <SegmentFilter
+        segments={availableSegments}
+        selectedSegments={selectedSegments}
+        onSegmentChange={setSelectedSegments}
+        totalCount={customers.length}
+        filteredCount={filteredCustomers.length}
+      />
+
       {/* Customer Table */}
-      <CustomerTable customers={customers} />
+      <CustomerTable customers={customers} selectedSegments={selectedSegments} />
     </div>
   );
 }

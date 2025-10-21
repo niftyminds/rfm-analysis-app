@@ -1,22 +1,52 @@
 'use client';
 
 import { useState } from 'react';
-import { Upload } from 'lucide-react';
 import FileUpload from '@/components/FileUpload';
+import ColumnMapper from '@/components/ColumnMapper';
 import Dashboard from '@/components/Dashboard';
-import { Customer } from '@/types';
+import { Customer, CSVRow, ColumnMapping } from '@/types';
+import { processCSVData } from '@/utils/rfmAnalysis';
+
+type AppStep = 'upload' | 'mapping' | 'dashboard';
 
 export default function Home() {
-  const [customers, setCustomers] = useState<Customer[] | null>(null);
+  const [step, setStep] = useState<AppStep>('upload');
+  const [csvData, setCSVData] = useState<CSVRow[]>([]);
+  const [columns, setColumns] = useState<string[]>([]);
+  const [customers, setCustomers] = useState<Customer[]>([]);
   const [loading, setLoading] = useState(false);
 
-  const handleDataProcessed = (data: Customer[]) => {
-    setCustomers(data);
-    setLoading(false);
+  const handleCSVLoaded = (data: CSVRow[], cols: string[]) => {
+    setCSVData(data);
+    setColumns(cols);
+    setStep('mapping');
+  };
+
+  const handleMapping = (mapping: ColumnMapping) => {
+    setLoading(true);
+    try {
+      const processedCustomers = processCSVData(csvData, mapping);
+      setCustomers(processedCustomers);
+      setStep('dashboard');
+    } catch (error) {
+      console.error('Error processing data:', error);
+      alert('Chyba při zpracování dat. Zkontrolujte mapování sloupců.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleReset = () => {
-    setCustomers(null);
+    setStep('upload');
+    setCSVData([]);
+    setColumns([]);
+    setCustomers([]);
+  };
+
+  const handleBackToUpload = () => {
+    setStep('upload');
+    setCSVData([]);
+    setColumns([]);
   };
 
   return (
@@ -39,9 +69,20 @@ export default function Home() {
 
       {/* Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {!customers ? (
-          <FileUpload onDataProcessed={handleDataProcessed} setLoading={setLoading} />
-        ) : (
+        {step === 'upload' && (
+          <FileUpload onCSVLoaded={handleCSVLoaded} setLoading={setLoading} />
+        )}
+
+        {step === 'mapping' && (
+          <ColumnMapper
+            columns={columns}
+            previewData={csvData.slice(0, 10)}
+            onMapping={handleMapping}
+            onBack={handleBackToUpload}
+          />
+        )}
+
+        {step === 'dashboard' && (
           <Dashboard customers={customers} onReset={handleReset} />
         )}
       </div>
