@@ -146,7 +146,7 @@ export default function FilterPanel({
                   value={filters.valueMin === 0 ? '' : filters.valueMin}
                   onChange={(e) => handleValueMinChange(e.target.value)}
                   placeholder={minValue.toLocaleString('cs-CZ')}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 placeholder:text-gray-600"
                 />
               </div>
               <span className="text-gray-600 mt-6">—</span>
@@ -157,7 +157,7 @@ export default function FilterPanel({
                   value={filters.valueMax === Infinity ? '' : filters.valueMax}
                   onChange={(e) => handleValueMaxChange(e.target.value)}
                   placeholder={maxValue.toLocaleString('cs-CZ')}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 placeholder:text-gray-600"
                 />
               </div>
             </div>
@@ -176,7 +176,7 @@ export default function FilterPanel({
                   value={filters.orderCountMin === 0 ? '' : filters.orderCountMin}
                   onChange={(e) => handleOrderMinChange(e.target.value)}
                   placeholder="0"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 placeholder:text-gray-600"
                 />
               </div>
               <span className="text-gray-600 mt-6">—</span>
@@ -187,7 +187,7 @@ export default function FilterPanel({
                   value={filters.orderCountMax === Infinity ? '' : filters.orderCountMax}
                   onChange={(e) => handleOrderMaxChange(e.target.value)}
                   placeholder="∞"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 placeholder:text-gray-600"
                 />
               </div>
             </div>
