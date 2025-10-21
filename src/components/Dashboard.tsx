@@ -168,7 +168,7 @@ export default function Dashboard({ customers, onReset }: DashboardProps) {
         </div>
 
         {/* Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
           <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-6 border border-blue-200">
             <div className="flex items-center gap-3 mb-2">
               <Users className="text-blue-600" size={24} />
@@ -197,12 +197,23 @@ export default function Dashboard({ customers, onReset }: DashboardProps) {
           
           <div className="bg-gradient-to-br from-orange-50 to-orange-100 rounded-xl p-6 border border-orange-200">
             <div className="flex items-center gap-3 mb-2">
-              <Calendar className="text-orange-600" size={24} />
+              <DollarSign className="text-orange-600" size={24} />
               <span className="text-sm font-medium text-orange-700">Prům. hodnota</span>
             </div>
             <p className="text-3xl font-bold text-orange-900">
               {Math.round(stats.avgValue).toLocaleString('cs-CZ')} Kč
             </p>
+          </div>
+
+          <div className="bg-gradient-to-br from-amber-50 to-amber-100 rounded-xl p-6 border border-amber-200">
+            <div className="flex items-center gap-3 mb-2">
+              <Calendar className="text-amber-600" size={24} />
+              <span className="text-sm font-medium text-amber-700">Prům. dny od poslední obj.</span>
+            </div>
+            <p className="text-3xl font-bold text-amber-900">
+              {Math.round(stats.avgRecency).toLocaleString('cs-CZ')} dní
+            </p>
+            <p className="text-xs text-amber-700 mt-1">Průměrná recency všech zákazníků</p>
           </div>
         </div>
       </div>
