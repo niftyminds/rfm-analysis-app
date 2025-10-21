@@ -169,16 +169,26 @@ export function processCSVData(data: CSVRow[], mapping: ColumnMapping): Customer
     const totalValue = orders.reduce((sum: number, order: any) => sum + order.amount, 0);
     
     const validDates = orders.map((o: any) => o.date).filter((d: any) => d !== null);
-    const lastOrderDate = validDates.length > 0 
-      ? new Date(Math.max(...validDates.map((d: Date) => d.getTime())))
-      : null;
-    
-    const recency = lastOrderDate 
+
+    // Seřazení dat pro získání první a poslední objednávky
+    const sortedDates = validDates.length > 0
+      ? validDates.sort((a: Date, b: Date) => a.getTime() - b.getTime())
+      : [];
+
+    const firstOrderDate = sortedDates.length > 0 ? sortedDates[0] : null;
+    const lastOrderDate = sortedDates.length > 0 ? sortedDates[sortedDates.length - 1] : null;
+
+    // Výpočet lifetime (dny od první objednávky)
+    const lifetime = firstOrderDate
+      ? Math.floor((today.getTime() - firstOrderDate.getTime()) / (1000 * 60 * 60 * 24))
+      : 0;
+
+    const recency = lastOrderDate
       ? Math.floor((today.getTime() - lastOrderDate.getTime()) / (1000 * 60 * 60 * 24))
       : 9999;
-    
+
     const nameParts = customer.name.split(' ').filter((p: string) => p.length > 0);
-    
+
     customers.push({
       email: customer.email,
       firstName: nameParts[0] || '',
@@ -186,6 +196,8 @@ export function processCSVData(data: CSVRow[], mapping: ColumnMapping): Customer
       orderCount,
       totalValue,
       lastOrderDate,
+      firstOrderDate,
+      lifetime,
       recency,
       frequency: orderCount,
       monetary: totalValue,

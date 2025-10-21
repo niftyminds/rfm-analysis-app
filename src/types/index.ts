@@ -5,6 +5,8 @@ export interface Customer {
   orderCount: number;
   totalValue: number;
   lastOrderDate: Date | null;
+  firstOrderDate: Date | null;
+  lifetime: number;
   recency: number;
   frequency: number;
   monetary: number;

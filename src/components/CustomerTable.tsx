@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useMemo, useEffect } from 'react';
-import { ChevronUp, ChevronDown, Search, Download } from 'lucide-react';
+import { ChevronUp, ChevronDown, ChevronRight, Search, Download, Calendar, TrendingUp } from 'lucide-react';
+import React from 'react';
 import { Customer, AdvancedFilters } from '@/types';
 import { SEGMENT_COLORS } from './SegmentFilter';
 
@@ -44,12 +45,23 @@ export default function CustomerTable({
   const [sortOrder, setSortOrder] = useState<SortOrder>('desc');
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
+  const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
   const itemsPerPage = 20;
 
   // Reset pagination na stránku 1 při změně filtrů
   useEffect(() => {
     setCurrentPage(1);
   }, [selectedSegments, searchTerm, advancedFilters]);
+
+  const toggleRow = (email: string) => {
+    const newExpanded = new Set(expandedRows);
+    if (newExpanded.has(email)) {
+      newExpanded.delete(email);
+    } else {
+      newExpanded.add(email);
+    }
+    setExpandedRows(newExpanded);
+  };
 
   const handleSort = (field: SortField) => {
     if (sortField === field) {
@@ -149,7 +161,8 @@ export default function CustomerTable({
         <table className="w-full">
           <thead>
             <tr className="border-b-2 border-gray-200">
-              <th 
+              <th className="py-3 px-4 w-12"></th>
+              <th
                 className="text-left py-3 px-4 font-semibold text-gray-700 cursor-pointer hover:bg-gray-50"
                 onClick={() => handleSort('name')}
               >
@@ -201,35 +214,130 @@ export default function CustomerTable({
             </tr>
           </thead>
           <tbody>
-            {paginatedCustomers.map((customer, index) => (
-              <tr key={customer.email} className="border-b border-gray-100 hover:bg-gray-50">
-                <td className="py-3 px-4">
-                  <div className="font-medium text-gray-900">
-                    {customer.firstName} {customer.lastName}
-                  </div>
-                </td>
-                <td className="py-3 px-4 text-gray-600 text-sm">{customer.email}</td>
-                <td className="py-3 px-4 text-right font-semibold text-gray-900">
-                  {customer.orderCount}
-                </td>
-                <td className="py-3 px-4 text-right font-semibold text-gray-900">
-                  {Math.round(customer.totalValue).toLocaleString('cs-CZ')} Kč
-                </td>
-                <td className="py-3 px-4 text-sm text-gray-600">
-                  {customer.lastOrderDate?.toLocaleDateString('cs-CZ') || '-'}
-                </td>
-                <td className="py-3 px-4 text-center">
-                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800">
-                    {customer.RFM_Score}
-                  </span>
-                </td>
-                <td className="py-3 px-4">
-                  <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium border ${SEGMENT_COLORS[customer.segment] || 'bg-gray-100 text-gray-800 border-gray-300'}`}>
-                    {customer.segment}
-                  </span>
-                </td>
-              </tr>
-            ))}
+            {paginatedCustomers.map((customer) => {
+              const isExpanded = expandedRows.has(customer.email);
+              return (
+                <React.Fragment key={customer.email}>
+                  {/* Main row */}
+                  <tr className="border-b border-gray-100 hover:bg-gray-50">
+                    <td className="py-3 px-4">
+                      <button
+                        onClick={() => toggleRow(customer.email)}
+                        className="text-gray-600 hover:text-indigo-600 transition-colors"
+                        aria-label={isExpanded ? 'Sbalit detaily' : 'Rozbalit detaily'}
+                      >
+                        {isExpanded ? <ChevronDown size={18} /> : <ChevronRight size={18} />}
+                      </button>
+                    </td>
+                    <td className="py-3 px-4">
+                      <div className="font-medium text-gray-900">
+                        {customer.firstName} {customer.lastName}
+                      </div>
+                    </td>
+                    <td className="py-3 px-4 text-gray-600 text-sm">{customer.email}</td>
+                    <td className="py-3 px-4 text-right font-semibold text-gray-900">
+                      {customer.orderCount}
+                    </td>
+                    <td className="py-3 px-4 text-right font-semibold text-gray-900">
+                      {Math.round(customer.totalValue).toLocaleString('cs-CZ')} Kč
+                    </td>
+                    <td className="py-3 px-4 text-sm text-gray-600">
+                      {customer.lastOrderDate?.toLocaleDateString('cs-CZ') || '-'}
+                    </td>
+                    <td className="py-3 px-4 text-center">
+                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800">
+                        {customer.RFM_Score}
+                      </span>
+                    </td>
+                    <td className="py-3 px-4">
+                      <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium border ${SEGMENT_COLORS[customer.segment] || 'bg-gray-100 text-gray-800 border-gray-300'}`}>
+                        {customer.segment}
+                      </span>
+                    </td>
+                  </tr>
+
+                  {/* Expanded details row */}
+                  {isExpanded && (
+                    <tr className="border-b border-gray-100">
+                      <td colSpan={8} className="bg-indigo-50 p-6">
+                        <div className="max-w-4xl">
+                          {/* Timeline metrics */}
+                          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                            {/* First Order */}
+                            <div className="bg-white rounded-lg p-4 border border-indigo-200">
+                              <div className="flex items-center gap-2 mb-2">
+                                <Calendar className="text-green-600" size={18} />
+                                <span className="text-xs font-semibold text-gray-700">První objednávka</span>
+                              </div>
+                              <p className="text-lg font-bold text-gray-900">
+                                {customer.firstOrderDate?.toLocaleDateString('cs-CZ') || '-'}
+                              </p>
+                              <p className="text-xs text-gray-600 mt-1">
+                                {customer.firstOrderDate && `před ${customer.lifetime} dny`}
+                              </p>
+                            </div>
+
+                            {/* Last Order */}
+                            <div className="bg-white rounded-lg p-4 border border-indigo-200">
+                              <div className="flex items-center gap-2 mb-2">
+                                <Calendar className="text-blue-600" size={18} />
+                                <span className="text-xs font-semibold text-gray-700">Poslední objednávka</span>
+                              </div>
+                              <p className="text-lg font-bold text-gray-900">
+                                {customer.lastOrderDate?.toLocaleDateString('cs-CZ') || '-'}
+                              </p>
+                              <p className="text-xs text-gray-600 mt-1">
+                                {customer.lastOrderDate && `před ${customer.recency} dny`}
+                              </p>
+                            </div>
+
+                            {/* Customer Lifetime */}
+                            <div className="bg-white rounded-lg p-4 border border-indigo-200">
+                              <div className="flex items-center gap-2 mb-2">
+                                <TrendingUp className="text-purple-600" size={18} />
+                                <span className="text-xs font-semibold text-gray-700">Zákaznická doba</span>
+                              </div>
+                              <p className="text-lg font-bold text-gray-900">
+                                {customer.lifetime} dní
+                              </p>
+                              <p className="text-xs text-gray-600 mt-1">
+                                {Math.round(customer.lifetime / 30)} měsíců
+                              </p>
+                            </div>
+                          </div>
+
+                          {/* Timeline visualization */}
+                          {customer.firstOrderDate && customer.lastOrderDate && (
+                            <div className="bg-white rounded-lg p-4 border border-indigo-200">
+                              <div className="flex items-center justify-between mb-2">
+                                <span className="text-xs font-semibold text-gray-700">Časová osa zákazníka</span>
+                                <span className="text-xs text-gray-600">
+                                  {customer.orderCount} {customer.orderCount === 1 ? 'objednávka' : customer.orderCount < 5 ? 'objednávky' : 'objednávek'}
+                                </span>
+                              </div>
+                              <div className="relative h-8 bg-gradient-to-r from-green-200 via-blue-200 to-purple-200 rounded-full overflow-hidden">
+                                <div className="absolute inset-0 flex items-center justify-between px-3">
+                                  <span className="text-xs font-medium text-gray-700">Start</span>
+                                  <span className="text-xs font-medium text-gray-700">Teď</span>
+                                </div>
+                              </div>
+                              <div className="flex items-center justify-between mt-1">
+                                <span className="text-xs text-gray-600">
+                                  {customer.firstOrderDate.toLocaleDateString('cs-CZ')}
+                                </span>
+                                <span className="text-xs text-gray-600">
+                                  {new Date().toLocaleDateString('cs-CZ')}
+                                </span>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  )}
+                </React.Fragment>
+              );
+            })}
           </tbody>
         </table>
       </div>
