@@ -36,3 +36,14 @@ export interface ColumnMapping {
   customerName: string;
   customerEmail: string;
 }
+
+export interface AdvancedFilters {
+  rfmScoreMin: number;
+  rfmScoreMax: number;
+  valueMin: number;
+  valueMax: number;
+  orderCountMin: number;
+  orderCountMax: number;
+  dateFrom: Date | null;
+  dateTo: Date | null;
+}

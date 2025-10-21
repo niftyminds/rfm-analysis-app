@@ -2,18 +2,34 @@
 
 import { useState, useMemo } from 'react';
 import { ChevronUp, ChevronDown, Search } from 'lucide-react';
-import { Customer } from '@/types';
+import { Customer, AdvancedFilters } from '@/types';
 import { SEGMENT_COLORS } from './SegmentFilter';
 
 interface CustomerTableProps {
   customers: Customer[];
   selectedSegments?: string[];
+  advancedFilters?: AdvancedFilters;
 }
 
 type SortField = 'name' | 'orderCount' | 'totalValue' | 'lastOrderDate' | 'RFM_Total' | 'segment';
 type SortOrder = 'asc' | 'desc';
 
-export default function CustomerTable({ customers, selectedSegments = [] }: CustomerTableProps) {
+const DEFAULT_ADVANCED_FILTERS: AdvancedFilters = {
+  rfmScoreMin: 3,
+  rfmScoreMax: 15,
+  valueMin: 0,
+  valueMax: Infinity,
+  orderCountMin: 0,
+  orderCountMax: Infinity,
+  dateFrom: null,
+  dateTo: null
+};
+
+export default function CustomerTable({
+  customers,
+  selectedSegments = [],
+  advancedFilters = DEFAULT_ADVANCED_FILTERS
+}: CustomerTableProps) {
   const [sortField, setSortField] = useState<SortField>('totalValue');
   const [sortOrder, setSortOrder] = useState<SortOrder>('desc');
   const [searchTerm, setSearchTerm] = useState('');
@@ -34,6 +50,19 @@ export default function CustomerTable({ customers, selectedSegments = [] }: Cust
       // Filter by selected segments
       const segmentMatch = selectedSegments.length === 0 || selectedSegments.includes(c.segment);
 
+      // Filter by advanced filters
+      const rfmMatch = c.RFM_Total >= advancedFilters.rfmScoreMin && c.RFM_Total <= advancedFilters.rfmScoreMax;
+      const valueMatch = c.totalValue >= advancedFilters.valueMin && c.totalValue <= advancedFilters.valueMax;
+      const orderMatch = c.orderCount >= advancedFilters.orderCountMin && c.orderCount <= advancedFilters.orderCountMax;
+
+      let dateMatch = true;
+      if (advancedFilters.dateFrom && c.lastOrderDate) {
+        dateMatch = dateMatch && c.lastOrderDate >= advancedFilters.dateFrom;
+      }
+      if (advancedFilters.dateTo && c.lastOrderDate) {
+        dateMatch = dateMatch && c.lastOrderDate <= advancedFilters.dateTo;
+      }
+
       // Filter by search term
       const searchLower = searchTerm.toLowerCase();
       const searchMatch = (
@@ -43,7 +72,7 @@ export default function CustomerTable({ customers, selectedSegments = [] }: Cust
         c.segment.toLowerCase().includes(searchLower)
       );
 
-      return segmentMatch && searchMatch;
+      return segmentMatch && rfmMatch && valueMatch && orderMatch && dateMatch && searchMatch;
     });
 
     return filtered.sort((a, b) => {
@@ -67,7 +96,7 @@ export default function CustomerTable({ customers, selectedSegments = [] }: Cust
       if (aVal > bVal) return sortOrder === 'asc' ? 1 : -1;
       return 0;
     });
-  }, [customers, sortField, sortOrder, searchTerm, selectedSegments]);
+  }, [customers, sortField, sortOrder, searchTerm, selectedSegments, advancedFilters]);
 
   const totalPages = Math.ceil(sortedAndFilteredCustomers.length / itemsPerPage);
   const paginatedCustomers = sortedAndFilteredCustomers.slice(

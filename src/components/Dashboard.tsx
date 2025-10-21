@@ -3,18 +3,31 @@
 import { useMemo, useState } from 'react';
 import { Download, RefreshCw, Users, DollarSign, TrendingUp, Calendar, Filter as FilterIcon } from 'lucide-react';
 import Papa from 'papaparse';
-import { Customer, Stats } from '@/types';
+import { Customer, Stats, AdvancedFilters } from '@/types';
 import SegmentChart from './SegmentChart';
 import CustomerTable from './CustomerTable';
 import SegmentFilter from './SegmentFilter';
+import FilterPanel from './FilterPanel';
 
 interface DashboardProps {
   customers: Customer[];
   onReset: () => void;
 }
 
+const DEFAULT_FILTERS: AdvancedFilters = {
+  rfmScoreMin: 3,
+  rfmScoreMax: 15,
+  valueMin: 0,
+  valueMax: Infinity,
+  orderCountMin: 0,
+  orderCountMax: Infinity,
+  dateFrom: null,
+  dateTo: null
+};
+
 export default function Dashboard({ customers, onReset }: DashboardProps) {
   const [selectedSegments, setSelectedSegments] = useState<string[]>([]);
+  const [advancedFilters, setAdvancedFilters] = useState<AdvancedFilters>(DEFAULT_FILTERS);
   const stats: Stats = useMemo(() => {
     const segments: Record<string, number> = {};
     customers.forEach(c => {
@@ -36,11 +49,58 @@ export default function Dashboard({ customers, onReset }: DashboardProps) {
   }, [stats.segments]);
 
   const filteredCustomers = useMemo(() => {
-    if (selectedSegments.length === 0) {
-      return customers;
-    }
-    return customers.filter(c => selectedSegments.includes(c.segment));
-  }, [customers, selectedSegments]);
+    return customers.filter(c => {
+      // Segment filter
+      if (selectedSegments.length > 0 && !selectedSegments.includes(c.segment)) {
+        return false;
+      }
+
+      // RFM score filter
+      if (c.RFM_Total < advancedFilters.rfmScoreMin || c.RFM_Total > advancedFilters.rfmScoreMax) {
+        return false;
+      }
+
+      // Value filter
+      if (c.totalValue < advancedFilters.valueMin || c.totalValue > advancedFilters.valueMax) {
+        return false;
+      }
+
+      // Order count filter
+      if (c.orderCount < advancedFilters.orderCountMin || c.orderCount > advancedFilters.orderCountMax) {
+        return false;
+      }
+
+      // Date filter
+      if (advancedFilters.dateFrom && c.lastOrderDate) {
+        if (c.lastOrderDate < advancedFilters.dateFrom) {
+          return false;
+        }
+      }
+      if (advancedFilters.dateTo && c.lastOrderDate) {
+        if (c.lastOrderDate > advancedFilters.dateTo) {
+          return false;
+        }
+      }
+
+      return true;
+    });
+  }, [customers, selectedSegments, advancedFilters]);
+
+  const activeFilterCount = useMemo(() => {
+    let count = 0;
+    if (advancedFilters.rfmScoreMin > 3 || advancedFilters.rfmScoreMax < 15) count++;
+    if (advancedFilters.valueMin > 0 || advancedFilters.valueMax !== Infinity) count++;
+    if (advancedFilters.orderCountMin > 0 || advancedFilters.orderCountMax !== Infinity) count++;
+    if (advancedFilters.dateFrom || advancedFilters.dateTo) count++;
+    return count;
+  }, [advancedFilters]);
+
+  const minValue = useMemo(() => Math.min(...customers.map(c => c.totalValue)), [customers]);
+  const maxValue = useMemo(() => Math.max(...customers.map(c => c.totalValue)), [customers]);
+
+  const handleClearAdvancedFilters = () => {
+    setAdvancedFilters(DEFAULT_FILTERS);
+  };
 
   const handleExport = (customersToExport: Customer[] = customers, filenameSuffix: string = 'analyza') => {
     const exportData = customersToExport.map(c => ({
@@ -77,13 +137,20 @@ export default function Dashboard({ customers, onReset }: DashboardProps) {
   };
 
   const handleExportFiltered = () => {
-    if (selectedSegments.length === 0) {
-      alert('Vyberte alespoň jeden segment pro export.');
+    if (selectedSegments.length === 0 && activeFilterCount === 0) {
+      alert('Vyberte alespoň jeden segment nebo aktivujte filtry pro export.');
       return;
     }
 
-    const segmentNames = selectedSegments.join('_').replace(/\s+/g, '-');
-    const suffix = `export_${segmentNames}`;
+    let suffix = 'export';
+    if (selectedSegments.length > 0) {
+      const segmentNames = selectedSegments.join('_').replace(/\s+/g, '-');
+      suffix += `_${segmentNames}`;
+    }
+    if (activeFilterCount > 0) {
+      suffix += '_filtered';
+    }
+
     handleExport(filteredCustomers, suffix);
   };
 
@@ -106,13 +173,13 @@ export default function Dashboard({ customers, onReset }: DashboardProps) {
             </button>
             <button
               onClick={handleExportFiltered}
-              disabled={selectedSegments.length === 0}
+              disabled={selectedSegments.length === 0 && activeFilterCount === 0}
               className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg font-semibold transition-colors shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-gray-400"
-              title={selectedSegments.length === 0 ? 'Vyberte alespoň jeden segment' : 'Exportovat vybrané segmenty'}
+              title={selectedSegments.length === 0 && activeFilterCount === 0 ? 'Vyberte segmenty nebo aktivujte filtry' : 'Exportovat filtrované zákazníky'}
             >
               <FilterIcon size={18} />
               <Download size={20} />
-              Exportovat vybrané ({selectedSegments.length})
+              Exportovat filtrované ({filteredCustomers.length})
             </button>
             <button
               onClick={() => handleExport()}
@@ -167,6 +234,16 @@ export default function Dashboard({ customers, onReset }: DashboardProps) {
       {/* Segment Chart */}
       <SegmentChart segments={stats.segments} total={stats.total} />
 
+      {/* Advanced Filters */}
+      <FilterPanel
+        filters={advancedFilters}
+        onFiltersChange={setAdvancedFilters}
+        onClearFilters={handleClearAdvancedFilters}
+        activeFilterCount={activeFilterCount}
+        minValue={minValue}
+        maxValue={maxValue}
+      />
+
       {/* Segment Filter */}
       <SegmentFilter
         segments={availableSegments}
@@ -177,7 +254,7 @@ export default function Dashboard({ customers, onReset }: DashboardProps) {
       />
 
       {/* Customer Table */}
-      <CustomerTable customers={customers} selectedSegments={selectedSegments} />
+      <CustomerTable customers={customers} selectedSegments={selectedSegments} advancedFilters={advancedFilters} />
     </div>
   );
 }
