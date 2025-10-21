@@ -99,7 +99,15 @@ export default function Home() {
               © 2025 <span className="font-semibold">HNK CZ s.r.o.</span>
             </p>
             <p className="text-sm text-gray-500">
-              Powered by <span className="text-indigo-600 font-semibold">NiftyMinds Agency</span>
+              Powered by{' '}
+              <a
+                href="https://niftyminds.cz/?utm_source=rfm-analysis&utm_medium=app"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-indigo-600 font-semibold hover:text-indigo-700 transition-colors underline"
+              >
+                niftyminds.cz
+              </a>
             </p>
           </div>
         </div>
