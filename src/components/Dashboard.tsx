@@ -1,7 +1,7 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import { Download, RefreshCw, Users, DollarSign, TrendingUp, Calendar, Filter as FilterIcon } from 'lucide-react';
+import { RefreshCw, Users, DollarSign, TrendingUp, Calendar } from 'lucide-react';
 import Papa from 'papaparse';
 import { Customer, Stats, AdvancedFilters } from '@/types';
 import SegmentChart from './SegmentChart';
@@ -158,32 +158,13 @@ export default function Dashboard({ customers, onReset }: DashboardProps) {
             <h2 className="text-3xl font-bold text-gray-900 mb-2">Výsledky analýzy</h2>
             <p className="text-gray-600">RFM segmentace {stats.total.toLocaleString('cs-CZ')} zákazníků</p>
           </div>
-          <div className="flex gap-3">
-            <button
-              onClick={onReset}
-              className="flex items-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg font-medium transition-colors"
-            >
-              <RefreshCw size={18} />
-              Nový soubor
-            </button>
-            <button
-              onClick={handleExportFiltered}
-              disabled={selectedSegments.length === 0 && activeFilterCount === 0}
-              className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg font-semibold transition-colors shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-gray-400"
-              title={selectedSegments.length === 0 && activeFilterCount === 0 ? 'Vyberte segmenty nebo aktivujte filtry' : 'Exportovat filtrované zákazníky'}
-            >
-              <FilterIcon size={18} />
-              <Download size={20} />
-              Exportovat filtrované ({filteredCustomers.length})
-            </button>
-            <button
-              onClick={() => handleExport()}
-              className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-lg font-semibold transition-colors shadow-lg"
-            >
-              <Download size={20} />
-              Exportovat vše
-            </button>
-          </div>
+          <button
+            onClick={onReset}
+            className="flex items-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg font-medium transition-colors"
+          >
+            <RefreshCw size={18} />
+            Nový soubor
+          </button>
         </div>
 
         {/* Stats Grid */}
@@ -252,7 +233,16 @@ export default function Dashboard({ customers, onReset }: DashboardProps) {
       />
 
       {/* Customer Table */}
-      <CustomerTable customers={customers} selectedSegments={selectedSegments} advancedFilters={advancedFilters} />
+      <CustomerTable
+        customers={customers}
+        selectedSegments={selectedSegments}
+        advancedFilters={advancedFilters}
+        totalCount={customers.length}
+        filteredCount={filteredCustomers.length}
+        activeFilterCount={activeFilterCount}
+        onExportFiltered={handleExportFiltered}
+        onExportAll={() => handleExport()}
+      />
     </div>
   );
 }

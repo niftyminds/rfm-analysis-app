@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useMemo } from 'react';
-import { ChevronUp, ChevronDown, Search } from 'lucide-react';
+import { ChevronUp, ChevronDown, Search, Download } from 'lucide-react';
 import { Customer, AdvancedFilters } from '@/types';
 import { SEGMENT_COLORS } from './SegmentFilter';
 
@@ -9,6 +9,11 @@ interface CustomerTableProps {
   customers: Customer[];
   selectedSegments?: string[];
   advancedFilters?: AdvancedFilters;
+  totalCount: number;
+  filteredCount: number;
+  activeFilterCount: number;
+  onExportFiltered: () => void;
+  onExportAll: () => void;
 }
 
 type SortField = 'name' | 'orderCount' | 'totalValue' | 'lastOrderDate' | 'RFM_Total' | 'segment';
@@ -28,7 +33,12 @@ const DEFAULT_ADVANCED_FILTERS: AdvancedFilters = {
 export default function CustomerTable({
   customers,
   selectedSegments = [],
-  advancedFilters = DEFAULT_ADVANCED_FILTERS
+  advancedFilters = DEFAULT_ADVANCED_FILTERS,
+  totalCount,
+  filteredCount,
+  activeFilterCount,
+  onExportFiltered,
+  onExportAll
 }: CustomerTableProps) {
   const [sortField, setSortField] = useState<SortField>('totalValue');
   const [sortOrder, setSortOrder] = useState<SortOrder>('desc');
@@ -271,6 +281,49 @@ export default function CustomerTable({
           </div>
         </div>
       )}
+
+      {/* Export Panel */}
+      <div className="mt-8 pt-6 border-t border-gray-200">
+        <div className="flex flex-col sm:flex-row gap-4">
+          {/* Export filtrovaných */}
+          <button
+            onClick={onExportFiltered}
+            disabled={selectedSegments && selectedSegments.length === 0 && activeFilterCount === 0 && searchTerm === ''}
+            className="flex-1 flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 disabled:bg-gray-300 disabled:cursor-not-allowed disabled:opacity-60 text-white px-6 py-4 rounded-xl font-semibold transition-colors shadow-lg"
+            title={selectedSegments && selectedSegments.length === 0 && activeFilterCount === 0 && searchTerm === '' ? 'Vyberte segment nebo použijte filtry' : 'Exportovat filtrované zákazníky'}
+          >
+            <Download size={20} />
+            <span>
+              Exportovat filtrované
+              {filteredCount > 0 && ` (${filteredCount.toLocaleString('cs-CZ')})`}
+            </span>
+          </button>
+
+          {/* Export všech */}
+          <button
+            onClick={onExportAll}
+            className="flex-1 flex items-center justify-center gap-2 bg-white hover:bg-gray-50 border-2 border-gray-300 text-gray-700 px-6 py-4 rounded-xl font-semibold transition-colors"
+          >
+            <Download size={20} />
+            <span>
+              Exportovat vše
+              {totalCount > 0 && ` (${totalCount.toLocaleString('cs-CZ')})`}
+            </span>
+          </button>
+        </div>
+
+        {/* Info text */}
+        {selectedSegments && selectedSegments.length > 0 && (
+          <div className="mt-3 text-center text-sm text-gray-600">
+            <p>
+              📊 Export bude obsahovat pouze vybrané segmenty:
+              <span className="font-semibold ml-1">
+                {selectedSegments.join(', ')}
+              </span>
+            </p>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
