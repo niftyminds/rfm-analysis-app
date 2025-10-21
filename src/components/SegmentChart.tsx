@@ -5,6 +5,8 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContaine
 interface SegmentChartProps {
   segments: Record<string, number>;
   total: number;
+  selectedSegments?: string[];
+  onSegmentClick?: (segment: string) => void;
 }
 
 const SEGMENT_COLORS: Record<string, string> = {
@@ -19,7 +21,7 @@ const SEGMENT_COLORS: Record<string, string> = {
   'Lost': '#6b7280'
 };
 
-export default function SegmentChart({ segments, total }: SegmentChartProps) {
+export default function SegmentChart({ segments, total, selectedSegments = [], onSegmentClick }: SegmentChartProps) {
   const data = Object.entries(segments)
     .map(([name, count]) => ({
       name,
@@ -27,6 +29,12 @@ export default function SegmentChart({ segments, total }: SegmentChartProps) {
       percentage: ((count / total) * 100).toFixed(1)
     }))
     .sort((a, b) => b.count - a.count);
+
+  const handleCardClick = (segmentName: string) => {
+    if (onSegmentClick) {
+      onSegmentClick(segmentName);
+    }
+  };
 
   return (
     <div className="bg-white rounded-2xl shadow-xl p-8">
@@ -72,23 +80,40 @@ export default function SegmentChart({ segments, total }: SegmentChartProps) {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {data.map((segment) => {
           const color = SEGMENT_COLORS[segment.name] || '#6b7280';
+          const isActive = selectedSegments.includes(segment.name);
+
           return (
-            <div 
+            <div
               key={segment.name}
-              className="rounded-xl p-4 border-2 transition-transform hover:scale-105"
-              style={{ 
+              onClick={() => handleCardClick(segment.name)}
+              className={`rounded-xl p-4 transition-all duration-200 cursor-pointer ${
+                isActive
+                  ? 'border-4 shadow-xl scale-105'
+                  : 'border-2 hover:scale-102 hover:shadow-lg'
+              }`}
+              style={{
                 borderColor: color,
                 backgroundColor: `${color}15`
               }}
+              title="Klikni pro filtrování"
             >
               <div className="flex justify-between items-center">
-                <span className="font-semibold" style={{ color }}>{segment.name}</span>
+                <div className="flex items-center gap-2">
+                  <span className={isActive ? 'font-bold' : 'font-semibold'} style={{ color }}>
+                    {segment.name}
+                  </span>
+                  {isActive && (
+                    <span className="text-xs bg-white px-2 py-0.5 rounded-full" style={{ color }}>
+                      ✓ Aktivní
+                    </span>
+                  )}
+                </div>
                 <span className="text-2xl font-bold" style={{ color }}>{segment.count}</span>
               </div>
               <div className="mt-2 bg-white bg-opacity-50 rounded-full h-2">
-                <div 
+                <div
                   className="rounded-full h-2 transition-all duration-500"
-                  style={{ 
+                  style={{
                     width: `${segment.percentage}%`,
                     backgroundColor: color
                   }}

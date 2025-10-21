@@ -232,7 +232,18 @@ export default function Dashboard({ customers, onReset }: DashboardProps) {
       </div>
 
       {/* Segment Chart */}
-      <SegmentChart segments={stats.segments} total={stats.total} />
+      <SegmentChart
+        segments={stats.segments}
+        total={stats.total}
+        selectedSegments={selectedSegments}
+        onSegmentClick={(segment) => {
+          if (selectedSegments.includes(segment)) {
+            setSelectedSegments(selectedSegments.filter(s => s !== segment));
+          } else {
+            setSelectedSegments([...selectedSegments, segment]);
+          }
+        }}
+      />
 
       {/* Advanced Filters */}
       <FilterPanel
