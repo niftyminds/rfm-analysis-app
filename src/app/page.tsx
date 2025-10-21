@@ -64,10 +64,10 @@ export default function Home() {
               <Image
                 src="/logo-niftyminds.svg"
                 alt="NiftyMinds Agency"
-                width={180}
-                height={40}
+                width={300}
+                height={67}
                 priority
-                className="h-10 md:h-10 w-auto"
+                className="h-auto w-auto max-w-[300px]"
               />
             </div>
           </div>
