@@ -21,11 +21,12 @@ type SortField = 'name' | 'orderCount' | 'totalValue' | 'lastOrderDate' | 'RFM_T
 type SortOrder = 'asc' | 'desc';
 
 interface TooltipData {
-  orderNumber: number;
+  orderNumber: number | null;
   date: Date;
-  value: number;
+  value: number | null;
   daysSincePrevious: number | null;
   position: { x: number; y: number };
+  isToday: boolean;
 }
 
 const DEFAULT_ADVANCED_FILTERS: AdvancedFilters = {
@@ -80,18 +81,27 @@ export default function CustomerTable({
 
     if (!firstDate || !lastDate || orderDates.length === 0) return null;
 
-    const totalDays = customer.lifetime;
+    const today = new Date();
+
+    // Vypočítej celkovou délku timeline (od první obj. do dnes)
+    const totalTimelineDays = Math.floor(
+      (today.getTime() - firstDate.getTime()) / (1000 * 60 * 60 * 24)
+    );
 
     return (
       <>
+        {/* Všechny objednávky (včetně poslední) */}
         {orderDates.map((orderDate, index) => {
-          // Vypočítej pozici na timeline (v %)
+          const isFirst = index === 0;
+
+          // Vypočítej pozici na timeline (0-100%)
+          // 100% = dnes, ne poslední objednávka
           const daysFromStart = Math.floor(
             (orderDate.getTime() - firstDate.getTime()) / (1000 * 60 * 60 * 24)
           );
-          const position = (daysFromStart / totalDays) * 100;
+          const position = (daysFromStart / totalTimelineDays) * 100;
 
-          // Vypočítej interval od předchozí objednávky
+          // Interval od předchozí objednávky
           let daysSincePrevious = null;
           if (index > 0) {
             const prevDate = orderDates[index - 1];
@@ -102,11 +112,23 @@ export default function CustomerTable({
 
           const orderValue = orderValues[index] || 0;
 
+          // Barvy: první zelená, ostatní indigo
+          const dotColor = isFirst
+            ? 'bg-green-600 hover:bg-green-700'
+            : 'bg-indigo-600 hover:bg-indigo-700';
+
+          const dotSize = isFirst
+            ? 'w-3 h-3 hover:scale-[1.6]'
+            : 'w-2.5 h-2.5 hover:scale-[1.8]';
+
           return (
             <div
-              key={index}
+              key={`order-${index}`}
               className="absolute top-1/2 transform -translate-y-1/2 -translate-x-1/2 group"
-              style={{ left: `${Math.max(2, Math.min(98, position))}%` }}
+              style={{
+                left: isFirst ? '0' : `${Math.min(95, position)}%`,
+                ...(isFirst && { transform: 'translateY(-50%)' })
+              }}
               onMouseEnter={(e) => {
                 const rect = e.currentTarget.getBoundingClientRect();
                 setHoveredOrder({
@@ -114,20 +136,24 @@ export default function CustomerTable({
                   date: orderDate,
                   value: orderValue,
                   daysSincePrevious,
-                  position: { x: rect.left, y: rect.top }
+                  position: { x: rect.left, y: rect.top },
+                  isToday: false
                 });
               }}
               onMouseLeave={() => setHoveredOrder(null)}
             >
-              {/* Order Dot */}
               <div
-                className="w-2.5 h-2.5 bg-indigo-600 rounded-full border-2 border-white shadow-md
-                           hover:scale-[1.8] hover:bg-indigo-700 hover:shadow-lg
-                           transition-all duration-200 cursor-pointer z-10 relative"
+                className={`${dotSize} ${dotColor} rounded-full border-2 border-white shadow-md
+                           transition-all duration-200 cursor-pointer z-10 relative`}
               ></div>
 
-              {/* Interval Label (zobrazí se jen na hover) */}
-              {daysSincePrevious !== null && (
+              {isFirst && (
+                <span className="absolute top-6 left-0 text-[10px] text-gray-600 whitespace-nowrap font-medium">
+                  Start
+                </span>
+              )}
+
+              {!isFirst && daysSincePrevious !== null && (
                 <span className="absolute -bottom-6 left-1/2 transform -translate-x-1/2
                                text-[10px] text-gray-500 whitespace-nowrap
                                opacity-0 group-hover:opacity-100 transition-opacity font-medium">
@@ -138,7 +164,42 @@ export default function CustomerTable({
           );
         })}
 
-        {/* Tooltip - zobrazí se pro hovered order */}
+        {/* "DNES" Marker */}
+        <div
+          className="absolute top-1/2 right-0 transform -translate-y-1/2 group"
+          onMouseEnter={(e) => {
+            const rect = e.currentTarget.getBoundingClientRect();
+            setHoveredOrder({
+              orderNumber: null,
+              date: today,
+              value: null,
+              daysSincePrevious: customer.recency,
+              position: { x: rect.left, y: rect.top },
+              isToday: true
+            });
+          }}
+          onMouseLeave={() => setHoveredOrder(null)}
+        >
+          {/* "Dnes" Dot */}
+          <div
+            className="w-3 h-3 bg-purple-600 hover:bg-purple-700 rounded-full border-2 border-white shadow-md
+                       hover:scale-[1.6] transition-all duration-200 cursor-pointer z-10 relative"
+          ></div>
+
+          {/* Label "Dnes" */}
+          <span className="absolute top-6 right-0 text-[10px] text-gray-600 whitespace-nowrap font-medium">
+            Dnes
+          </span>
+
+          {/* Recency label na hover */}
+          <span className="absolute -bottom-6 right-0
+                         text-[10px] text-gray-500 whitespace-nowrap
+                         opacity-0 group-hover:opacity-100 transition-opacity font-medium">
+            +{customer.recency}d
+          </span>
+        </div>
+
+        {/* Tooltip */}
         {hoveredOrder && (
           <div
             className="absolute z-50 bg-white rounded-lg shadow-xl border border-gray-200 p-3
@@ -150,39 +211,65 @@ export default function CustomerTable({
               minWidth: '200px'
             }}
           >
-            {/* Tooltip Arrow */}
             <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-full">
               <div className="border-8 border-transparent border-t-white"></div>
             </div>
 
-            {/* Tooltip Content */}
             <div className="space-y-1.5">
-              <p className="text-xs font-bold text-indigo-600">
-                Objednávka #{hoveredOrder.orderNumber}
-              </p>
-              <div className="flex items-center gap-2">
-                <Calendar size={14} className="text-gray-500" />
-                <p className="text-sm font-semibold text-gray-900">
-                  {hoveredOrder.date.toLocaleDateString('cs-CZ', {
-                    day: 'numeric',
-                    month: 'long',
-                    year: 'numeric'
-                  })}
-                </p>
-              </div>
-              <div className="flex items-center gap-2">
-                <DollarSign size={14} className="text-gray-500" />
-                <p className="text-sm font-semibold text-gray-900">
-                  {Math.round(hoveredOrder.value).toLocaleString('cs-CZ')} Kč
-                </p>
-              </div>
-              {hoveredOrder.daysSincePrevious !== null && (
-                <div className="pt-1.5 mt-1.5 border-t border-gray-200">
-                  <p className="text-xs text-gray-600">
-                    <span className="font-medium">{hoveredOrder.daysSincePrevious} dní</span>
-                    {' '}od předchozí objednávky
+              {hoveredOrder.isToday ? (
+                // Tooltip pro "Dnes" marker
+                <>
+                  <p className="text-xs font-bold text-purple-600">
+                    Dnes
                   </p>
-                </div>
+                  <div className="flex items-center gap-2">
+                    <Calendar size={14} className="text-gray-500" />
+                    <p className="text-sm font-semibold text-gray-900">
+                      {hoveredOrder.date.toLocaleDateString('cs-CZ', {
+                        day: 'numeric',
+                        month: 'long',
+                        year: 'numeric'
+                      })}
+                    </p>
+                  </div>
+                  <div className="pt-1.5 mt-1.5 border-t border-gray-200">
+                    <p className="text-xs text-gray-600">
+                      <span className="font-medium">{hoveredOrder.daysSincePrevious} dní</span>
+                      {' '}od poslední objednávky
+                    </p>
+                  </div>
+                </>
+              ) : (
+                // Tooltip pro objednávky
+                <>
+                  <p className="text-xs font-bold text-indigo-600">
+                    Objednávka #{hoveredOrder.orderNumber}
+                  </p>
+                  <div className="flex items-center gap-2">
+                    <Calendar size={14} className="text-gray-500" />
+                    <p className="text-sm font-semibold text-gray-900">
+                      {hoveredOrder.date.toLocaleDateString('cs-CZ', {
+                        day: 'numeric',
+                        month: 'long',
+                        year: 'numeric'
+                      })}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <DollarSign size={14} className="text-gray-500" />
+                    <p className="text-sm font-semibold text-gray-900">
+                      {Math.round(hoveredOrder.value!).toLocaleString('cs-CZ')} Kč
+                    </p>
+                  </div>
+                  {hoveredOrder.daysSincePrevious !== null && (
+                    <div className="pt-1.5 mt-1.5 border-t border-gray-200">
+                      <p className="text-xs text-gray-600">
+                        <span className="font-medium">{hoveredOrder.daysSincePrevious} dní</span>
+                        {' '}od předchozí objednávky
+                      </p>
+                    </div>
+                  )}
+                </>
               )}
             </div>
           </div>
@@ -452,42 +539,32 @@ export default function CustomerTable({
                                 {/* Timeline Bar */}
                                 <div className="absolute top-1/2 left-0 right-0 h-1 bg-gradient-to-r from-green-500 via-blue-500 to-purple-500 transform -translate-y-1/2 rounded-full"></div>
 
-                                {/* Start Marker */}
-                                <div className="absolute left-0 top-1/2 transform -translate-y-1/2">
-                                  <div className="w-3 h-3 bg-green-600 rounded-full border-2 border-white shadow-md"></div>
-                                  <span className="absolute top-6 left-0 text-[10px] text-gray-600 whitespace-nowrap font-medium">
-                                    Start
-                                  </span>
-                                </div>
-
-                                {/* End Marker (Dnes) */}
-                                <div className="absolute right-0 top-1/2 transform -translate-y-1/2">
-                                  <div className="w-3 h-3 bg-purple-600 rounded-full border-2 border-white shadow-md"></div>
-                                  <span className="absolute top-6 right-0 text-[10px] text-gray-600 whitespace-nowrap font-medium">
-                                    Dnes
-                                  </span>
-                                </div>
-
                                 {/* Order Markers s Tooltips */}
                                 {renderOrderMarkers(customer)}
                               </div>
 
                               {/* Legend/Labels */}
                               <div className="mt-3 flex justify-between text-xs text-gray-600">
-                                <span>
-                                  {customer.firstOrderDate.toLocaleDateString('cs-CZ', {
-                                    day: 'numeric',
-                                    month: 'numeric',
-                                    year: 'numeric'
-                                  })}
-                                </span>
-                                <span>
-                                  {customer.lastOrderDate.toLocaleDateString('cs-CZ', {
-                                    day: 'numeric',
-                                    month: 'numeric',
-                                    year: 'numeric'
-                                  })}
-                                </span>
+                                <div>
+                                  <p className="font-medium">První objednávka</p>
+                                  <p>
+                                    {customer.firstOrderDate.toLocaleDateString('cs-CZ', {
+                                      day: 'numeric',
+                                      month: 'numeric',
+                                      year: 'numeric'
+                                    })}
+                                  </p>
+                                </div>
+                                <div className="text-right">
+                                  <p className="font-medium">Poslední objednávka</p>
+                                  <p>
+                                    {customer.lastOrderDate.toLocaleDateString('cs-CZ', {
+                                      day: 'numeric',
+                                      month: 'numeric',
+                                      year: 'numeric'
+                                    })}
+                                  </p>
+                                </div>
                               </div>
                             </div>
                           )}
