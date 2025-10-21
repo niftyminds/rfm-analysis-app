@@ -65,7 +65,7 @@ export default function Home() {
                 src="/logo-niftyminds.svg"
                 alt="NiftyMinds Agency"
                 width={90}
-                height={20}
+                height={9}
                 priority
                 className="h-auto w-auto max-w-[90px]"
               />
