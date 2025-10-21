@@ -1,7 +1,7 @@
 'use client';
 
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
-import { Check, X } from 'lucide-react';
+import { Check } from 'lucide-react';
 
 interface SegmentChartProps {
   segments: Record<string, number>;
@@ -32,57 +32,15 @@ export default function SegmentChart({ segments, total, selectedSegments = [], o
     }))
     .sort((a, b) => b.count - a.count);
 
-  const allSegments = data.map(s => s.name);
-
   const handleCardClick = (segmentName: string) => {
     if (onSegmentClick) {
       onSegmentClick(segmentName);
     }
   };
 
-  const handleSelectAll = () => {
-    if (onSegmentClick) {
-      // Toggle všech segmentů - pokud jsou všechny vybrané, odeber všechny
-      if (selectedSegments.length === allSegments.length) {
-        allSegments.forEach(() => onSegmentClick(allSegments[0])); // Clear
-      } else {
-        allSegments.forEach(seg => {
-          if (!selectedSegments.includes(seg)) {
-            onSegmentClick(seg);
-          }
-        });
-      }
-    }
-  };
-
-  const handleClearAll = () => {
-    if (onSegmentClick && selectedSegments.length > 0) {
-      // Klikni na všechny vybrané pro toggle
-      selectedSegments.forEach(seg => onSegmentClick(seg));
-    }
-  };
-
   return (
     <div className="bg-white rounded-2xl shadow-xl p-8">
-      <div className="flex items-center justify-between mb-6">
-        <h2 className="text-2xl font-bold text-gray-900">Segmentace zákazníků</h2>
-        <div className="flex gap-2">
-          <button
-            onClick={handleSelectAll}
-            className="text-sm text-indigo-600 hover:text-indigo-800 font-medium px-3 py-1.5 rounded-md hover:bg-indigo-50 transition-colors"
-          >
-            Vybrat vše
-          </button>
-          <button
-            onClick={handleClearAll}
-            disabled={selectedSegments.length === 0}
-            className="text-sm text-gray-600 hover:text-gray-800 font-medium px-3 py-1.5 rounded-md hover:bg-gray-100 transition-colors flex items-center gap-1 disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            <X size={14} />
-            Zrušit výběr
-          </button>
-        </div>
-      </div>
+      <h2 className="text-2xl font-bold text-gray-900 mb-6">Segmentace zákazníků</h2>
       
       <div className="h-96 mb-8">
         <ResponsiveContainer width="100%" height="100%">

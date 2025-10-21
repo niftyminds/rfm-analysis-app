@@ -101,7 +101,7 @@ export default function ColumnMapper({ columns, previewData, onMapping, onBack }
               <label className="block text-sm font-semibold text-gray-900 mb-1">
                 {field.label}
               </label>
-              <p className="text-xs text-gray-500 mb-3">{field.description}</p>
+              <p className="text-xs text-gray-600 mb-3">{field.description}</p>
               <select
                 value={mapping[field.key]}
                 onChange={(e) => handleChange(field.key, e.target.value)}

@@ -116,11 +116,11 @@ export default function FileUpload({ onCSVLoaded, setLoading }: FileUploadProps)
             onChange={handleChange}
             className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
           />
-          <Upload className="mx-auto h-12 w-12 text-gray-400 mb-4" />
+          <Upload className="mx-auto h-12 w-12 text-gray-600 mb-4" />
           <p className="text-lg font-medium text-gray-700 mb-2">
             Přetáhněte CSV soubor sem
           </p>
-          <p className="text-sm text-gray-500 mb-4">
+          <p className="text-sm text-gray-600 mb-4">
             nebo klikněte pro výběr souboru
           </p>
           <button className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-lg font-medium transition-colors">

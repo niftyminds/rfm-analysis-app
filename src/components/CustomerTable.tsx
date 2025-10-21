@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { ChevronUp, ChevronDown, Search, Download } from 'lucide-react';
 import { Customer, AdvancedFilters } from '@/types';
 import { SEGMENT_COLORS } from './SegmentFilter';
@@ -45,6 +45,11 @@ export default function CustomerTable({
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 20;
+
+  // Reset pagination na stránku 1 při změně filtrů
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [selectedSegments, searchTerm, advancedFilters]);
 
   const handleSort = (field: SortField) => {
     if (sortField === field) {
@@ -126,7 +131,7 @@ export default function CustomerTable({
           Top zákazníci ({sortedAndFilteredCustomers.length})
         </h2>
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" size={20} />
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-600" size={20} />
           <input
             type="text"
             placeholder="Hledat zákazníka..."
@@ -239,7 +244,7 @@ export default function CustomerTable({
             <button
               onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
               disabled={currentPage === 1}
-              className="px-4 py-2 border border-gray-300 rounded-lg disabled:bg-gray-200 disabled:text-gray-400 disabled:cursor-not-allowed hover:bg-gray-50"
+              className="px-4 py-2 border border-gray-300 rounded-lg disabled:bg-gray-200 disabled:text-gray-500 disabled:cursor-not-allowed hover:bg-gray-50 text-gray-700"
             >
               Předchozí
             </button>
@@ -263,7 +268,7 @@ export default function CustomerTable({
                     className={`px-3 py-2 rounded-lg ${
                       currentPage === pageNum
                         ? 'bg-indigo-600 text-white'
-                        : 'border border-gray-300 hover:bg-gray-50'
+                        : 'border border-gray-300 hover:bg-gray-50 text-gray-700'
                     }`}
                   >
                     {pageNum}
@@ -274,7 +279,7 @@ export default function CustomerTable({
             <button
               onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
               disabled={currentPage === totalPages}
-              className="px-4 py-2 border border-gray-300 rounded-lg disabled:bg-gray-200 disabled:text-gray-400 disabled:cursor-not-allowed hover:bg-gray-50"
+              className="px-4 py-2 border border-gray-300 rounded-lg disabled:bg-gray-200 disabled:text-gray-500 disabled:cursor-not-allowed hover:bg-gray-50 text-gray-700"
             >
               Další
             </button>
