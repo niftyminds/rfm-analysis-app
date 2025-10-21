@@ -205,7 +205,7 @@ export default function FilterPanel({
                   type="date"
                   value={formatDateForInput(filters.dateFrom)}
                   onChange={(e) => handleDateFromChange(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-gray-600"
                 />
               </div>
               <span className="text-gray-600 mt-6">—</span>
@@ -215,7 +215,7 @@ export default function FilterPanel({
                   type="date"
                   value={formatDateForInput(filters.dateTo)}
                   onChange={(e) => handleDateToChange(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-gray-600"
                 />
               </div>
             </div>
