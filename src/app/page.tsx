@@ -60,14 +60,11 @@ export default function Home() {
               <h1 className="text-3xl font-bold text-gray-900">RFM Analýza</h1>
               <p className="text-gray-600 mt-1">Zákaznická segmentace & marketing insights</p>
             </div>
-            <div className="flex items-center">
-              <Image
-                src="/logo-niftyminds.svg"
+            <div className="flex items-center justify-center" style={{ width: '200px', height: 'auto' }}>
+              <img
+                src="/logo-niftyminds.png"
                 alt="NiftyMinds Agency"
-                width={90}
-                height={9}
-                priority
-                className="h-auto w-auto max-w-[90px]"
+                style={{ width: '150px', height: 'auto' }}
               />
             </div>
           </div>

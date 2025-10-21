@@ -6,7 +6,6 @@ import Papa from 'papaparse';
 import { Customer, Stats, AdvancedFilters } from '@/types';
 import SegmentChart from './SegmentChart';
 import CustomerTable from './CustomerTable';
-import SegmentFilter from './SegmentFilter';
 import FilterPanel from './FilterPanel';
 
 interface DashboardProps {
@@ -43,10 +42,6 @@ export default function Dashboard({ customers, onReset }: DashboardProps) {
       segments
     };
   }, [customers]);
-
-  const availableSegments = useMemo(() => {
-    return Object.keys(stats.segments).sort();
-  }, [stats.segments]);
 
   const filteredCustomers = useMemo(() => {
     return customers.filter(c => {
@@ -236,6 +231,7 @@ export default function Dashboard({ customers, onReset }: DashboardProps) {
         segments={stats.segments}
         total={stats.total}
         selectedSegments={selectedSegments}
+        filteredCount={filteredCustomers.length}
         onSegmentClick={(segment) => {
           if (selectedSegments.includes(segment)) {
             setSelectedSegments(selectedSegments.filter(s => s !== segment));
@@ -253,15 +249,6 @@ export default function Dashboard({ customers, onReset }: DashboardProps) {
         activeFilterCount={activeFilterCount}
         minValue={minValue}
         maxValue={maxValue}
-      />
-
-      {/* Segment Filter */}
-      <SegmentFilter
-        segments={availableSegments}
-        selectedSegments={selectedSegments}
-        onSegmentChange={setSelectedSegments}
-        totalCount={customers.length}
-        filteredCount={filteredCustomers.length}
       />
 
       {/* Customer Table */}
