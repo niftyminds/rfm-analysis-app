@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Image from 'next/image';
 import FileUpload from '@/components/FileUpload';
 import ColumnMapper from '@/components/ColumnMapper';
 import Dashboard from '@/components/Dashboard';
@@ -59,9 +60,15 @@ export default function Home() {
               <h1 className="text-3xl font-bold text-gray-900">RFM Analýza</h1>
               <p className="text-gray-600 mt-1">Zákaznická segmentace & marketing insights</p>
             </div>
-            <div className="flex items-center gap-2 text-sm text-gray-500">
-              <span className="font-semibold text-indigo-600">NiftyMinds</span>
-              <span>Agency</span>
+            <div className="flex items-center">
+              <Image
+                src="/logo-niftyminds.svg"
+                alt="NiftyMinds Agency"
+                width={180}
+                height={40}
+                priority
+                className="h-10 md:h-10 w-auto"
+              />
             </div>
           </div>
         </div>
