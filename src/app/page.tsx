@@ -4,16 +4,18 @@ import { useState } from 'react';
 import Image from 'next/image';
 import FileUpload from '@/components/FileUpload';
 import ColumnMapper from '@/components/ColumnMapper';
+import DataPreview from '@/components/DataPreview';
 import Dashboard from '@/components/Dashboard';
-import { Customer, CSVRow, ColumnMapping } from '@/types';
+import { Customer, CSVRow, ColumnMapping, DataFilters } from '@/types';
 import { processCSVData } from '@/utils/rfmAnalysis';
 
-type AppStep = 'upload' | 'mapping' | 'dashboard';
+type AppStep = 'upload' | 'mapping' | 'preview' | 'dashboard';
 
 export default function Home() {
   const [step, setStep] = useState<AppStep>('upload');
   const [csvData, setCSVData] = useState<CSVRow[]>([]);
   const [columns, setColumns] = useState<string[]>([]);
+  const [currentMapping, setCurrentMapping] = useState<ColumnMapping | null>(null);
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [loading, setLoading] = useState(false);
 
@@ -24,9 +26,42 @@ export default function Home() {
   };
 
   const handleMapping = (mapping: ColumnMapping) => {
+    setCurrentMapping(mapping);
+    setStep('preview');
+  };
+
+  const handlePreviewConfirm = (filters: DataFilters) => {
+    if (!currentMapping) return;
+
     setLoading(true);
     try {
-      const processedCustomers = processCSVData(csvData, mapping);
+      // Filtruj data podle vybraných kritérií
+      const filteredData = csvData.filter(row => {
+        const email = (row[currentMapping.customerEmail] || '').toString().toLowerCase().trim();
+        const name = (row[currentMapping.customerName] || '').toString().toLowerCase().trim();
+
+        if (!email) return false;
+
+        // Vyloučit podle manuálního výběru (HLAVNÍ METODA)
+        if (filters.manualExcludeEmails.includes(email)) {
+          return false;
+        }
+
+        // Vyloučit podle keywordů (pokud není v manuálním výběru)
+        if (filters.excludeTestData) {
+          const hasKeyword = filters.excludeByKeywords.some(keyword =>
+            email.includes(keyword) || (name && name.includes(keyword))
+          );
+          if (hasKeyword) {
+            return false;
+          }
+        }
+
+        return true;
+      });
+
+      // TEPRVE TEĎ spusť RFM analýzu
+      const processedCustomers = processCSVData(filteredData, currentMapping);
       setCustomers(processedCustomers);
       setStep('dashboard');
     } catch (error) {
@@ -37,10 +72,18 @@ export default function Home() {
     }
   };
 
+  const handlePreviewCancel = () => {
+    setStep('upload');
+    setCSVData([]);
+    setColumns([]);
+    setCurrentMapping(null);
+  };
+
   const handleReset = () => {
     setStep('upload');
     setCSVData([]);
     setColumns([]);
+    setCurrentMapping(null);
     setCustomers([]);
   };
 
@@ -48,6 +91,7 @@ export default function Home() {
     setStep('upload');
     setCSVData([]);
     setColumns([]);
+    setCurrentMapping(null);
   };
 
   return (
@@ -83,6 +127,15 @@ export default function Home() {
             previewData={csvData.slice(0, 10)}
             onMapping={handleMapping}
             onBack={handleBackToUpload}
+          />
+        )}
+
+        {step === 'preview' && currentMapping && (
+          <DataPreview
+            data={csvData}
+            columnMapping={currentMapping}
+            onConfirm={handlePreviewConfirm}
+            onCancel={handlePreviewCancel}
           />
         )}
 

@@ -106,10 +106,10 @@ export default function Dashboard({ customers, onReset }: DashboardProps) {
       pocet_objednavek: c.orderCount,
       hodnota_objednavek: Math.round(c.totalValue * 100) / 100,
       datum_prvni_objednavky: c.firstOrderDate
-        ? c.firstOrderDate.toLocaleDateString('cs-CZ')
+        ? c.firstOrderDate.toISOString().split('T')[0]
         : '',
       datum_posledni_objednavky: c.lastOrderDate
-        ? c.lastOrderDate.toLocaleDateString('cs-CZ')
+        ? c.lastOrderDate.toISOString().split('T')[0]
         : '',
       lifetime_dny: c.lifetime,
       RFM_skore: c.RFM_Score,

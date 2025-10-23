@@ -25,7 +25,6 @@ interface TooltipData {
   date: Date;
   value: number | null;
   daysSincePrevious: number | null;
-  position: { x: number; y: number };
   isToday: boolean;
 }
 
@@ -56,12 +55,25 @@ export default function CustomerTable({
   const [currentPage, setCurrentPage] = useState(1);
   const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
   const [hoveredOrder, setHoveredOrder] = useState<TooltipData | null>(null);
+  const [pinnedOrder, setPinnedOrder] = useState<TooltipData | null>(null);
   const itemsPerPage = 20;
 
   // Reset pagination na stránku 1 při změně filtrů
   useEffect(() => {
     setCurrentPage(1);
   }, [selectedSegments, searchTerm, advancedFilters]);
+
+  // Close pinned tooltip on outside click
+  useEffect(() => {
+    const handleClickOutside = () => {
+      setPinnedOrder(null);
+    };
+
+    if (pinnedOrder) {
+      document.addEventListener('click', handleClickOutside);
+      return () => document.removeEventListener('click', handleClickOutside);
+    }
+  }, [pinnedOrder]);
 
   const toggleRow = (email: string) => {
     const newExpanded = new Set(expandedRows);
@@ -71,6 +83,17 @@ export default function CustomerTable({
       newExpanded.add(email);
     }
     setExpandedRows(newExpanded);
+  };
+
+  const handleToggleAll = () => {
+    if (expandedRows.size === paginatedCustomers.length && paginatedCustomers.every(c => expandedRows.has(c.email))) {
+      // Všechno na aktuální stránce rozbaleno → Sbalit vše
+      setExpandedRows(new Set());
+    } else {
+      // Něco sbaleno → Rozbalit vše (pouze aktuální stránka)
+      const allEmails = paginatedCustomers.map(c => c.email);
+      setExpandedRows(new Set(allEmails));
+    }
   };
 
   const renderOrderMarkers = (customer: Customer) => {
@@ -93,6 +116,7 @@ export default function CustomerTable({
         {/* Všechny objednávky (včetně poslední) */}
         {orderDates.map((orderDate, index) => {
           const isFirst = index === 0;
+          const isLast = index === orderDates.length - 1;
 
           // Vypočítej pozici na timeline (0-100%)
           // 100% = dnes, ne poslední objednávka
@@ -118,8 +142,33 @@ export default function CustomerTable({
             : 'bg-indigo-600 hover:bg-indigo-700';
 
           const dotSize = isFirst
-            ? 'w-3 h-3 hover:scale-[1.6]'
-            : 'w-2.5 h-2.5 hover:scale-[1.8]';
+            ? 'w-3 h-3'
+            : 'w-2.5 h-2.5';
+
+          const isHovered = hoveredOrder?.orderNumber === index + 1 && !hoveredOrder?.isToday;
+          const isPinned = pinnedOrder?.orderNumber === index + 1 && !pinnedOrder?.isToday;
+          const showTooltip = isHovered || isPinned;
+
+          // Určení tooltip alignmentu
+          let tooltipAlignment: 'left' | 'center' | 'right' = 'center';
+          if (isFirst || position < 15) {
+            tooltipAlignment = 'left'; // První bod nebo blízko začátku
+          } else if (position > 85) {
+            tooltipAlignment = 'right'; // Blízko konce
+          }
+
+          // Tooltip classes based on alignment
+          const tooltipPositionClass = {
+            left: 'left-0',
+            center: 'left-1/2 -translate-x-1/2',
+            right: 'right-0'
+          }[tooltipAlignment];
+
+          const arrowPositionClass = {
+            left: 'left-4',
+            center: 'left-1/2 -translate-x-1/2',
+            right: 'right-4'
+          }[tooltipAlignment];
 
           return (
             <div
@@ -129,36 +178,112 @@ export default function CustomerTable({
                 left: isFirst ? '0' : `${Math.min(95, position)}%`,
                 ...(isFirst && { transform: 'translateY(-50%)' })
               }}
-              onMouseEnter={(e) => {
-                const rect = e.currentTarget.getBoundingClientRect();
+              onMouseEnter={() => {
                 setHoveredOrder({
                   orderNumber: index + 1,
                   date: orderDate,
                   value: orderValue,
                   daysSincePrevious,
-                  position: { x: rect.left, y: rect.top },
                   isToday: false
                 });
               }}
-              onMouseLeave={() => setHoveredOrder(null)}
+              onMouseLeave={() => {
+                // Only clear hover if not pinned
+                if (!isPinned) {
+                  setHoveredOrder(null);
+                }
+              }}
+              onClick={(e) => {
+                e.stopPropagation();
+                // Toggle pin
+                if (isPinned) {
+                  setPinnedOrder(null);
+                } else {
+                  setPinnedOrder({
+                    orderNumber: index + 1,
+                    date: orderDate,
+                    value: orderValue,
+                    daysSincePrevious,
+                    isToday: false
+                  });
+                }
+              }}
             >
               <div
                 className={`${dotSize} ${dotColor} rounded-full border-2 border-white shadow-md
-                           transition-all duration-200 cursor-pointer z-10 relative`}
+                           transition-all duration-200 cursor-pointer z-10 relative
+                           ${showTooltip ? 'scale-150' : ''}`}
               ></div>
 
-              {isFirst && (
-                <span className="absolute top-6 left-0 text-[10px] text-gray-600 whitespace-nowrap font-medium">
-                  Start
+              {!isFirst && daysSincePrevious !== null && (
+                <span className="absolute -top-8 left-1/2 transform -translate-x-1/2
+                               text-[11.5px] text-gray-700 whitespace-nowrap
+                               opacity-0 group-hover:opacity-100 transition-opacity font-semibold z-20">
+                  +{daysSincePrevious}d
                 </span>
               )}
 
-              {!isFirst && daysSincePrevious !== null && (
-                <span className="absolute -bottom-6 left-1/2 transform -translate-x-1/2
-                               text-[10px] text-gray-500 whitespace-nowrap
-                               opacity-0 group-hover:opacity-100 transition-opacity font-medium">
-                  +{daysSincePrevious}d
-                </span>
+              {/* Tooltip - INSIDE parent, přímo nad tímto bodem */}
+              {showTooltip && (
+                <div
+                  className={`absolute bottom-full mb-3
+                             bg-white rounded-lg shadow-xl border border-gray-200 p-3
+                             pointer-events-auto z-50 transition-opacity
+                             ${tooltipPositionClass}`}
+                  style={{ minWidth: '200px' }}
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  {/* Tooltip Arrow - pointing DOWN */}
+                  <div className={`absolute top-full ${arrowPositionClass}`}>
+                    <div className="w-0 h-0
+                                    border-l-8 border-l-transparent
+                                    border-r-8 border-r-transparent
+                                    border-t-8 border-t-white">
+                    </div>
+                  </div>
+
+                  {/* Pin indicator */}
+                  {isPinned && (
+                    <div className="absolute top-2 right-2">
+                      <div className="w-2 h-2 bg-indigo-600 rounded-full"></div>
+                    </div>
+                  )}
+
+                  <div className="space-y-1.5">
+                    <p className="text-xs font-bold text-indigo-600">
+                      Objednávka #{index + 1}
+                    </p>
+                    <div className="flex items-center gap-2">
+                      <Calendar size={14} className="text-gray-500" />
+                      <p className="text-sm font-semibold text-gray-900">
+                        {orderDate.toLocaleDateString('cs-CZ', {
+                          day: 'numeric',
+                          month: 'long',
+                          year: 'numeric'
+                        })}
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <DollarSign size={14} className="text-gray-500" />
+                      <p className="text-sm font-semibold text-gray-900">
+                        {Math.round(orderValue).toLocaleString('cs-CZ')} Kč
+                      </p>
+                    </div>
+                    {daysSincePrevious !== null && (
+                      <div className="pt-1.5 mt-1.5 border-t border-gray-200">
+                        <p className="text-xs text-gray-600">
+                          <span className="font-medium">{daysSincePrevious} dní</span>
+                          {' '}od předchozí objednávky
+                        </p>
+                      </div>
+                    )}
+                    {isPinned && (
+                      <p className="text-[10px] text-indigo-600 mt-2 pt-2 border-t">
+                        📌 Připnuto - klikni pro odepnutí
+                      </p>
+                    )}
+                  </div>
+                </div>
               )}
             </div>
           );
@@ -167,113 +292,94 @@ export default function CustomerTable({
         {/* "DNES" Marker */}
         <div
           className="absolute top-1/2 right-0 transform -translate-y-1/2 group"
-          onMouseEnter={(e) => {
-            const rect = e.currentTarget.getBoundingClientRect();
+          onMouseEnter={() => {
             setHoveredOrder({
               orderNumber: null,
               date: today,
               value: null,
               daysSincePrevious: customer.recency,
-              position: { x: rect.left, y: rect.top },
               isToday: true
             });
           }}
-          onMouseLeave={() => setHoveredOrder(null)}
+          onMouseLeave={() => {
+            if (!pinnedOrder?.isToday) {
+              setHoveredOrder(null);
+            }
+          }}
+          onClick={(e) => {
+            e.stopPropagation();
+            if (pinnedOrder?.isToday) {
+              setPinnedOrder(null);
+            } else {
+              setPinnedOrder({
+                orderNumber: null,
+                date: today,
+                value: null,
+                daysSincePrevious: customer.recency,
+                isToday: true
+              });
+            }
+          }}
         >
           {/* "Dnes" Dot */}
           <div
-            className="w-3 h-3 bg-purple-600 hover:bg-purple-700 rounded-full border-2 border-white shadow-md
-                       hover:scale-[1.6] transition-all duration-200 cursor-pointer z-10 relative"
+            className={`w-3 h-3 bg-purple-600 hover:bg-purple-700 rounded-full border-2 border-white shadow-md
+                       transition-all duration-200 cursor-pointer z-10 relative
+                       ${(hoveredOrder?.isToday || pinnedOrder?.isToday) ? 'scale-150' : ''}`}
           ></div>
 
-          {/* Label "Dnes" */}
-          <span className="absolute top-6 right-0 text-[10px] text-gray-600 whitespace-nowrap font-medium">
-            Dnes
-          </span>
+          {/* Tooltip pro Dnes */}
+          {(hoveredOrder?.isToday || pinnedOrder?.isToday) && (
+            <div
+              className="absolute right-0 bottom-full mb-3
+                         bg-white rounded-lg shadow-xl border border-gray-200 p-3
+                         pointer-events-auto z-50"
+              style={{ minWidth: '200px' }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Tooltip Arrow - aligned right */}
+              <div className="absolute top-full right-4">
+                <div className="w-0 h-0
+                                border-l-8 border-l-transparent
+                                border-r-8 border-r-transparent
+                                border-t-8 border-t-white">
+                </div>
+              </div>
 
-          {/* Recency label na hover */}
-          <span className="absolute -bottom-6 right-0
-                         text-[10px] text-gray-500 whitespace-nowrap
-                         opacity-0 group-hover:opacity-100 transition-opacity font-medium">
-            +{customer.recency}d
-          </span>
-        </div>
-
-        {/* Tooltip */}
-        {hoveredOrder && (
-          <div
-            className="absolute z-50 bg-white rounded-lg shadow-xl border border-gray-200 p-3
-                       pointer-events-none transition-opacity"
-            style={{
-              left: '50%',
-              top: '-80px',
-              transform: 'translateX(-50%)',
-              minWidth: '200px'
-            }}
-          >
-            <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-full">
-              <div className="border-8 border-transparent border-t-white"></div>
-            </div>
-
-            <div className="space-y-1.5">
-              {hoveredOrder.isToday ? (
-                // Tooltip pro "Dnes" marker
-                <>
-                  <p className="text-xs font-bold text-purple-600">
-                    Dnes
-                  </p>
-                  <div className="flex items-center gap-2">
-                    <Calendar size={14} className="text-gray-500" />
-                    <p className="text-sm font-semibold text-gray-900">
-                      {hoveredOrder.date.toLocaleDateString('cs-CZ', {
-                        day: 'numeric',
-                        month: 'long',
-                        year: 'numeric'
-                      })}
-                    </p>
-                  </div>
-                  <div className="pt-1.5 mt-1.5 border-t border-gray-200">
-                    <p className="text-xs text-gray-600">
-                      <span className="font-medium">{hoveredOrder.daysSincePrevious} dní</span>
-                      {' '}od poslední objednávky
-                    </p>
-                  </div>
-                </>
-              ) : (
-                // Tooltip pro objednávky
-                <>
-                  <p className="text-xs font-bold text-indigo-600">
-                    Objednávka #{hoveredOrder.orderNumber}
-                  </p>
-                  <div className="flex items-center gap-2">
-                    <Calendar size={14} className="text-gray-500" />
-                    <p className="text-sm font-semibold text-gray-900">
-                      {hoveredOrder.date.toLocaleDateString('cs-CZ', {
-                        day: 'numeric',
-                        month: 'long',
-                        year: 'numeric'
-                      })}
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <DollarSign size={14} className="text-gray-500" />
-                    <p className="text-sm font-semibold text-gray-900">
-                      {Math.round(hoveredOrder.value!).toLocaleString('cs-CZ')} Kč
-                    </p>
-                  </div>
-                  {hoveredOrder.daysSincePrevious !== null && (
-                    <div className="pt-1.5 mt-1.5 border-t border-gray-200">
-                      <p className="text-xs text-gray-600">
-                        <span className="font-medium">{hoveredOrder.daysSincePrevious} dní</span>
-                        {' '}od předchozí objednávky
-                      </p>
-                    </div>
-                  )}
-                </>
+              {/* Pin indicator */}
+              {pinnedOrder?.isToday && (
+                <div className="absolute top-2 right-2">
+                  <div className="w-2 h-2 bg-purple-600 rounded-full"></div>
+                </div>
               )}
+
+              <div className="space-y-1.5">
+                <p className="text-xs font-bold text-purple-600">Dnes</p>
+                <div className="flex items-center gap-2">
+                  <Calendar size={14} className="text-gray-500" />
+                  <p className="text-sm font-semibold text-gray-900">
+                    {today.toLocaleDateString('cs-CZ', {
+                      day: 'numeric',
+                      month: 'long',
+                      year: 'numeric'
+                    })}
+                  </p>
+                </div>
+                <div className="pt-1.5 mt-1.5 border-t border-gray-200">
+                  <p className="text-xs text-gray-600">
+                    <span className="font-medium">{customer.recency} dní</span>
+                    {' '}od poslední objednávky
+                  </p>
+                </div>
+                {pinnedOrder?.isToday && (
+                  <p className="text-[10px] text-purple-600 mt-2 pt-2 border-t">
+                    📌 Připnuto - klikni pro odepnutí
+                  </p>
+                )}
+              </div>
             </div>
-          </div>
-        )}
+          )}
+        </div>
       </>
     );
   };
@@ -354,9 +460,32 @@ export default function CustomerTable({
   return (
     <div className="bg-white rounded-2xl shadow-xl p-8">
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-bold text-gray-900">
-          Top zákazníci ({sortedAndFilteredCustomers.length})
-        </h2>
+        <div className="flex items-center gap-4">
+          <h2 className="text-2xl font-bold text-gray-900">
+            Top zákazníci ({sortedAndFilteredCustomers.length})
+          </h2>
+
+          {/* Expand/Collapse All tlačítko */}
+          <button
+            onClick={handleToggleAll}
+            className="flex items-center gap-2 px-4 py-2 text-sm font-medium
+                       text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50
+                       rounded-lg transition-colors border border-indigo-200"
+          >
+            {expandedRows.size === paginatedCustomers.length && paginatedCustomers.every(c => expandedRows.has(c.email)) ? (
+              <>
+                <ChevronUp size={16} />
+                Sbalit vše
+              </>
+            ) : (
+              <>
+                <ChevronDown size={16} />
+                Rozbalit vše
+              </>
+            )}
+          </button>
+        </div>
+
         <div className="relative">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-600" size={20} />
           <input
@@ -535,35 +664,64 @@ export default function CustomerTable({
                               </div>
 
                               {/* Timeline Container */}
-                              <div className="relative h-16 bg-gradient-to-r from-green-100 via-blue-100 to-purple-100 rounded-lg p-3 pt-6">
+                              <div className="relative h-28 bg-gradient-to-r from-green-100 via-blue-100 to-purple-100 rounded-lg px-3 py-10">
+                                {/* Labels NAD timeline */}
+                                <div className="absolute top-2 left-3 right-3 flex justify-between text-[10px] font-medium text-gray-600">
+                                  <span>Start</span>
+                                  <span>Dnes</span>
+                                </div>
+
                                 {/* Timeline Bar */}
                                 <div className="absolute top-1/2 left-0 right-0 h-1 bg-gradient-to-r from-green-500 via-blue-500 to-purple-500 transform -translate-y-1/2 rounded-full"></div>
 
                                 {/* Order Markers s Tooltips */}
                                 {renderOrderMarkers(customer)}
-                              </div>
 
-                              {/* Legend/Labels */}
-                              <div className="mt-3 flex justify-between text-xs text-gray-600">
-                                <div>
-                                  <p className="font-medium">První objednávka</p>
-                                  <p>
-                                    {customer.firstOrderDate.toLocaleDateString('cs-CZ', {
-                                      day: 'numeric',
-                                      month: 'numeric',
-                                      year: 'numeric'
-                                    })}
-                                  </p>
-                                </div>
-                                <div className="text-right">
-                                  <p className="font-medium">Poslední objednávka</p>
-                                  <p>
-                                    {customer.lastOrderDate.toLocaleDateString('cs-CZ', {
-                                      day: 'numeric',
-                                      month: 'numeric',
-                                      year: 'numeric'
-                                    })}
-                                  </p>
+                                {/* Labels POD timeline */}
+                                <div className="absolute bottom-2 left-3 right-3 flex justify-between text-[10px] text-gray-600">
+                                  {customer.orderCount === 1 ? (
+                                    // Jen 1 objednávka - zobraz ji uprostřed
+                                    <div className="w-full text-center">
+                                      <p className="text-gray-500 uppercase tracking-wide mb-0.5">
+                                        Jediná objednávka
+                                      </p>
+                                      <p className="font-semibold text-gray-900 text-xs">
+                                        {customer.firstOrderDate?.toLocaleDateString('cs-CZ', {
+                                          day: 'numeric',
+                                          month: 'numeric',
+                                          year: 'numeric'
+                                        })}
+                                      </p>
+                                    </div>
+                                  ) : (
+                                    // Více objednávek - zobraz první a poslední
+                                    <>
+                                      <div className="text-left">
+                                        <p className="text-gray-500 uppercase tracking-wide mb-0.5">
+                                          První objednávka
+                                        </p>
+                                        <p className="font-semibold text-gray-900 text-xs">
+                                          {customer.firstOrderDate?.toLocaleDateString('cs-CZ', {
+                                            day: 'numeric',
+                                            month: 'numeric',
+                                            year: 'numeric'
+                                          })}
+                                        </p>
+                                      </div>
+                                      <div className="text-right">
+                                        <p className="text-gray-500 uppercase tracking-wide mb-0.5">
+                                          Poslední objednávka
+                                        </p>
+                                        <p className="font-semibold text-gray-900 text-xs">
+                                          {customer.lastOrderDate?.toLocaleDateString('cs-CZ', {
+                                            day: 'numeric',
+                                            month: 'numeric',
+                                            year: 'numeric'
+                                          })}
+                                        </p>
+                                      </div>
+                                    </>
+                                  )}
                                 </div>
                               </div>
                             </div>

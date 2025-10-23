@@ -51,3 +51,9 @@ export interface AdvancedFilters {
   dateFrom: Date | null;
   dateTo: Date | null;
 }
+
+export interface DataFilters {
+  excludeTestData: boolean;
+  excludeByKeywords: string[];
+  manualExcludeEmails: string[];
+}
