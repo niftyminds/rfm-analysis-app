@@ -313,6 +313,7 @@ export default function Dashboard({ customers, onReset }: DashboardProps) {
               <span className="text-base sm:text-sm">Nový soubor</span>
             </button>
           </div>
+          </div>
         </div>
 
         {/* Stats Grid */}
