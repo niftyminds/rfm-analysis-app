@@ -68,9 +68,22 @@ export default function Footer() {
 
         {/* Copyright */}
         <div className="mt-8 pt-8 border-t border-gray-200">
-          <p className="text-sm text-gray-600 text-center">
-            © {currentYear} NiftyMinds Agency. Všechna práva vyhrazena.
-          </p>
+          <div className="flex flex-col md:flex-row justify-between items-center gap-2 md:gap-4">
+            <p className="text-sm text-gray-600 text-center md:text-left">
+              © {currentYear} NiftyMinds Agency. Všechna práva vyhrazena.
+            </p>
+            <p className="text-sm text-gray-500 text-center md:text-right">
+              Powered by{' '}
+              <a
+                href="https://niftyminds.cz/?utm_source=rfm-analysis&utm_medium=app"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-indigo-600 font-semibold hover:text-indigo-700 transition-colors underline"
+              >
+                niftyminds.cz
+              </a>
+            </p>
+          </div>
         </div>
       </div>
     </footer>
