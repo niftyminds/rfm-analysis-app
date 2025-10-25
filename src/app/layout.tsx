@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import Footer from "@/components/Footer";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -19,8 +20,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="cs">
-      <body className="antialiased">
-        {children}
+      <body className="antialiased flex flex-col min-h-screen">
+        <main className="flex-1">
+          {children}
+        </main>
+        <Footer />
       </body>
     </html>
   );
