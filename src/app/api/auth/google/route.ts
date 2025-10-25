@@ -8,8 +8,13 @@ export async function GET(request: NextRequest) {
     process.env.NEXT_PUBLIC_REDIRECT_URI
   );
 
+  // Používáme pouze 'drive.file' scope místo 'spreadsheets'
+  // Výhody:
+  // - NEVYŽADUJE Google App Verification (6+ týdnů proces)
+  // - Přístup POUZE k souborům vytvořeným aplikací (vyšší bezpečnost)
+  // - Plně postačuje pro vytváření a editaci Google Sheets
+  // - Zobrazí "unverified app" varování, ale lze přeskočit
   const scopes = [
-    'https://www.googleapis.com/auth/spreadsheets',
     'https://www.googleapis.com/auth/drive.file'
   ];
 

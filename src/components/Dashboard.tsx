@@ -267,12 +267,28 @@ export default function Dashboard({ customers, onReset }: DashboardProps) {
             <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">Výsledky analýzy</h2>
             <p className="text-sm sm:text-base text-gray-600">RFM segmentace {stats.total.toLocaleString('cs-CZ')} zákazníků</p>
           </div>
-          <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
-            <button
-              onClick={handleExportToSheets}
-              disabled={isExportingToSheets}
-              className="flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 active:bg-green-800 text-white px-4 py-3 sm:py-2 rounded-lg font-semibold transition-colors shadow-lg disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px]"
-            >
+          <div className="flex flex-col gap-3 w-full sm:w-auto">
+            {/* Info box o Google OAuth */}
+            {!isGoogleAuthenticated && (
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 text-xs sm:text-sm text-blue-800">
+                <div className="flex items-start gap-2">
+                  <svg className="w-4 h-4 sm:w-5 sm:h-5 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd"/>
+                  </svg>
+                  <div>
+                    <strong>První přihlášení:</strong> Google zobrazí varování "unverified app".
+                    Klikněte na <span className="font-semibold">Advanced</span> → <span className="font-semibold">Go to RFM Analýza (unsafe)</span>.
+                    Aplikace má přístup pouze k souborům, které vytvoří.
+                  </div>
+                </div>
+              </div>
+            )}
+            <div className="flex flex-col sm:flex-row gap-3">
+              <button
+                onClick={handleExportToSheets}
+                disabled={isExportingToSheets}
+                className="flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 active:bg-green-800 text-white px-4 py-3 sm:py-2 rounded-lg font-semibold transition-colors shadow-lg disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px]"
+              >
               {isExportingToSheets ? (
                 <>
                   <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
