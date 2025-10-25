@@ -95,20 +95,20 @@ export default function Home() {
   };
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
+    <main className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 flex flex-col">
       {/* Header */}
       <header className="bg-white border-b border-gray-200 shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900">RFM Analýza</h1>
-              <p className="text-gray-600 mt-1">Zákaznická segmentace & marketing insights</p>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex-1 min-w-0">
+              <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 truncate">RFM Analýza</h1>
+              <p className="text-sm sm:text-base text-gray-600 mt-1 hidden sm:block">Zákaznická segmentace & marketing insights</p>
             </div>
-            <div className="flex items-center justify-center" style={{ width: '200px', height: 'auto' }}>
+            <div className="flex-shrink-0">
               <img
                 src="/logo-niftyminds.png"
                 alt="NiftyMinds Agency"
-                style={{ width: '150px', height: 'auto' }}
+                className="w-20 h-auto sm:w-32 lg:w-[150px]"
               />
             </div>
           </div>
@@ -116,7 +116,7 @@ export default function Home() {
       </header>
 
       {/* Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {step === 'upload' && (
           <FileUpload onCSVLoaded={handleCSVLoaded} setLoading={setLoading} />
         )}
@@ -145,7 +145,7 @@ export default function Home() {
       </div>
 
       {/* Footer */}
-      <footer className="mt-16 bg-white border-t border-gray-200">
+      <footer className="bg-white border-t border-gray-200 mt-auto">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
             <p className="text-sm text-gray-600">

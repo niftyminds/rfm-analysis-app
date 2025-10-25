@@ -17,10 +17,12 @@ export default function ColumnMapper({ columns, previewData, onMapping, onBack }
     orderDate: '',
     orderValue: '',
     customerName: '',
-    customerEmail: ''
+    customerEmail: '',
+    additionalFields: []
   });
 
   const [errors, setErrors] = useState<string[]>([]);
+  const [selectedAdditionalFields, setSelectedAdditionalFields] = useState<Set<string>>(new Set());
 
   // Auto-detect columns based on common names
   const autoDetectColumns = () => {
@@ -69,7 +71,31 @@ export default function ColumnMapper({ columns, previewData, onMapping, onBack }
       return;
     }
 
-    onMapping(mapping);
+    onMapping({
+      ...mapping,
+      additionalFields: Array.from(selectedAdditionalFields)
+    });
+  };
+
+  // Dostupné sloupce pro dodatečná pole (vynechávají již mapované)
+  const availableAdditionalColumns = columns.filter(col =>
+    col !== mapping.orderNumber &&
+    col !== mapping.orderDate &&
+    col !== mapping.orderValue &&
+    col !== mapping.customerName &&
+    col !== mapping.customerEmail
+  );
+
+  const toggleAdditionalField = (field: string) => {
+    setSelectedAdditionalFields(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(field)) {
+        newSet.delete(field);
+      } else {
+        newSet.add(field);
+      }
+      return newSet;
+    });
   };
 
   const fields = [
@@ -82,20 +108,20 @@ export default function ColumnMapper({ columns, previewData, onMapping, onBack }
 
   return (
     <div className="max-w-5xl mx-auto">
-      <div className="bg-white rounded-2xl shadow-xl p-8">
+      <div className="bg-white rounded-xl sm:rounded-2xl shadow-xl p-4 sm:p-6 lg:p-8">
         {/* Header */}
-        <div className="text-center mb-8">
-          <Table className="mx-auto h-16 w-16 text-indigo-600 mb-4" />
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">
+        <div className="text-center mb-6 sm:mb-8">
+          <Table className="mx-auto h-12 w-12 sm:h-16 sm:w-16 text-indigo-600 mb-3 sm:mb-4" />
+          <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">
             Mapování sloupců CSV
           </h2>
-          <p className="text-gray-600">
+          <p className="text-sm sm:text-base text-gray-600">
             Přiřaďte sloupce z vašeho CSV souboru k požadovaným polím
           </p>
         </div>
 
         {/* Column Mapping Form */}
-        <div className="space-y-6 mb-8">
+        <div className="space-y-4 sm:space-y-6 mb-6 sm:mb-8">
           {fields.map(field => (
             <div key={field.key} className="border border-gray-200 rounded-lg p-4">
               <label className="block text-sm font-semibold text-gray-900 mb-1">
@@ -105,7 +131,7 @@ export default function ColumnMapper({ columns, previewData, onMapping, onBack }
               <select
                 value={mapping[field.key]}
                 onChange={(e) => handleChange(field.key, e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                className="w-full px-4 py-3 sm:py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-base min-h-[48px] sm:min-h-0"
               >
                 <option value="">-- Vyberte sloupec --</option>
                 {columns.map(col => (
@@ -128,6 +154,43 @@ export default function ColumnMapper({ columns, previewData, onMapping, onBack }
               )}
             </div>
           ))}
+
+        {/* Additional Fields Selection */}
+        {availableAdditionalColumns.length > 0 && (
+          <div className="mt-8 border-t border-gray-200 pt-6">
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">
+              Dodatečné sloupce (volitelné)
+            </h3>
+            <p className="text-sm text-gray-600 mb-4">
+              Vyberte další sloupce z CSV, které chcete zahrnout do analýzy
+            </p>
+
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+              {availableAdditionalColumns.map(col => (
+                <label
+                  key={col}
+                  className="flex items-center gap-2 p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors"
+                >
+                  <input
+                    type="checkbox"
+                    checked={selectedAdditionalFields.has(col)}
+                    onChange={() => toggleAdditionalField(col)}
+                    className="w-4 h-4 text-indigo-600 rounded focus:ring-indigo-500"
+                  />
+                  <span className="text-sm text-gray-900">{col}</span>
+                </label>
+              ))}
+            </div>
+
+            {selectedAdditionalFields.size > 0 && (
+              <div className="mt-4 p-3 bg-indigo-50 border border-indigo-200 rounded-lg">
+                <p className="text-sm font-semibold text-indigo-900">
+                  ✓ Vybráno: {selectedAdditionalFields.size} dodatečných sloupců
+                </p>
+              </div>
+            )}
+          </div>
+        )}
         </div>
 
         {/* Errors */}
@@ -186,16 +249,16 @@ export default function ColumnMapper({ columns, previewData, onMapping, onBack }
         </div>
 
         {/* Actions */}
-        <div className="flex justify-between items-center">
+        <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-3">
           <button
             onClick={onBack}
-            className="px-6 py-2 text-gray-700 hover:text-gray-900 font-medium transition-colors"
+            className="px-6 py-3 sm:py-2 bg-gray-100 hover:bg-gray-200 active:bg-gray-300 text-gray-700 hover:text-gray-900 font-semibold transition-colors text-center min-h-[48px] sm:min-h-0 rounded-lg"
           >
             ← Zpět
           </button>
           <button
             onClick={validateAndSubmit}
-            className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-3 rounded-lg font-semibold transition-colors shadow-lg"
+            className="flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white px-6 sm:px-8 py-3 rounded-lg font-semibold transition-colors shadow-lg min-h-[52px] text-base"
           >
             Analyzovat data
             <ArrowRight size={20} />

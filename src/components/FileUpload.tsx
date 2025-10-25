@@ -88,22 +88,22 @@ export default function FileUpload({ onCSVLoaded, setLoading }: FileUploadProps)
 
   return (
     <div className="max-w-3xl mx-auto">
-      <div className="bg-white rounded-2xl shadow-xl p-8">
-        <div className="text-center mb-8">
-          <FileSpreadsheet className="mx-auto h-16 w-16 text-indigo-600 mb-4" />
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">
+      <div className="bg-white rounded-xl sm:rounded-2xl shadow-xl p-4 sm:p-6 lg:p-8">
+        <div className="text-center mb-6 sm:mb-8">
+          <FileSpreadsheet className="mx-auto h-12 w-12 sm:h-16 sm:w-16 text-indigo-600 mb-3 sm:mb-4" />
+          <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">
             Nahrajte CSV soubor
           </h2>
-          <p className="text-gray-600">
+          <p className="text-sm sm:text-base text-gray-600">
             Nahrajte soubor s objednávkami pro RFM analýzu
           </p>
         </div>
 
         <div
-          className={`relative border-2 border-dashed rounded-xl p-12 text-center transition-colors ${
+          className={`relative border-2 border-dashed rounded-lg sm:rounded-xl p-8 sm:p-12 text-center transition-colors ${
             dragActive
               ? 'border-indigo-600 bg-indigo-50'
-              : 'border-gray-300 hover:border-indigo-400 bg-gray-50'
+              : 'border-gray-300 hover:border-indigo-400 active:border-indigo-500 bg-gray-50'
           }`}
           onDragEnter={handleDrag}
           onDragLeave={handleDrag}
@@ -114,16 +114,16 @@ export default function FileUpload({ onCSVLoaded, setLoading }: FileUploadProps)
             type="file"
             accept=".csv"
             onChange={handleChange}
-            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
           />
-          <Upload className="mx-auto h-12 w-12 text-gray-600 mb-4" />
-          <p className="text-lg font-medium text-gray-700 mb-2">
+          <Upload className="mx-auto h-10 w-10 sm:h-12 sm:w-12 text-gray-600 mb-3 sm:mb-4" />
+          <p className="text-base sm:text-lg font-medium text-gray-700 mb-2">
             Přetáhněte CSV soubor sem
           </p>
           <p className="text-sm text-gray-600 mb-4">
             nebo klikněte pro výběr souboru
           </p>
-          <button className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-lg font-medium transition-colors">
+          <button className="bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white px-6 py-3 rounded-lg font-medium transition-colors min-h-[48px] text-base pointer-events-none">
             Vybrat soubor
           </button>
         </div>

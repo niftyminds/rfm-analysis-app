@@ -98,27 +98,38 @@ export default function Dashboard({ customers, onReset }: DashboardProps) {
   };
 
   const handleExport = (customersToExport: Customer[] = customers, filenameSuffix: string = 'analyza') => {
-    const exportData = customersToExport.map(c => ({
-      email: c.email,
-      tags: c.segment, // NEW: tags column right after email
-      jmeno: c.firstName,
-      prijmeni: c.lastName,
-      pocet_objednavek: c.orderCount,
-      hodnota_objednavek: Math.round(c.totalValue * 100) / 100,
-      datum_prvni_objednavky: c.firstOrderDate
-        ? c.firstOrderDate.toISOString().split('T')[0]
-        : '',
-      datum_posledni_objednavky: c.lastOrderDate
-        ? c.lastOrderDate.toISOString().split('T')[0]
-        : '',
-      lifetime_dny: c.lifetime,
-      RFM_skore: c.RFM_Score,
-      R_skore: c.R_Score,
-      F_skore: c.F_Score,
-      M_skore: c.M_Score,
-      segment: c.segment,
-      recency_dny: c.recency
-    }));
+    const exportData = customersToExport.map(c => {
+      const baseData: Record<string, any> = {
+        email: c.email,
+        tags: c.segment, // NEW: tags column right after email
+        jmeno: c.firstName,
+        prijmeni: c.lastName,
+        pocet_objednavek: c.orderCount,
+        hodnota_objednavek: Math.round(c.totalValue * 100) / 100,
+        datum_prvni_objednavky: c.firstOrderDate
+          ? `${String(c.firstOrderDate.getDate()).padStart(2, '0')}.${String(c.firstOrderDate.getMonth() + 1).padStart(2, '0')}.${c.firstOrderDate.getFullYear()}`
+          : '',
+        datum_posledni_objednavky: c.lastOrderDate
+          ? `${String(c.lastOrderDate.getDate()).padStart(2, '0')}.${String(c.lastOrderDate.getMonth() + 1).padStart(2, '0')}.${c.lastOrderDate.getFullYear()}`
+          : '',
+        lifetime_dny: c.lifetime,
+        RFM_skore: c.RFM_Score,
+        R_skore: c.R_Score,
+        F_skore: c.F_Score,
+        M_skore: c.M_Score,
+        segment: c.segment,
+        recency_dny: c.recency
+      };
+
+      // Přidat dodatečná pole
+      if (c.additionalFields) {
+        Object.entries(c.additionalFields).forEach(([fieldName, value]) => {
+          baseData[fieldName] = value;
+        });
+      }
+
+      return baseData;
+    });
 
     const csv = Papa.unparse(exportData, {
       delimiter: ';',
@@ -154,67 +165,67 @@ export default function Dashboard({ customers, onReset }: DashboardProps) {
   };
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6 sm:space-y-8">
       {/* Header */}
-      <div className="bg-white rounded-2xl shadow-xl p-8">
-        <div className="flex justify-between items-start mb-6">
-          <div>
-            <h2 className="text-3xl font-bold text-gray-900 mb-2">Výsledky analýzy</h2>
-            <p className="text-gray-600">RFM segmentace {stats.total.toLocaleString('cs-CZ')} zákazníků</p>
+      <div className="bg-white rounded-xl sm:rounded-2xl shadow-xl p-4 sm:p-6 lg:p-8">
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4 mb-4 sm:mb-6">
+          <div className="flex-1 min-w-0">
+            <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">Výsledky analýzy</h2>
+            <p className="text-sm sm:text-base text-gray-600">RFM segmentace {stats.total.toLocaleString('cs-CZ')} zákazníků</p>
           </div>
           <button
             onClick={onReset}
-            className="flex items-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg font-medium transition-colors"
+            className="flex items-center justify-center gap-2 bg-gray-100 hover:bg-gray-200 active:bg-gray-300 text-gray-700 px-4 py-3 sm:py-2 rounded-lg font-medium transition-colors w-full sm:w-auto min-h-[44px]"
           >
             <RefreshCw size={18} />
-            Nový soubor
+            <span className="text-base sm:text-sm">Nový soubor</span>
           </button>
         </div>
 
         {/* Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
-          <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-6 border border-blue-200">
-            <div className="flex items-center gap-3 mb-2">
-              <Users className="text-blue-600" size={24} />
-              <span className="text-sm font-medium text-blue-700">Celkem zákazníků</span>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 sm:gap-6">
+          <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-4 sm:p-6 border border-blue-200">
+            <div className="flex items-center gap-2 sm:gap-3 mb-2">
+              <Users className="text-blue-600 flex-shrink-0" size={20} />
+              <span className="text-xs sm:text-sm font-medium text-blue-700">Celkem zákazníků</span>
             </div>
-            <p className="text-3xl font-bold text-blue-900">{stats.total.toLocaleString('cs-CZ')}</p>
+            <p className="text-2xl sm:text-3xl font-bold text-blue-900">{stats.total.toLocaleString('cs-CZ')}</p>
           </div>
-          
-          <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-xl p-6 border border-green-200">
-            <div className="flex items-center gap-3 mb-2">
-              <DollarSign className="text-green-600" size={24} />
-              <span className="text-sm font-medium text-green-700">Celková hodnota</span>
+
+          <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-xl p-4 sm:p-6 border border-green-200">
+            <div className="flex items-center gap-2 sm:gap-3 mb-2">
+              <DollarSign className="text-green-600 flex-shrink-0" size={20} />
+              <span className="text-xs sm:text-sm font-medium text-green-700">Celková hodnota</span>
             </div>
-            <p className="text-3xl font-bold text-green-900">
+            <p className="text-2xl sm:text-3xl font-bold text-green-900">
               {Math.round(stats.totalValue).toLocaleString('cs-CZ')} Kč
             </p>
           </div>
-          
-          <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl p-6 border border-purple-200">
-            <div className="flex items-center gap-3 mb-2">
-              <TrendingUp className="text-purple-600" size={24} />
-              <span className="text-sm font-medium text-purple-700">Prům. objednávek</span>
+
+          <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl p-4 sm:p-6 border border-purple-200">
+            <div className="flex items-center gap-2 sm:gap-3 mb-2">
+              <TrendingUp className="text-purple-600 flex-shrink-0" size={20} />
+              <span className="text-xs sm:text-sm font-medium text-purple-700">Prům. objednávek</span>
             </div>
-            <p className="text-3xl font-bold text-purple-900">{stats.avgOrders.toFixed(2)}</p>
+            <p className="text-2xl sm:text-3xl font-bold text-purple-900">{stats.avgOrders.toFixed(2)}</p>
           </div>
-          
-          <div className="bg-gradient-to-br from-orange-50 to-orange-100 rounded-xl p-6 border border-orange-200">
-            <div className="flex items-center gap-3 mb-2">
-              <DollarSign className="text-orange-600" size={24} />
-              <span className="text-sm font-medium text-orange-700">Prům. hodnota</span>
+
+          <div className="bg-gradient-to-br from-orange-50 to-orange-100 rounded-xl p-4 sm:p-6 border border-orange-200">
+            <div className="flex items-center gap-2 sm:gap-3 mb-2">
+              <DollarSign className="text-orange-600 flex-shrink-0" size={20} />
+              <span className="text-xs sm:text-sm font-medium text-orange-700">Prům. hodnota</span>
             </div>
-            <p className="text-3xl font-bold text-orange-900">
+            <p className="text-2xl sm:text-3xl font-bold text-orange-900">
               {Math.round(stats.avgValue).toLocaleString('cs-CZ')} Kč
             </p>
           </div>
 
-          <div className="bg-gradient-to-br from-amber-50 to-amber-100 rounded-xl p-6 border border-amber-200">
-            <div className="flex items-center gap-3 mb-2">
-              <Calendar className="text-amber-600" size={24} />
-              <span className="text-sm font-medium text-amber-700">Prům. dny od poslední obj.</span>
+          <div className="bg-gradient-to-br from-amber-50 to-amber-100 rounded-xl p-4 sm:p-6 border border-amber-200">
+            <div className="flex items-center gap-2 sm:gap-3 mb-2">
+              <Calendar className="text-amber-600 flex-shrink-0" size={20} />
+              <span className="text-xs sm:text-sm font-medium text-amber-700">Prům. dny od poslední obj.</span>
             </div>
-            <p className="text-3xl font-bold text-amber-900">
+            <p className="text-2xl sm:text-3xl font-bold text-amber-900">
               {Math.round(stats.avgRecency).toLocaleString('cs-CZ')} dní
             </p>
             <p className="text-xs text-amber-700 mt-1">Průměrná recency všech zákazníků</p>

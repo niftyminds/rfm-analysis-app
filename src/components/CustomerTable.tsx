@@ -56,7 +56,7 @@ export default function CustomerTable({
   const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
   const [hoveredOrder, setHoveredOrder] = useState<TooltipData | null>(null);
   const [pinnedOrder, setPinnedOrder] = useState<TooltipData | null>(null);
-  const itemsPerPage = 20;
+  const [itemsPerPage, setItemsPerPage] = useState(10);
 
   // Reset pagination na stránku 1 při změně filtrů
   useEffect(() => {
@@ -411,14 +411,21 @@ export default function CustomerTable({
         dateMatch = dateMatch && c.lastOrderDate <= advancedFilters.dateTo;
       }
 
-      // Filter by search term
+      // Filter by search term (including additional fields)
       const searchLower = searchTerm.toLowerCase();
-      const searchMatch = (
+      let searchMatch = (
         c.email.toLowerCase().includes(searchLower) ||
         c.firstName.toLowerCase().includes(searchLower) ||
         c.lastName.toLowerCase().includes(searchLower) ||
         c.segment.toLowerCase().includes(searchLower)
       );
+
+      // Search in additional fields
+      if (!searchMatch && c.additionalFields) {
+        searchMatch = Object.values(c.additionalFields).some(value =>
+          value.toLowerCase().includes(searchLower)
+        );
+      }
 
       return segmentMatch && rfmMatch && valueMatch && orderMatch && dateMatch && searchMatch;
     });
@@ -458,50 +465,254 @@ export default function CustomerTable({
   };
 
   return (
-    <div className="bg-white rounded-2xl shadow-xl p-8">
-      <div className="flex justify-between items-center mb-6">
-        <div className="flex items-center gap-4">
-          <h2 className="text-2xl font-bold text-gray-900">
-            Top zákazníci ({sortedAndFilteredCustomers.length})
-          </h2>
+    <div className="bg-white rounded-xl sm:rounded-2xl shadow-xl p-4 sm:p-6 lg:p-8">
+      <div className="flex flex-col gap-4 mb-4 sm:mb-6">
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
+          <div className="flex items-center gap-3">
+            <h2 className="text-xl sm:text-2xl font-bold text-gray-900">
+              Top zákazníci ({sortedAndFilteredCustomers.length})
+            </h2>
 
-          {/* Expand/Collapse All tlačítko */}
-          <button
-            onClick={handleToggleAll}
-            className="flex items-center gap-2 px-4 py-2 text-sm font-medium
-                       text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50
-                       rounded-lg transition-colors border border-indigo-200"
-          >
-            {expandedRows.size === paginatedCustomers.length && paginatedCustomers.every(c => expandedRows.has(c.email)) ? (
-              <>
-                <ChevronUp size={16} />
-                Sbalit vše
-              </>
-            ) : (
-              <>
-                <ChevronDown size={16} />
-                Rozbalit vše
-              </>
-            )}
-          </button>
-        </div>
+            {/* Expand/Collapse All tlačítko - hidden on mobile */}
+            <button
+              onClick={handleToggleAll}
+              className="hidden lg:flex items-center gap-2 px-4 py-2 text-sm font-medium
+                         text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50
+                         rounded-lg transition-colors border border-indigo-200"
+            >
+              {expandedRows.size === paginatedCustomers.length && paginatedCustomers.every(c => expandedRows.has(c.email)) ? (
+                <>
+                  <ChevronUp size={16} />
+                  Sbalit vše
+                </>
+              ) : (
+                <>
+                  <ChevronDown size={16} />
+                  Rozbalit vše
+                </>
+              )}
+            </button>
+          </div>
 
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-600" size={20} />
-          <input
-            type="text"
-            placeholder="Hledat zákazníka..."
-            value={searchTerm}
-            onChange={(e) => {
-              setSearchTerm(e.target.value);
-              setCurrentPage(1);
-            }}
-            className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-gray-900 placeholder:text-gray-600"
-          />
+          <div className="relative w-full sm:w-auto sm:min-w-[280px]">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-600 pointer-events-none" size={18} />
+            <input
+              type="text"
+              placeholder="Hledat zákazníka..."
+              value={searchTerm}
+              onChange={(e) => {
+                setSearchTerm(e.target.value);
+                setCurrentPage(1);
+              }}
+              className="w-full pl-10 pr-4 py-3 sm:py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-base text-gray-900 placeholder:text-gray-600 min-h-[44px]"
+            />
+          </div>
         </div>
       </div>
 
-      <div className="overflow-x-auto">
+      {/* MOBILE CARD LAYOUT */}
+      <div className="lg:hidden space-y-3">
+        {paginatedCustomers.map((customer) => {
+          const isExpanded = expandedRows.has(customer.email);
+          return (
+            <div
+              key={customer.email}
+              className="bg-gradient-to-br from-gray-50 to-white border border-gray-200 rounded-lg shadow-sm overflow-hidden"
+            >
+              {/* Card Header - Always visible */}
+              <div
+                onClick={() => toggleRow(customer.email)}
+                className="p-4 cursor-pointer active:bg-gray-100 transition-colors"
+              >
+                <div className="flex items-start justify-between gap-3 mb-3">
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-semibold text-gray-900 text-base truncate">
+                      {customer.firstName} {customer.lastName}
+                    </h3>
+                    <p className="text-sm text-gray-600 truncate mt-0.5">{customer.email}</p>
+                  </div>
+                  <div className="flex-shrink-0 flex items-center gap-2">
+                    <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium border ${SEGMENT_COLORS[customer.segment] || 'bg-gray-100 text-gray-800 border-gray-300'}`}>
+                      {customer.segment}
+                    </span>
+                    {isExpanded ? <ChevronUp size={20} className="text-gray-600" /> : <ChevronDown size={20} className="text-gray-600" />}
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <p className="text-xs text-gray-500 mb-0.5">Objednávky</p>
+                    <p className="font-semibold text-gray-900">{customer.orderCount}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-500 mb-0.5">Hodnota</p>
+                    <p className="font-semibold text-gray-900">{Math.round(customer.totalValue).toLocaleString('cs-CZ')} Kč</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-500 mb-0.5">Poslední obj.</p>
+                    <p className="text-sm text-gray-700">{customer.lastOrderDate?.toLocaleDateString('cs-CZ') || '-'}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-500 mb-0.5">RFM skóre</p>
+                    <p className="font-semibold text-indigo-600">{customer.RFM_Score}</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Expanded Details */}
+              {isExpanded && (
+                <div className="border-t border-gray-200 bg-indigo-50 p-4">
+                  <div className="space-y-4">
+                    {/* Timeline metrics */}
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                      {/* First Order */}
+                      <div className="bg-white rounded-lg p-3 border border-indigo-200">
+                        <div className="flex items-center gap-2 mb-1">
+                          <Calendar className="text-green-600" size={16} />
+                          <span className="text-xs font-semibold text-gray-700">První objednávka</span>
+                        </div>
+                        <p className="text-sm font-bold text-gray-900">
+                          {customer.firstOrderDate?.toLocaleDateString('cs-CZ') || '-'}
+                        </p>
+                        <p className="text-xs text-gray-600 mt-0.5">
+                          {customer.firstOrderDate && `před ${customer.lifetime} dny`}
+                        </p>
+                      </div>
+
+                      {/* Last Order */}
+                      <div className="bg-white rounded-lg p-3 border border-indigo-200">
+                        <div className="flex items-center gap-2 mb-1">
+                          <Calendar className="text-blue-600" size={16} />
+                          <span className="text-xs font-semibold text-gray-700">Poslední objednávka</span>
+                        </div>
+                        <p className="text-sm font-bold text-gray-900">
+                          {customer.lastOrderDate?.toLocaleDateString('cs-CZ') || '-'}
+                        </p>
+                        <p className="text-xs text-gray-600 mt-0.5">
+                          {customer.lastOrderDate && `před ${customer.recency} dny`}
+                        </p>
+                      </div>
+
+                      {/* Customer Lifetime */}
+                      <div className="bg-white rounded-lg p-3 border border-indigo-200">
+                        <div className="flex items-center gap-2 mb-1">
+                          <TrendingUp className="text-purple-600" size={16} />
+                          <span className="text-xs font-semibold text-gray-700">Zákaznická doba</span>
+                        </div>
+                        <p className="text-sm font-bold text-gray-900">
+                          {customer.lifetime} dní
+                        </p>
+                        <p className="text-xs text-gray-600 mt-0.5">
+                          {Math.round(customer.lifetime / 30)} měsíců
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Enhanced Timeline s objednávkami */}
+                    {customer.firstOrderDate && customer.lastOrderDate && (
+                      <div className="bg-white rounded-lg p-3 border border-indigo-200">
+                        <div className="mb-2 flex justify-between items-center">
+                          <p className="text-xs font-semibold text-gray-700">
+                            Časová osa zákazníka
+                          </p>
+                          <p className="text-xs text-gray-600">
+                            {customer.orderCount} {customer.orderCount === 1 ? 'objednávka' :
+                             customer.orderCount < 5 ? 'objednávky' : 'objednávek'}
+                          </p>
+                        </div>
+
+                        {/* Timeline Container - zmenšený pro mobil */}
+                        <div className="relative h-20 bg-gradient-to-r from-green-100 via-blue-100 to-purple-100 rounded-lg px-2 py-8">
+                          {/* Labels NAD timeline */}
+                          <div className="absolute top-1 left-2 right-2 flex justify-between text-[9px] font-medium text-gray-600">
+                            <span>Start</span>
+                            <span>Dnes</span>
+                          </div>
+
+                          {/* Timeline Bar */}
+                          <div className="absolute top-1/2 left-0 right-0 h-0.5 bg-gradient-to-r from-green-500 via-blue-500 to-purple-500 transform -translate-y-1/2 rounded-full"></div>
+
+                          {/* Order Markers - zjednodušené pro mobil */}
+                          {renderOrderMarkers(customer)}
+
+                          {/* Labels POD timeline */}
+                          <div className="absolute bottom-1 left-2 right-2 flex justify-between text-[9px] text-gray-600">
+                            {customer.orderCount === 1 ? (
+                              <div className="w-full text-center">
+                                <p className="text-gray-500 uppercase tracking-wide">
+                                  Jediná obj.
+                                </p>
+                                <p className="font-semibold text-gray-900 text-[10px]">
+                                  {customer.firstOrderDate?.toLocaleDateString('cs-CZ', {
+                                    day: 'numeric',
+                                    month: 'numeric',
+                                    year: '2-digit'
+                                  })}
+                                </p>
+                              </div>
+                            ) : (
+                              <>
+                                <div className="text-left">
+                                  <p className="text-gray-500 uppercase tracking-wide">
+                                    První
+                                  </p>
+                                  <p className="font-semibold text-gray-900 text-[10px]">
+                                    {customer.firstOrderDate?.toLocaleDateString('cs-CZ', {
+                                      day: 'numeric',
+                                      month: 'numeric',
+                                      year: '2-digit'
+                                    })}
+                                  </p>
+                                </div>
+                                <div className="text-right">
+                                  <p className="text-gray-500 uppercase tracking-wide">
+                                    Poslední
+                                  </p>
+                                  <p className="font-semibold text-gray-900 text-[10px]">
+                                    {customer.lastOrderDate?.toLocaleDateString('cs-CZ', {
+                                      day: 'numeric',
+                                      month: 'numeric',
+                                      year: '2-digit'
+                                    })}
+                                  </p>
+                                </div>
+                              </>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Additional Fields */}
+                    {customer.additionalFields && Object.keys(customer.additionalFields).length > 0 && (
+                      <div className="bg-white rounded-lg p-3 border border-indigo-200">
+                        <p className="text-xs font-semibold text-gray-700 mb-2">
+                          Dodatečná data
+                        </p>
+                        <div className="grid grid-cols-1 gap-2">
+                          {Object.entries(customer.additionalFields).map(([fieldName, value]) => (
+                            <div key={fieldName} className="bg-gray-50 rounded p-2">
+                              <p className="text-[10px] text-gray-500 uppercase tracking-wide mb-0.5">
+                                {fieldName}
+                              </p>
+                              <p className="text-xs font-medium text-gray-900">
+                                {value}
+                              </p>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+
+      {/* DESKTOP TABLE LAYOUT */}
+      <div className="hidden lg:block overflow-x-auto">
         <table className="w-full">
           <thead>
             <tr className="border-b-2 border-gray-200">
@@ -726,6 +937,27 @@ export default function CustomerTable({
                               </div>
                             </div>
                           )}
+
+                          {/* Additional Fields */}
+                          {customer.additionalFields && Object.keys(customer.additionalFields).length > 0 && (
+                            <div className="bg-white rounded-lg p-4 border border-indigo-200 mt-4">
+                              <p className="text-xs font-semibold text-gray-700 mb-3">
+                                Dodatečná data
+                              </p>
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                {Object.entries(customer.additionalFields).map(([fieldName, value]) => (
+                                  <div key={fieldName} className="bg-gray-50 rounded p-2">
+                                    <p className="text-[10px] text-gray-500 uppercase tracking-wide mb-1">
+                                      {fieldName}
+                                    </p>
+                                    <p className="text-sm font-medium text-gray-900">
+                                      {value}
+                                    </p>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
                         </div>
                       </td>
                     </tr>
@@ -739,19 +971,40 @@ export default function CustomerTable({
 
       {/* Pagination */}
       {totalPages > 1 && (
-        <div className="mt-6 flex items-center justify-between">
-          <p className="text-sm text-gray-900">
-            Zobrazeno {((currentPage - 1) * itemsPerPage) + 1} - {Math.min(currentPage * itemsPerPage, sortedAndFilteredCustomers.length)} z {sortedAndFilteredCustomers.length}
-          </p>
+        <div className="mt-6 flex flex-col sm:flex-row items-center justify-between gap-3">
+          <div className="flex flex-col sm:flex-row items-center gap-3">
+            <p className="text-xs sm:text-sm text-gray-900 text-center sm:text-left">
+              Zobrazeno {((currentPage - 1) * itemsPerPage) + 1} - {Math.min(currentPage * itemsPerPage, sortedAndFilteredCustomers.length)} z {sortedAndFilteredCustomers.length}
+            </p>
+            <div className="hidden sm:flex items-center gap-2">
+              <label htmlFor="items-per-page" className="text-xs text-gray-600 whitespace-nowrap">
+                Zobrazit:
+              </label>
+              <select
+                id="items-per-page"
+                value={itemsPerPage}
+                onChange={(e) => {
+                  setItemsPerPage(Number(e.target.value));
+                  setCurrentPage(1);
+                }}
+                className="px-3 py-1.5 border border-gray-300 rounded-lg text-sm text-gray-900 focus:ring-2 focus:ring-indigo-500 focus:border-transparent bg-white"
+              >
+                <option value={10}>10</option>
+                <option value={20}>20</option>
+                <option value={50}>50</option>
+                <option value={100}>100</option>
+              </select>
+            </div>
+          </div>
           <div className="flex gap-2">
             <button
               onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
               disabled={currentPage === 1}
-              className="px-4 py-2 border border-gray-300 rounded-lg disabled:bg-gray-200 disabled:text-gray-500 disabled:cursor-not-allowed hover:bg-gray-50 text-gray-700"
+              className="px-3 sm:px-4 py-2.5 sm:py-2 border border-gray-300 rounded-lg disabled:bg-gray-200 disabled:text-gray-500 disabled:cursor-not-allowed hover:bg-gray-50 active:bg-gray-100 text-gray-700 text-sm min-h-[44px] sm:min-h-0"
             >
               Předchozí
             </button>
-            <div className="flex items-center gap-1">
+            <div className="hidden sm:flex items-center gap-1">
               {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
                 let pageNum;
                 if (totalPages <= 5) {
@@ -763,7 +1016,7 @@ export default function CustomerTable({
                 } else {
                   pageNum = currentPage - 2 + i;
                 }
-                
+
                 return (
                   <button
                     key={pageNum}
@@ -779,10 +1032,14 @@ export default function CustomerTable({
                 );
               })}
             </div>
+            {/* Mobile page indicator */}
+            <div className="sm:hidden flex items-center px-3 py-2 bg-gray-100 rounded-lg text-sm font-medium text-gray-700">
+              {currentPage} / {totalPages}
+            </div>
             <button
               onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
               disabled={currentPage === totalPages}
-              className="px-4 py-2 border border-gray-300 rounded-lg disabled:bg-gray-200 disabled:text-gray-500 disabled:cursor-not-allowed hover:bg-gray-50 text-gray-700"
+              className="px-3 sm:px-4 py-2.5 sm:py-2 border border-gray-300 rounded-lg disabled:bg-gray-200 disabled:text-gray-500 disabled:cursor-not-allowed hover:bg-gray-50 active:bg-gray-100 text-gray-700 text-sm min-h-[44px] sm:min-h-0"
             >
               Další
             </button>
@@ -791,17 +1048,17 @@ export default function CustomerTable({
       )}
 
       {/* Export Panel */}
-      <div className="mt-8 pt-6 border-t border-gray-200">
-        <div className="flex flex-col sm:flex-row gap-4">
+      <div className="mt-6 sm:mt-8 pt-4 sm:pt-6 border-t border-gray-200">
+        <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
           {/* Export filtrovaných */}
           <button
             onClick={onExportFiltered}
             disabled={selectedSegments && selectedSegments.length === 0 && activeFilterCount === 0 && searchTerm === ''}
-            className="flex-1 flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 disabled:bg-gray-300 disabled:cursor-not-allowed disabled:opacity-60 text-white px-6 py-4 rounded-xl font-semibold transition-colors shadow-lg"
+            className="flex-1 flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 disabled:bg-gray-300 disabled:cursor-not-allowed disabled:opacity-60 text-white px-4 sm:px-6 py-3 sm:py-4 rounded-lg sm:rounded-xl font-semibold transition-colors shadow-lg min-h-[52px] text-sm sm:text-base"
             title={selectedSegments && selectedSegments.length === 0 && activeFilterCount === 0 && searchTerm === '' ? 'Vyberte segment nebo použijte filtry' : 'Exportovat filtrované zákazníky'}
           >
-            <Download size={20} />
-            <span>
+            <Download size={18} className="flex-shrink-0" />
+            <span className="truncate">
               Exportovat filtrované
               {filteredCount > 0 && ` (${filteredCount.toLocaleString('cs-CZ')})`}
             </span>
@@ -810,10 +1067,10 @@ export default function CustomerTable({
           {/* Export všech */}
           <button
             onClick={onExportAll}
-            className="flex-1 flex items-center justify-center gap-2 bg-white hover:bg-gray-50 border-2 border-gray-300 text-gray-700 px-6 py-4 rounded-xl font-semibold transition-colors"
+            className="flex-1 flex items-center justify-center gap-2 bg-white hover:bg-gray-50 active:bg-gray-100 border-2 border-gray-300 text-gray-700 px-4 sm:px-6 py-3 sm:py-4 rounded-lg sm:rounded-xl font-semibold transition-colors min-h-[52px] text-sm sm:text-base"
           >
-            <Download size={20} />
-            <span>
+            <Download size={18} className="flex-shrink-0" />
+            <span className="truncate">
               Exportovat vše
               {totalCount > 0 && ` (${totalCount.toLocaleString('cs-CZ')})`}
             </span>

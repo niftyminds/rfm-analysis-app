@@ -18,6 +18,7 @@ export interface Customer {
   segment: string;
   orderDates: Date[];
   orderValues: number[];
+  additionalFields?: Record<string, string>; // Dynamická dodatečná pole
 }
 
 export interface Stats {
@@ -39,6 +40,7 @@ export interface ColumnMapping {
   orderValue: string;
   customerName: string;
   customerEmail: string;
+  additionalFields?: string[]; // Volitelné dodatečné sloupce
 }
 
 export interface AdvancedFilters {

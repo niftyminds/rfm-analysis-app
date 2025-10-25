@@ -145,11 +145,29 @@ export function processCSVData(data: CSVRow[], mapping: ColumnMapping): Customer
     const date = parseCzechDate(row[mapping.orderDate]);
     const amount = parseAmount(row[mapping.orderValue]);
     const name = (row[mapping.customerName] || '').trim();
-    
+
     if (!ordersByEmail[email]) {
-      ordersByEmail[email] = { email, name, orders: {} };
+      ordersByEmail[email] = {
+        email,
+        name,
+        orders: {},
+        additionalFieldsValues: {} // Tracking unique values for each additional field
+      };
     }
-    
+
+    // Agregace dodatečných polí (unique hodnoty)
+    if (mapping.additionalFields && mapping.additionalFields.length > 0) {
+      mapping.additionalFields.forEach(fieldName => {
+        const value = (row[fieldName] || '').toString().trim();
+        if (value) {
+          if (!ordersByEmail[email].additionalFieldsValues[fieldName]) {
+            ordersByEmail[email].additionalFieldsValues[fieldName] = new Set<string>();
+          }
+          ordersByEmail[email].additionalFieldsValues[fieldName].add(value);
+        }
+      });
+    }
+
     if (!ordersByEmail[email].orders[orderNum]) {
       ordersByEmail[email].orders[orderNum] = { date, amount };
     } else {
@@ -200,6 +218,15 @@ export function processCSVData(data: CSVRow[], mapping: ColumnMapping): Customer
 
     const nameParts = customer.name.split(' ').filter((p: string) => p.length > 0);
 
+    // Zpracování dodatečných polí - spojení unique hodnot čárkou
+    const additionalFields: Record<string, string> = {};
+    if (customer.additionalFieldsValues) {
+      Object.keys(customer.additionalFieldsValues).forEach(fieldName => {
+        const uniqueValues = Array.from(customer.additionalFieldsValues[fieldName]);
+        additionalFields[fieldName] = uniqueValues.join(', ');
+      });
+    }
+
     customers.push({
       email: customer.email,
       firstName: nameParts[0] || '',
@@ -219,7 +246,8 @@ export function processCSVData(data: CSVRow[], mapping: ColumnMapping): Customer
       RFM_Total: 0,
       segment: '',
       orderDates,
-      orderValues
+      orderValues,
+      additionalFields: Object.keys(additionalFields).length > 0 ? additionalFields : undefined
     });
   });
   
