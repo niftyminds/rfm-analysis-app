@@ -107,10 +107,10 @@ export default function Dashboard({ customers, onReset }: DashboardProps) {
         pocet_objednavek: c.orderCount,
         hodnota_objednavek: Math.round(c.totalValue * 100) / 100,
         datum_prvni_objednavky: c.firstOrderDate
-          ? `${String(c.firstOrderDate.getDate()).padStart(2, '0')}.${String(c.firstOrderDate.getMonth() + 1).padStart(2, '0')}.${c.firstOrderDate.getFullYear()}`
+          ? `${c.firstOrderDate.getFullYear()}-${String(c.firstOrderDate.getMonth() + 1).padStart(2, '0')}-${String(c.firstOrderDate.getDate()).padStart(2, '0')}`
           : '',
         datum_posledni_objednavky: c.lastOrderDate
-          ? `${String(c.lastOrderDate.getDate()).padStart(2, '0')}.${String(c.lastOrderDate.getMonth() + 1).padStart(2, '0')}.${c.lastOrderDate.getFullYear()}`
+          ? `${c.lastOrderDate.getFullYear()}-${String(c.lastOrderDate.getMonth() + 1).padStart(2, '0')}-${String(c.lastOrderDate.getDate()).padStart(2, '0')}`
           : '',
         lifetime_dny: c.lifetime,
         RFM_skore: c.RFM_Score,
