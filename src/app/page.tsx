@@ -109,15 +109,15 @@ export default function LandingPage() {
             {/* Screenshot (mobile order 2, desktop order 2) */}
             <div className="relative order-2">
               <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-2 shadow-2xl border border-white/20">
-                <div className="bg-white rounded-xl p-4 sm:p-6 shadow-inner">
-                  <div className="aspect-video bg-gradient-to-br from-gray-100 to-gray-200 rounded-lg flex items-center justify-center overflow-hidden">
+                <div className="bg-white rounded-xl p-2 sm:p-2.5 shadow-inner">
+                  <div className="aspect-video bg-gradient-to-br from-gray-100 to-gray-200 rounded-lg overflow-hidden">
                     {homepageContent.hero.screenshot.src !== '/dashboard-preview.png' ? (
                       <Image
                         src={homepageContent.hero.screenshot.src}
                         alt={homepageContent.hero.screenshot.alt}
-                        width={800}
-                        height={450}
-                        className="w-full h-full object-cover rounded-lg"
+                        width={1920}
+                        height={1080}
+                        className="w-full h-full object-cover object-top rounded-lg"
                       />
                     ) : (
                       <div className="text-center text-gray-400 px-4">
