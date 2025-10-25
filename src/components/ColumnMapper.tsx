@@ -144,11 +144,14 @@ export default function ColumnMapper({ columns, previewData, onMapping, onBack }
                 <div className="mt-3 bg-gray-50 rounded-md p-3">
                   <p className="text-xs font-medium text-gray-700 mb-2">Náhled dat:</p>
                   <div className="space-y-1">
-                    {previewData.slice(0, 3).map((row, idx) => (
-                      <p key={idx} className="text-xs text-gray-600 truncate">
-                        {row[mapping[field.key]] || '(prázdné)'}
-                      </p>
-                    ))}
+                    {previewData.slice(0, 3).map((row, idx) => {
+                      const columnName = mapping[field.key] as string;
+                      return (
+                        <p key={idx} className="text-xs text-gray-600 truncate">
+                          {row[columnName] || '(prázdné)'}
+                        </p>
+                      );
+                    })}
                   </div>
                 </div>
               )}
