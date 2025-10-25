@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import { RefreshCw, Users, DollarSign, TrendingUp, Calendar } from 'lucide-react';
 import Papa from 'papaparse';
 import { Customer, Stats, AdvancedFilters } from '@/types';
@@ -27,6 +27,8 @@ const DEFAULT_FILTERS: AdvancedFilters = {
 export default function Dashboard({ customers, onReset }: DashboardProps) {
   const [selectedSegments, setSelectedSegments] = useState<string[]>([]);
   const [advancedFilters, setAdvancedFilters] = useState<AdvancedFilters>(DEFAULT_FILTERS);
+  const [isExportingToSheets, setIsExportingToSheets] = useState(false);
+  const [isGoogleAuthenticated, setIsGoogleAuthenticated] = useState(false);
   const stats: Stats = useMemo(() => {
     const segments: Record<string, number> = {};
     customers.forEach(c => {
@@ -164,6 +166,62 @@ export default function Dashboard({ customers, onReset }: DashboardProps) {
     handleExport(filteredCustomers, suffix);
   };
 
+  // Zkontrolovat autentizaci při mount
+  useEffect(() => {
+    fetch('/api/auth/check')
+      .then(res => res.json())
+      .then(data => setIsGoogleAuthenticated(data.authenticated))
+      .catch(() => setIsGoogleAuthenticated(false));
+  }, []);
+
+  // Handler pro Google Sheets export
+  const handleExportToSheets = async () => {
+    if (!isGoogleAuthenticated) {
+      // Redirect na OAuth flow
+      window.location.href = '/api/auth/google';
+      return;
+    }
+
+    setIsExportingToSheets(true);
+
+    try {
+      // Příprava dat pro export
+      const exportData = {
+        customers: customers,
+        stats: {
+          total: stats.total,
+          totalRevenue: stats.totalValue,
+          avgOrderValue: stats.avgValue,
+          avgOrdersPerCustomer: stats.avgOrders
+        },
+        segments: stats.segments
+      };
+
+      const response = await fetch('/api/sheets/export', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(exportData)
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        // Zobrazit toast notifikaci
+        alert('✓ Exportováno do Google Sheets!');
+
+        // Otevřít spreadsheet v novém tabu
+        window.open(result.url, '_blank');
+      } else {
+        alert('Chyba při exportu do Google Sheets');
+      }
+    } catch (error) {
+      console.error('Export error:', error);
+      alert('Chyba při exportu do Google Sheets');
+    } finally {
+      setIsExportingToSheets(false);
+    }
+  };
+
   return (
     <div className="space-y-6 sm:space-y-8">
       {/* Header */}
@@ -173,13 +231,36 @@ export default function Dashboard({ customers, onReset }: DashboardProps) {
             <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">Výsledky analýzy</h2>
             <p className="text-sm sm:text-base text-gray-600">RFM segmentace {stats.total.toLocaleString('cs-CZ')} zákazníků</p>
           </div>
-          <button
-            onClick={onReset}
-            className="flex items-center justify-center gap-2 bg-gray-100 hover:bg-gray-200 active:bg-gray-300 text-gray-700 px-4 py-3 sm:py-2 rounded-lg font-medium transition-colors w-full sm:w-auto min-h-[44px]"
-          >
-            <RefreshCw size={18} />
-            <span className="text-base sm:text-sm">Nový soubor</span>
-          </button>
+          <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+            <button
+              onClick={handleExportToSheets}
+              disabled={isExportingToSheets}
+              className="flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 active:bg-green-800 text-white px-4 py-3 sm:py-2 rounded-lg font-semibold transition-colors shadow-lg disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px]"
+            >
+              {isExportingToSheets ? (
+                <>
+                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                  <span className="text-base sm:text-sm">Exportuji...</span>
+                </>
+              ) : (
+                <>
+                  <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/>
+                  </svg>
+                  <span className="text-base sm:text-sm">
+                    {isGoogleAuthenticated ? 'Export do Sheets' : 'Přihlásit a exportovat'}
+                  </span>
+                </>
+              )}
+            </button>
+            <button
+              onClick={onReset}
+              className="flex items-center justify-center gap-2 bg-gray-100 hover:bg-gray-200 active:bg-gray-300 text-gray-700 px-4 py-3 sm:py-2 rounded-lg font-medium transition-colors min-h-[44px]"
+            >
+              <RefreshCw size={18} />
+              <span className="text-base sm:text-sm">Nový soubor</span>
+            </button>
+          </div>
         </div>
 
         {/* Stats Grid */}
