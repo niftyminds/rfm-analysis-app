@@ -1,6 +1,5 @@
 import React from 'react';
 import Link from 'next/link';
-import Footer from '@/components/Footer';
 
 export const metadata = {
   title: 'RFM Analýza | Segmentace zákazníků za 2 minuty',
@@ -343,9 +342,6 @@ export default function LandingPage() {
           </p>
         </div>
       </section>
-
-      {/* Footer */}
-      <Footer />
     </div>
   );
 }
