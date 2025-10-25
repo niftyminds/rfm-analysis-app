@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import FileUpload from '@/components/FileUpload';
@@ -19,6 +19,11 @@ export default function Home() {
   const [currentMapping, setCurrentMapping] = useState<ColumnMapping | null>(null);
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [loading, setLoading] = useState(false);
+
+  // Scroll to top when step changes
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [step]);
 
   const handleCSVLoaded = (data: CSVRow[], cols: string[]) => {
     setCSVData(data);
