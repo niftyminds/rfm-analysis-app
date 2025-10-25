@@ -13,9 +13,9 @@
       "link": "#how-it-works"
     },
     "trustBadges": [
-      "✓ Bez registrace",
-      "✓ 100% zdarma",
-      "✓ Data zůstávají u vás"
+      "Bez registrace",
+      "100% zdarma",
+      "Data zůstávají u vás"
     ],
     "screenshot": {
       "src": "/images/dashboard-preview.png",
@@ -23,9 +23,9 @@
     }
   },
   "video": {
-    "enabled": false,
+    "enabled": true,
     "platform": "youtube",
-    "videoId": "dQw4w9WgXcQ",
+    "videoId": "KLj9mwwjp2Q",
     "title": "Jak funguje RFM Analýza?",
     "description": "Podívejte se na krátké video, jak jednoduše segmentovat zákazníky pomocí RFM analýzy."
   },
