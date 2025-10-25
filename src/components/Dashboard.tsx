@@ -174,50 +174,8 @@ export default function Dashboard({ customers, onReset }: DashboardProps) {
       .catch(() => setIsGoogleAuthenticated(false));
   }, []);
 
-  // Handler pro Google Sheets export
-  const handleExportToSheets = async () => {
-    if (!isGoogleAuthenticated) {
-      // Otevřít OAuth v novém okně (popup)
-      const width = 600;
-      const height = 700;
-      const left = window.screenX + (window.outerWidth - width) / 2;
-      const top = window.screenY + (window.outerHeight - height) / 2;
-
-      const popup = window.open(
-        '/api/auth/google',
-        'Google OAuth',
-        `width=${width},height=${height},left=${left},top=${top},toolbar=0,scrollbars=1,status=1,resizable=1,location=1,menuBar=0`
-      );
-
-      if (!popup) {
-        alert('Povoľte vyskakovací okna pro přihlášení k Google');
-        return;
-      }
-
-      // Čekat na dokončení autentizace v popupu
-      const checkAuthInterval = setInterval(async () => {
-        try {
-          // Zkontrolovat, jestli se popup zavřel
-          if (popup.closed) {
-            clearInterval(checkAuthInterval);
-            // Zkontrolovat autentizaci
-            const authCheck = await fetch('/api/auth/check');
-            const authData = await authCheck.json();
-            if (authData.authenticated) {
-              setIsGoogleAuthenticated(true);
-              // Automaticky spustit export po úspěšné autentizaci
-              handleExportToSheets();
-            }
-            return;
-          }
-        } catch (error) {
-          console.error('Auth check error:', error);
-        }
-      }, 1000);
-
-      return;
-    }
-
+  // Funkce pro provedení samotného exportu
+  const performExport = async () => {
     setIsExportingToSheets(true);
 
     try {
@@ -256,6 +214,54 @@ export default function Dashboard({ customers, onReset }: DashboardProps) {
     } finally {
       setIsExportingToSheets(false);
     }
+  };
+
+  // Handler pro Google Sheets export
+  const handleExportToSheets = async () => {
+    if (!isGoogleAuthenticated) {
+      // Otevřít OAuth v novém okně (popup)
+      const width = 600;
+      const height = 700;
+      const left = window.screenX + (window.outerWidth - width) / 2;
+      const top = window.screenY + (window.outerHeight - height) / 2;
+
+      const popup = window.open(
+        '/api/auth/google',
+        'Google OAuth',
+        `width=${width},height=${height},left=${left},top=${top},toolbar=0,scrollbars=1,status=1,resizable=1,location=1,menuBar=0`
+      );
+
+      if (!popup) {
+        alert('Povoľte vyskakovací okna pro přihlášení k Google');
+        return;
+      }
+
+      // Čekat na dokončení autentizace v popupu
+      const checkAuthInterval = setInterval(async () => {
+        try {
+          // Zkontrolovat, jestli se popup zavřel
+          if (popup.closed) {
+            clearInterval(checkAuthInterval);
+            // Zkontrolovat autentizaci
+            const authCheck = await fetch('/api/auth/check');
+            const authData = await authCheck.json();
+            if (authData.authenticated) {
+              setIsGoogleAuthenticated(true);
+              // Automaticky spustit export po úspěšné autentizaci
+              performExport();
+            }
+            return;
+          }
+        } catch (error) {
+          console.error('Auth check error:', error);
+        }
+      }, 1000);
+
+      return;
+    }
+
+    // Pokud je již přihlášený, rovnou spustit export
+    performExport();
   };
 
   return (
