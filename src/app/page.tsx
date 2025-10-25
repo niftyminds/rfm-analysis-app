@@ -48,9 +48,9 @@ export default function LandingPage() {
         <div className="absolute inset-0 bg-grid-white/[0.05] bg-[size:60px_60px]" />
 
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 py-16 sm:py-20 md:py-32">
-          <div className="grid md:grid-cols-2 gap-12 items-center">
-            {/* Left: Text */}
-            <div className="text-center md:text-left">
+          <div className="flex flex-col md:grid md:grid-cols-2 gap-8 md:gap-12 md:items-center">
+            {/* Top: Badge + Heading (mobile order 1, desktop order 1) */}
+            <div className="text-center md:text-left order-1">
               <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-full px-4 py-2 mb-6">
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
@@ -58,53 +58,56 @@ export default function LandingPage() {
                 <span className="text-sm font-medium">{homepageContent.hero.badge}</span>
               </div>
 
-              <h1 className="text-3xl sm:text-4xl md:text-6xl font-bold mb-6 leading-tight">
+              <h1 className="text-3xl sm:text-4xl md:text-6xl font-bold mb-6 md:mb-8 leading-tight">
                 {homepageContent.hero.heading}
                 <br />
                 <span className="text-indigo-200">{homepageContent.hero.subheading}</span>
               </h1>
 
-              <p className="text-lg sm:text-xl md:text-2xl text-indigo-100 mb-8 leading-relaxed">
-                {homepageContent.hero.description}
-              </p>
+              {/* Description, CTA, Trust badges - shown on desktop only here */}
+              <div className="hidden md:block">
+                <p className="text-lg sm:text-xl md:text-2xl text-indigo-100 mb-8 leading-relaxed">
+                  {homepageContent.hero.description}
+                </p>
 
-              <div className="flex flex-col sm:flex-row gap-4 justify-center md:justify-start">
-                <Link
-                  href={homepageContent.hero.primaryCta.link}
-                  className="group inline-flex items-center justify-center gap-2 bg-white text-indigo-600 px-6 sm:px-8 py-3 sm:py-4 rounded-xl font-bold text-base sm:text-lg shadow-xl hover:shadow-2xl hover:scale-105 transition-all"
-                >
-                  <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                  </svg>
-                  {homepageContent.hero.primaryCta.text}
-                  <svg className="w-4 h-4 sm:w-5 sm:h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                  </svg>
-                </Link>
-
-                <a
-                  href={homepageContent.hero.secondaryCta.link}
-                  className="inline-flex items-center justify-center gap-2 bg-white/10 backdrop-blur-sm text-white px-6 sm:px-8 py-3 sm:py-4 rounded-xl font-bold text-base sm:text-lg border-2 border-white/30 hover:bg-white/20 transition-all"
-                >
-                  {homepageContent.hero.secondaryCta.text}
-                </a>
-              </div>
-
-              {/* Trust badges */}
-              <div className="mt-8 flex flex-wrap gap-4 sm:gap-6 justify-center md:justify-start text-sm text-indigo-200">
-                {homepageContent.hero.trustBadges.map((badge, i) => (
-                  <div key={i} className="flex items-center gap-2">
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                <div className="flex flex-col sm:flex-row gap-4 justify-center md:justify-start">
+                  <Link
+                    href={homepageContent.hero.primaryCta.link}
+                    className="group inline-flex items-center justify-center gap-2 bg-white text-indigo-600 px-6 sm:px-8 py-3 sm:py-4 rounded-xl font-bold text-base sm:text-lg shadow-xl hover:shadow-2xl hover:scale-105 transition-all"
+                  >
+                    <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                     </svg>
-                    <span>{badge}</span>
-                  </div>
-                ))}
+                    {homepageContent.hero.primaryCta.text}
+                    <svg className="w-4 h-4 sm:w-5 sm:h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                    </svg>
+                  </Link>
+
+                  <a
+                    href={homepageContent.hero.secondaryCta.link}
+                    className="inline-flex items-center justify-center gap-2 bg-white/10 backdrop-blur-sm text-white px-6 sm:px-8 py-3 sm:py-4 rounded-xl font-bold text-base sm:text-lg border-2 border-white/30 hover:bg-white/20 transition-all"
+                  >
+                    {homepageContent.hero.secondaryCta.text}
+                  </a>
+                </div>
+
+                {/* Trust badges */}
+                <div className="mt-8 flex flex-wrap gap-4 sm:gap-6 justify-center md:justify-start text-sm text-indigo-200">
+                  {homepageContent.hero.trustBadges.map((badge, i) => (
+                    <div key={i} className="flex items-center gap-2">
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                      </svg>
+                      <span>{badge}</span>
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
 
-            {/* Right: Screenshot/Mockup */}
-            <div className="relative mt-8 md:mt-0">
+            {/* Screenshot (mobile order 2, desktop order 2) */}
+            <div className="relative order-2">
               <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-2 shadow-2xl border border-white/20">
                 <div className="bg-white rounded-xl p-4 sm:p-6 shadow-inner">
                   <div className="aspect-video bg-gradient-to-br from-gray-100 to-gray-200 rounded-lg flex items-center justify-center overflow-hidden">
@@ -139,6 +142,47 @@ export default function LandingPage() {
                 <div className="text-xl sm:text-2xl font-bold text-orange-600">89</div>
               </div>
             </div>
+
+            {/* Bottom: Description + CTA + Trust badges (mobile only, order 3) */}
+            <div className="text-center md:hidden order-3">
+              <p className="text-lg sm:text-xl text-indigo-100 mb-8 leading-relaxed">
+                {homepageContent.hero.description}
+              </p>
+
+              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                <Link
+                  href={homepageContent.hero.primaryCta.link}
+                  className="group inline-flex items-center justify-center gap-2 bg-white text-indigo-600 px-6 sm:px-8 py-3 sm:py-4 rounded-xl font-bold text-base sm:text-lg shadow-xl hover:shadow-2xl hover:scale-105 transition-all"
+                >
+                  <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                  </svg>
+                  {homepageContent.hero.primaryCta.text}
+                  <svg className="w-4 h-4 sm:w-5 sm:h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                  </svg>
+                </Link>
+
+                <a
+                  href={homepageContent.hero.secondaryCta.link}
+                  className="inline-flex items-center justify-center gap-2 bg-white/10 backdrop-blur-sm text-white px-6 sm:px-8 py-3 sm:py-4 rounded-xl font-bold text-base sm:text-lg border-2 border-white/30 hover:bg-white/20 transition-all"
+                >
+                  {homepageContent.hero.secondaryCta.text}
+                </a>
+              </div>
+
+              {/* Trust badges */}
+              <div className="mt-8 flex flex-wrap gap-4 sm:gap-6 justify-center text-sm text-indigo-200">
+                {homepageContent.hero.trustBadges.map((badge, i) => (
+                  <div key={i} className="flex items-center gap-2">
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                    <span>{badge}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
         </div>
       </section>
@@ -156,7 +200,7 @@ export default function LandingPage() {
               </p>
             </div>
 
-            <div className="aspect-video bg-gray-900 rounded-2xl overflow-hidden shadow-2xl">
+            <div className="aspect-video bg-black rounded-lg overflow-hidden border border-gray-200">
               {homepageContent.video.platform === 'youtube' && (
                 <iframe
                   src={`https://www.youtube.com/embed/${homepageContent.video.videoId}`}
