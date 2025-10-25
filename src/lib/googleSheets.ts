@@ -97,6 +97,13 @@ export async function createSpreadsheet(
     throw new Error('Failed to create spreadsheet');
   }
 
+  // Získat skutečná sheet IDs z vytvořeného spreadsheetu
+  const sheetIds = {
+    zakaznici: spreadsheet.data.sheets?.[0]?.properties?.sheetId || 0,
+    statistiky: spreadsheet.data.sheets?.[1]?.properties?.sheetId || 1,
+    segmenty: spreadsheet.data.sheets?.[2]?.properties?.sheetId || 2,
+  };
+
   // 2. Naplnění Sheet 1: Zákazníci
   await populateCustomersSheet(sheets, spreadsheetId, customers);
 
@@ -107,7 +114,7 @@ export async function createSpreadsheet(
   await populateSegmentsSheet(sheets, spreadsheetId, segments);
 
   // 5. Aplikace formátování
-  await applyFormatting(sheets, spreadsheetId, customers.length);
+  await applyFormatting(sheets, spreadsheetId, customers.length, sheetIds);
 
   return spreadsheetId;
 }
@@ -225,7 +232,8 @@ async function populateSegmentsSheet(
 async function applyFormatting(
   sheets: any,
   spreadsheetId: string,
-  rowCount: number
+  rowCount: number,
+  sheetIds: { zakaznici: number; statistiky: number; segmenty: number }
 ) {
   // Mapa barev pro segmenty
   const segmentColors: Record<string, { red: number; green: number; blue: number }> = {
@@ -243,7 +251,7 @@ async function applyFormatting(
     {
       repeatCell: {
         range: {
-          sheetId: 0, // Zákazníci sheet
+          sheetId: sheetIds.zakaznici, // Zákazníci sheet
           startRowIndex: 0,
           endRowIndex: 1
         },
@@ -265,7 +273,7 @@ async function applyFormatting(
     {
       autoResizeDimensions: {
         dimensions: {
-          sheetId: 0,
+          sheetId: sheetIds.zakaznici,
           dimension: 'COLUMNS',
           startIndex: 0,
           endIndex: 20
@@ -277,7 +285,7 @@ async function applyFormatting(
     {
       repeatCell: {
         range: {
-          sheetId: 1, // Statistiky sheet
+          sheetId: sheetIds.statistiky, // Statistiky sheet
           startRowIndex: 0,
           endRowIndex: 1
         },
@@ -298,7 +306,7 @@ async function applyFormatting(
     {
       autoResizeDimensions: {
         dimensions: {
-          sheetId: 1,
+          sheetId: sheetIds.statistiky,
           dimension: 'COLUMNS',
           startIndex: 0,
           endIndex: 2
@@ -310,7 +318,7 @@ async function applyFormatting(
     {
       repeatCell: {
         range: {
-          sheetId: 2, // Segmenty sheet
+          sheetId: sheetIds.segmenty, // Segmenty sheet
           startRowIndex: 0,
           endRowIndex: 1
         },
@@ -331,7 +339,7 @@ async function applyFormatting(
     {
       autoResizeDimensions: {
         dimensions: {
-          sheetId: 2,
+          sheetId: sheetIds.segmenty,
           dimension: 'COLUMNS',
           startIndex: 0,
           endIndex: 3
@@ -347,7 +355,7 @@ async function applyFormatting(
       addConditionalFormatRule: {
         rule: {
           ranges: [{
-            sheetId: 0,
+            sheetId: sheetIds.zakaznici,
             startRowIndex: 1,
             endRowIndex: rowCount + 1,
             startColumnIndex: 13, // Segment sloupec (index 13)
