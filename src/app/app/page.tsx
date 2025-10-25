@@ -20,9 +20,9 @@ export default function Home() {
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [loading, setLoading] = useState(false);
 
-  // Scroll to top when step changes
+  // Scroll to top when step changes (instant, no animation)
   useEffect(() => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    window.scrollTo({ top: 0, behavior: 'instant' });
   }, [step]);
 
   const handleCSVLoaded = (data: CSVRow[], cols: string[]) => {

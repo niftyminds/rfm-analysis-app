@@ -253,7 +253,7 @@ export default function DataPreview({ data, columnMapping, onConfirm, onCancel }
                   onChange={(e) => setCustomKeyword(e.target.value)}
                   onKeyPress={(e) => e.key === 'Enter' && addKeywordAndExclude()}
                   placeholder="např. michal@example.com, test, demo..."
-                  className="flex-1 px-4 py-3 sm:py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 text-base text-gray-900 placeholder:text-gray-600 min-h-[48px] sm:min-h-0"
+                  className="flex-1 px-4 py-3 sm:py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 text-base text-gray-900 placeholder:text-gray-700 min-h-[48px] sm:min-h-0"
                 />
                 <button
                   onClick={addKeywordAndExclude}

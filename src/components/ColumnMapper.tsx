@@ -131,11 +131,11 @@ export default function ColumnMapper({ columns, previewData, onMapping, onBack }
               <select
                 value={mapping[field.key]}
                 onChange={(e) => handleChange(field.key, e.target.value)}
-                className="w-full px-4 py-3 sm:py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-base min-h-[48px] sm:min-h-0"
+                className="w-full px-4 py-3 sm:py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-base min-h-[48px] sm:min-h-0 text-gray-900"
               >
-                <option value="">-- Vyberte sloupec --</option>
+                <option value="" className="text-gray-700">-- Vyberte sloupec --</option>
                 {columns.map(col => (
-                  <option key={col} value={col}>{col}</option>
+                  <option key={col} value={col} className="text-gray-900">{col}</option>
                 ))}
               </select>
 
