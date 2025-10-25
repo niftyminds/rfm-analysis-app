@@ -100,11 +100,25 @@ export default function Home() {
       {/* Header */}
       <header className="bg-white border-b border-gray-200 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
-          <div className="flex items-center justify-between gap-3">
+          <div className="flex items-center justify-between gap-3 sm:gap-6">
+            {/* Left: Title */}
             <div className="flex-1 min-w-0">
               <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 truncate">RFM Analýza</h1>
               <p className="text-sm sm:text-base text-gray-600 mt-1 hidden sm:block">Zákaznická segmentace & marketing insights</p>
             </div>
+
+            {/* Center: Home Icon */}
+            <Link
+              href="/"
+              className="group flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 bg-indigo-50 hover:bg-indigo-100 text-indigo-600 hover:text-indigo-700 rounded-xl transition-all hover:scale-110 shadow-sm hover:shadow-md flex-shrink-0"
+              title="Zpět na hlavní stránku"
+            >
+              <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+              </svg>
+            </Link>
+
+            {/* Right: Logo */}
             <div className="flex-shrink-0">
               <img
                 src="/logo-niftyminds.png"
@@ -115,20 +129,6 @@ export default function Home() {
           </div>
         </div>
       </header>
-
-      {/* Back to Home Link */}
-      <div className="max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-2">
-        <Link
-          href="/"
-          className="group inline-flex items-center gap-2 bg-white text-indigo-600 hover:bg-indigo-50 px-4 py-2.5 sm:px-5 sm:py-3 rounded-lg border-2 border-indigo-100 hover:border-indigo-200 shadow-sm hover:shadow-md transition-all font-semibold text-sm sm:text-base"
-        >
-          <svg className="w-4 h-4 sm:w-5 sm:h-5 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-          </svg>
-          <span className="hidden sm:inline">Zpět na hlavní stránku</span>
-          <span className="sm:hidden">Zpět</span>
-        </Link>
-      </div>
 
       {/* Content */}
       <div className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
