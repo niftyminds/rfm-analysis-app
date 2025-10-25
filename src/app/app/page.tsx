@@ -117,15 +117,16 @@ export default function Home() {
       </header>
 
       {/* Back to Home Link */}
-      <div className="max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 pt-4">
+      <div className="max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-2">
         <Link
           href="/"
-          className="inline-flex items-center gap-2 text-indigo-600 hover:text-indigo-700 transition-colors font-medium text-sm sm:text-base"
+          className="group inline-flex items-center gap-2 bg-white text-indigo-600 hover:bg-indigo-50 px-4 py-2.5 sm:px-5 sm:py-3 rounded-lg border-2 border-indigo-100 hover:border-indigo-200 shadow-sm hover:shadow-md transition-all font-semibold text-sm sm:text-base"
         >
-          <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-4 h-4 sm:w-5 sm:h-5 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
           </svg>
-          Zpět na hlavní stránku
+          <span className="hidden sm:inline">Zpět na hlavní stránku</span>
+          <span className="sm:hidden">Zpět</span>
         </Link>
       </div>
 
