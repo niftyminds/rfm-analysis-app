@@ -6,8 +6,8 @@ interface Customer {
   lastName: string;
   orderCount: number;
   totalValue: number;
-  firstOrderDate: Date | null;
-  lastOrderDate: Date | null;
+  firstOrderDate: Date | string | null;
+  lastOrderDate: Date | string | null;
   recency: number;
   lifetime: number;
   R_Score: number;
@@ -16,6 +16,25 @@ interface Customer {
   RFM_Score: string;
   segment: string;
   additionalFields?: Record<string, string>;
+}
+
+// Helper funkce pro formátování data (podporuje Date objekty i ISO strings)
+function formatDate(date: Date | string | null): string {
+  if (!date) return '';
+
+  // Pokud je to už ISO string (např. "2023-01-15T00:00:00.000Z")
+  if (typeof date === 'string') {
+    // Pokud je to už ve formátu YYYY-MM-DD, použij přímo
+    if (/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+      return date;
+    }
+    // Jinak parsuj ISO string a formátuj
+    const dateObj = new Date(date);
+    return `${dateObj.getFullYear()}-${String(dateObj.getMonth() + 1).padStart(2, '0')}-${String(dateObj.getDate()).padStart(2, '0')}`;
+  }
+
+  // Pokud je to Date objekt
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
 }
 
 interface Stats {
@@ -129,12 +148,8 @@ async function populateCustomersSheet(
       c.lastName,
       c.orderCount,
       Math.round(c.totalValue * 100) / 100,
-      c.firstOrderDate
-        ? `${c.firstOrderDate.getFullYear()}-${String(c.firstOrderDate.getMonth() + 1).padStart(2, '0')}-${String(c.firstOrderDate.getDate()).padStart(2, '0')}`
-        : '',
-      c.lastOrderDate
-        ? `${c.lastOrderDate.getFullYear()}-${String(c.lastOrderDate.getMonth() + 1).padStart(2, '0')}-${String(c.lastOrderDate.getDate()).padStart(2, '0')}`
-        : '',
+      formatDate(c.firstOrderDate),
+      formatDate(c.lastOrderDate),
       c.recency,
       c.lifetime,
       c.R_Score,

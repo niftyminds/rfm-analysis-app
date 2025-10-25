@@ -19,7 +19,63 @@ export async function GET(request: NextRequest) {
     const { tokens } = await oauth2Client.getToken(code);
 
     // Uložení tokenu do session/cookie (bezpečně!)
-    const response = NextResponse.redirect(new URL('/', request.url));
+    // Vytvoření HTML stránky, která zavře popup okno
+    const html = `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>Přihlášení úspěšné</title>
+          <style>
+            body {
+              font-family: system-ui, -apple-system, sans-serif;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              height: 100vh;
+              margin: 0;
+              background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+              color: white;
+            }
+            .container {
+              text-align: center;
+              padding: 2rem;
+            }
+            .checkmark {
+              font-size: 4rem;
+              margin-bottom: 1rem;
+            }
+            h1 {
+              margin: 0 0 0.5rem 0;
+              font-size: 1.5rem;
+            }
+            p {
+              margin: 0;
+              opacity: 0.9;
+            }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <div class="checkmark">✓</div>
+            <h1>Přihlášení úspěšné!</h1>
+            <p>Okno se automaticky zavře...</p>
+          </div>
+          <script>
+            // Zavřít okno po krátkém zpoždění
+            setTimeout(() => {
+              window.close();
+            }, 1500);
+          </script>
+        </body>
+      </html>
+    `;
+
+    const response = new NextResponse(html, {
+      headers: {
+        'Content-Type': 'text/html; charset=utf-8'
+      }
+    });
+
     response.cookies.set('google_access_token', tokens.access_token!, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
