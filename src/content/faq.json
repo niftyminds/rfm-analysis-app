@@ -1,0 +1,31 @@
+{
+  "enabled": true,
+  "sectionTitle": "Často kladené otázky",
+  "sectionDescription": "Odpovědi na nejčastější dotazy ohledně RFM Analýzy",
+  "faqs": [
+    {
+      "question": "Co je RFM Analýza?",
+      "answer": "RFM Analýza je metoda segmentace zákazníků založená na třech metrikách: **Recency** (jak nedávno nakoupili), **Frequency** (jak často nakupují) a **Monetary** (kolik utrácejí). Zákazníci jsou rozděleni do segmentů jako 'Champions', 'Loyal Customers', 'At Risk' atd."
+    },
+    {
+      "question": "Jaký formát CSV potřebuji?",
+      "answer": "CSV soubor by měl obsahovat minimálně tyto sloupce: **email zákazníka**, **datum objednávky** a **hodnota objednávky**. Podporujeme exporty z Shopify, WooCommerce a všech běžných e-shop platforem. Systém vám pomůže s mapováním sloupců."
+    },
+    {
+      "question": "Jsou moje data v bezpečí?",
+      "answer": "Ano! Všechna data se zpracovávají **pouze ve vašem prohlížeči**. Neposíláme je na servery, neukládáme je a nesdílíme s třetími stranami. Po zavření stránky se data smažou."
+    },
+    {
+      "question": "Je služba opravdu zdarma?",
+      "answer": "Ano, je 100% zdarma bez skrytých poplatků. Není třeba registrace ani platební karta. Můžete analyzovat neomezený počet zákazníků a provádět neomezený počet analýz."
+    },
+    {
+      "question": "Mohu exportovat výsledky?",
+      "answer": "Ano! Můžete exportovat výsledky do **Google Sheets** jedním kliknutím (vyžaduje přihlášení k Google účtu) nebo si stáhnout **CSV soubor** s kompletními daty."
+    },
+    {
+      "question": "Jak dlouho trvá analýza?",
+      "answer": "Většina analýz trvá **méně než 2 minuty** od nahrání CSV po zobrazení dashboardu. Závisí na velikosti souboru a rychlosti vašeho počítače. I analýza 10 000+ zákazníků je obvykle otázkou několika sekund."
+    }
+  ]
+}

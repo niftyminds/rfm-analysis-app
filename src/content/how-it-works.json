@@ -1,0 +1,27 @@
+{
+  "sectionTitle": "Jak to funguje?",
+  "sectionDescription": "Tři jednoduché kroky k profesionální segmentaci zákazníků",
+  "steps": [
+    {
+      "number": 1,
+      "icon": "Upload",
+      "title": "Nahrajte CSV soubor",
+      "description": "Export dat ze svého e-shopu (Shopify, WooCommerce, nebo vlastní systém). Stačí CSV soubor s objednávkami.",
+      "color": "indigo"
+    },
+    {
+      "number": 2,
+      "icon": "Settings",
+      "title": "Mapujte sloupce",
+      "description": "Přiřaďte sloupce z vašeho CSV (email, datum, částka). Systém vám pomůže s automatickou detekcí.",
+      "color": "purple"
+    },
+    {
+      "number": 3,
+      "icon": "TrendingUp",
+      "title": "Analyzujte výsledky",
+      "description": "Získejte interaktivní dashboard s RFM segmenty, grafy a možností exportu do Google Sheets.",
+      "color": "blue"
+    }
+  ]
+}

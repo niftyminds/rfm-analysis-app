@@ -1,0 +1,55 @@
+{
+  "hero": {
+    "badge": "🚀 Nová verze 2.0",
+    "heading": "RFM analýza vašeho e-shopu za 15 vteřin",
+    "subheading": "",
+    "description": "Profesionální RFM analýza bez instalace a registrace. Nahrajte CSV soubor z vašeho e-shopu a získejte detailní segmentaci zákazníků včetně export do Google Sheets.",
+    "primaryCta": {
+      "text": "Spustit analýzu zdarma",
+      "link": "/app"
+    },
+    "secondaryCta": {
+      "text": "Jak to funguje?",
+      "link": "#how-it-works"
+    },
+    "trustBadges": [
+      "✓ Bez registrace",
+      "✓ 100% zdarma",
+      "✓ Data zůstávají u vás"
+    ],
+    "screenshot": {
+      "src": "/images/dashboard-preview.png",
+      "alt": "Ukázka RFM Analýzy dashboard"
+    }
+  },
+  "video": {
+    "enabled": false,
+    "platform": "youtube",
+    "videoId": "dQw4w9WgXcQ",
+    "title": "Jak funguje RFM Analýza?",
+    "description": "Podívejte se na krátké video, jak jednoduše segmentovat zákazníky pomocí RFM analýzy."
+  },
+  "stats": {
+    "enabled": false,
+    "items": [
+      {
+        "value": "10 000+",
+        "label": "Analyzovaných zákazníků"
+      },
+      {
+        "value": "500+",
+        "label": "Spokojených uživatelů"
+      },
+      {
+        "value": "< 2 min",
+        "label": "Průměrný čas analýzy"
+      }
+    ]
+  },
+  "finalCta": {
+    "heading": "Připraveni na lepší segmentaci?",
+    "description": "Začněte analyzovat své zákazníky během 2 minut. Zcela zdarma, bez registrace.",
+    "buttonText": "Spustit RFM Analýzu",
+    "buttonLink": "/app"
+  }
+}

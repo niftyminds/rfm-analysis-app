@@ -1,0 +1,42 @@
+{
+  "sectionTitle": "Proč používat naši RFM Analýzu?",
+  "sectionDescription": "Vše, co potřebujete pro profesionální segmentaci zákazníků na jednom místě",
+  "features": [
+    {
+      "icon": "Upload",
+      "title": "Jednoduchý CSV import",
+      "description": "Nahrajte CSV soubor z vašeho e-shopu (Shopify, WooCommerce, vlastní systém). Podporujeme všechny běžné formáty.",
+      "color": "indigo"
+    },
+    {
+      "icon": "Zap",
+      "title": "Automatická RFM segmentace",
+      "description": "Algoritmus automaticky vypočítá Recency, Frequency a Monetary skóre pro každého zákazníka a přiřadí segmenty.",
+      "color": "purple"
+    },
+    {
+      "icon": "BarChart3",
+      "title": "Interaktivní dashboard",
+      "description": "Vizualizace dat pomocí grafů a tabulek. Filtrujte zákazníky podle segmentů, hodnoty nebo aktivity.",
+      "color": "blue"
+    },
+    {
+      "icon": "Download",
+      "title": "Export do Google Sheets",
+      "description": "Exportujte výsledky přímo do Google Sheets pro další práci s daty a sdílení s týmem.",
+      "color": "green"
+    },
+    {
+      "icon": "Shield",
+      "title": "100% soukromí dat",
+      "description": "Vaše data se zpracovávají pouze ve vašem prohlížeči. Neukládáme je na servery ani je nesdílíme.",
+      "color": "red"
+    },
+    {
+      "icon": "Sparkles",
+      "title": "Zdarma bez omezení",
+      "description": "Plná funkčnost zdarma. Bez registrace, bez limitů na počet zákazníků nebo analýz.",
+      "color": "yellow"
+    }
+  ]
+}

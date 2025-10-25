@@ -1,0 +1,32 @@
+{
+  "site": {
+    "title": "RFM Analýza | Segmentace zákazníků za 2 minuty",
+    "description": "Profesionální RFM analýza pro e-shopy. Bez registrace, 100% zdarma, data zůstávají u vás.",
+    "keywords": "RFM analýza, segmentace zákazníků, e-shop marketing, customer segmentation, marketing automation"
+  },
+  "company": {
+    "name": "NiftyMinds Agency",
+    "logo": "/logo-niftyminds.png",
+    "email": "info@niftyminds.agency",
+    "website": "https://niftyminds.agency"
+  },
+  "social": {
+    "enabled": false,
+    "links": [
+      {
+        "platform": "twitter",
+        "url": "https://twitter.com/niftyminds",
+        "icon": "Twitter"
+      },
+      {
+        "platform": "linkedin",
+        "url": "https://linkedin.com/company/niftyminds",
+        "icon": "Linkedin"
+      }
+    ]
+  },
+  "legal": {
+    "termsUrl": "/terms",
+    "privacyUrl": "/privacy"
+  }
+}
