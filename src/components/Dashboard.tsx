@@ -7,6 +7,7 @@ import { Customer, Stats, AdvancedFilters } from '@/types';
 import SegmentChart from './SegmentChart';
 import CustomerTable from './CustomerTable';
 import FilterPanel from './FilterPanel';
+import ExportModal from './ExportModal';
 
 interface DashboardProps {
   customers: Customer[];
@@ -29,6 +30,8 @@ export default function Dashboard({ customers, onReset }: DashboardProps) {
   const [advancedFilters, setAdvancedFilters] = useState<AdvancedFilters>(DEFAULT_FILTERS);
   const [isExportingToSheets, setIsExportingToSheets] = useState(false);
   const [isGoogleAuthenticated, setIsGoogleAuthenticated] = useState(false);
+  const [showExportModal, setShowExportModal] = useState(false);
+  const [exportType, setExportType] = useState<'csv' | 'sheets'>('csv');
   const stats: Stats = useMemo(() => {
     const segments: Record<string, number> = {};
     customers.forEach(c => {
@@ -99,7 +102,7 @@ export default function Dashboard({ customers, onReset }: DashboardProps) {
     setAdvancedFilters(DEFAULT_FILTERS);
   };
 
-  const handleExport = (customersToExport: Customer[] = customers, filenameSuffix: string = 'analyza') => {
+  const handleExportCSVInternal = (customersToExport: Customer[] = customers, filenameSuffix: string = 'analyza') => {
     const exportData = customersToExport.map(c => {
       const baseData: Record<string, any> = {
         email: c.email,
@@ -163,7 +166,7 @@ export default function Dashboard({ customers, onReset }: DashboardProps) {
       suffix += '_filtered';
     }
 
-    handleExport(filteredCustomers, suffix);
+    handleExportCSVInternal(filteredCustomers, suffix);
   };
 
   // Zkontrolovat autentizaci při mount
@@ -175,7 +178,7 @@ export default function Dashboard({ customers, onReset }: DashboardProps) {
   }, []);
 
   // Funkce pro provedení samotného exportu
-  const performExport = async () => {
+  const performExportToSheetsInternal = async () => {
     setIsExportingToSheets(true);
 
     try {
@@ -216,8 +219,8 @@ export default function Dashboard({ customers, onReset }: DashboardProps) {
     }
   };
 
-  // Handler pro Google Sheets export
-  const handleExportToSheets = async () => {
+  // Handler pro Google Sheets export (internal)
+  const handleExportToSheetsInternal = async () => {
     if (!isGoogleAuthenticated) {
       // Otevřít OAuth v novém okně (popup)
       const width = 600;
@@ -248,7 +251,7 @@ export default function Dashboard({ customers, onReset }: DashboardProps) {
             if (authData.authenticated) {
               setIsGoogleAuthenticated(true);
               // Automaticky spustit export po úspěšné autentizaci
-              performExport();
+              performExportToSheetsInternal();
             }
             return;
           }
@@ -261,7 +264,41 @@ export default function Dashboard({ customers, onReset }: DashboardProps) {
     }
 
     // Pokud je již přihlášený, rovnou spustit export
-    performExport();
+    performExportToSheetsInternal();
+  };
+
+  // Wrapper functions for lead generation modal
+  const handleExportClick = (type: 'csv' | 'sheets') => {
+    setExportType(type);
+    setShowExportModal(true);
+  };
+
+  const handleEmailSubmit = async (email: string, newsletter: boolean) => {
+    try {
+      // Call API to save lead
+      const response = await fetch('/api/leads', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, newsletter, exportType })
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to save lead');
+      }
+
+      // Close modal
+      setShowExportModal(false);
+
+      // Proceed with export based on type
+      if (exportType === 'csv') {
+        handleExportCSVInternal();
+      } else {
+        handleExportToSheetsInternal();
+      }
+    } catch (error: any) {
+      console.error('Lead submission error:', error);
+      throw new Error('Nepodařilo se uložit email. Zkuste to znovu.');
+    }
   };
 
   return (
@@ -275,7 +312,7 @@ export default function Dashboard({ customers, onReset }: DashboardProps) {
           </div>
           <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
             <button
-              onClick={handleExportToSheets}
+              onClick={() => handleExportClick('sheets')}
               disabled={isExportingToSheets}
               className="flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 active:bg-green-800 text-white px-4 py-3 sm:py-2 rounded-lg font-semibold transition-colors shadow-lg disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px]"
             >
@@ -406,7 +443,15 @@ export default function Dashboard({ customers, onReset }: DashboardProps) {
         filteredCount={filteredCustomers.length}
         activeFilterCount={activeFilterCount}
         onExportFiltered={handleExportFiltered}
-        onExportAll={() => handleExport()}
+        onExportAll={() => handleExportClick('csv')}
+      />
+
+      {/* Export Modal */}
+      <ExportModal
+        isOpen={showExportModal}
+        onClose={() => setShowExportModal(false)}
+        onSubmit={handleEmailSubmit}
+        exportType={exportType}
       />
     </div>
   );
