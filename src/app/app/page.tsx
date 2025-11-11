@@ -40,42 +40,51 @@ export default function Home() {
     if (!currentMapping) return;
 
     setLoading(true);
-    try {
-      // Filtruj data podle vybraných kritérií
-      const filteredData = csvData.filter(row => {
-        const email = (row[currentMapping.customerEmail] || '').toString().toLowerCase().trim();
-        const name = (row[currentMapping.customerName] || '').toString().toLowerCase().trim();
 
-        if (!email) return false;
+    // Use setTimeout to allow UI to update before heavy processing
+    setTimeout(() => {
+      try {
+        // Filtruj data podle vybraných kritérií
+        const filteredData = csvData.filter(row => {
+          const email = (row[currentMapping.customerEmail] || '').toString().toLowerCase().trim();
+          const name = (row[currentMapping.customerName] || '').toString().toLowerCase().trim();
 
-        // Vyloučit podle manuálního výběru (HLAVNÍ METODA)
-        if (filters.manualExcludeEmails.includes(email)) {
-          return false;
-        }
+          if (!email) return false;
 
-        // Vyloučit podle keywordů (pokud není v manuálním výběru)
-        if (filters.excludeTestData) {
-          const hasKeyword = filters.excludeByKeywords.some(keyword =>
-            email.includes(keyword) || (name && name.includes(keyword))
-          );
-          if (hasKeyword) {
+          // Vyloučit podle manuálního výběru (HLAVNÍ METODA)
+          if (filters.manualExcludeEmails.includes(email)) {
             return false;
           }
-        }
 
-        return true;
-      });
+          // Vyloučit podle keywordů (pokud není v manuálním výběru)
+          if (filters.excludeTestData) {
+            const hasKeyword = filters.excludeByKeywords.some(keyword =>
+              email.includes(keyword) || (name && name.includes(keyword))
+            );
+            if (hasKeyword) {
+              return false;
+            }
+          }
 
-      // TEPRVE TEĎ spusť RFM analýzu
-      const processedCustomers = processCSVData(filteredData, currentMapping);
-      setCustomers(processedCustomers);
-      setStep('dashboard');
-    } catch (error) {
-      console.error('Error processing data:', error);
-      alert('Chyba při zpracování dat. Zkontrolujte mapování sloupců.');
-    } finally {
-      setLoading(false);
-    }
+          return true;
+        });
+
+        console.log(`📊 Zpracovávám ${filteredData.length} řádků z ${csvData.length} celkových...`);
+
+        // TEPRVE TEĎ spusť RFM analýzu
+        const processedCustomers = processCSVData(filteredData, currentMapping);
+
+        console.log(`✅ RFM analýza dokončena: ${processedCustomers.length} zákazníků`);
+
+        setCustomers(processedCustomers);
+        setStep('dashboard');
+      } catch (error) {
+        console.error('Error processing data:', error);
+        alert('Chyba při zpracování dat. Zkontrolujte mapování sloupců.');
+      } finally {
+        setLoading(false);
+      }
+    }, 100);
   };
 
   const handlePreviewCancel = () => {
@@ -163,6 +172,46 @@ export default function Home() {
           <Dashboard customers={customers} onReset={handleReset} />
         )}
       </div>
+
+      {/* Loading Overlay */}
+      {loading && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full">
+            {/* Spinner */}
+            <div className="flex justify-center mb-6">
+              <div className="relative">
+                <div className="w-20 h-20 border-8 border-indigo-200 border-t-indigo-600 rounded-full animate-spin"></div>
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <svg className="w-8 h-8 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                  </svg>
+                </div>
+              </div>
+            </div>
+
+            {/* Text */}
+            <div className="text-center space-y-3">
+              <h3 className="text-2xl font-bold text-gray-900">
+                Zpracovávám RFM analýzu...
+              </h3>
+              <p className="text-gray-600">
+                Analyzuji {csvData.length.toLocaleString('cs-CZ')} řádků dat
+              </p>
+              <div className="flex items-center justify-center gap-2 text-sm text-gray-500">
+                <div className="flex gap-1">
+                  <span className="w-2 h-2 bg-indigo-600 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></span>
+                  <span className="w-2 h-2 bg-indigo-600 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></span>
+                  <span className="w-2 h-2 bg-indigo-600 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></span>
+                </div>
+                <span>Prosím čekejte</span>
+              </div>
+              <p className="text-xs text-gray-400 mt-4">
+                U velkých souborů může zpracování trvat několik sekund
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
     </main>
   );
 }

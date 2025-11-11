@@ -32,3 +32,7 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts*.csv
+
+# Test data
+test-data-*.csv
+generate-test-csv.js
