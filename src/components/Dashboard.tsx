@@ -38,6 +38,7 @@ export default function Dashboard({ customers, onReset }: DashboardProps) {
   const [exportType, setExportType] = useState<'csv' | 'sheets'>('csv');
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [spreadsheetUrl, setSpreadsheetUrl] = useState('');
+  const [processingPhase, setProcessingPhase] = useState('');
   const stats: Stats = useMemo(() => {
     const segments: Record<string, number> = {};
     const clvSegments: Record<string, number> = {};
@@ -197,81 +198,195 @@ export default function Dashboard({ customers, onReset }: DashboardProps) {
       .catch(() => setIsGoogleAuthenticated(false));
   }, []);
 
-  // Funkce pro provedení samotného exportu
-  const performExportToSheetsInternal = async () => {
-    setIsExportingToSheets(true);
+  // Helper funkce pro optimalizaci dat (komprese)
+  const optimizeCustomerData = (customer: Customer) => ({
+    email: customer.email,
+    firstName: customer.firstName,
+    lastName: customer.lastName,
+    orderCount: customer.orderCount,
+    totalValue: Math.round(customer.totalValue),
+    lastOrderDate: customer.lastOrderDate?.getTime() || null,
+    firstOrderDate: customer.firstOrderDate?.getTime() || null,
+    lifetime: customer.lifetime,
+    recency: customer.recency,
+    frequency: customer.frequency,
+    monetary: Math.round(customer.monetary),
+    R_Score: customer.R_Score,
+    F_Score: customer.F_Score,
+    M_Score: customer.M_Score,
+    RFM_Score: customer.RFM_Score,
+    RFM_Total: customer.RFM_Total,
+    segment: customer.segment,
+    // CLV fields
+    aov: Math.round(customer.aov),
+    purchaseFrequency: Math.round(customer.purchaseFrequency * 100) / 100,
+    historicalCLV: Math.round(customer.historicalCLV),
+    churnProbability: Math.round(customer.churnProbability * 100) / 100,
+    churnRisk: customer.churnRisk,
+    predictedCLV: Math.round(customer.predictedCLV),
+    lifetimeCLV: Math.round(customer.lifetimeCLV),
+    clvSegment: customer.clvSegment,
+    additionalFields: customer.additionalFields,
+    // DŮLEŽITÉ: Zahrnout orderDates a orderValues s optimalizací
+    orderDates: customer.orderDates?.map(d => d.getTime()) || [],
+    orderValues: customer.orderValues?.map(v => Math.round(v)) || []
+  });
 
-    try {
-      // Příprava dat pro export - odstraň velká pole pro snížení velikosti payloadu
-      const exportData = {
-        customers: customers.map(c => ({
-          email: c.email,
-          firstName: c.firstName,
-          lastName: c.lastName,
-          orderCount: c.orderCount,
-          totalValue: c.totalValue,
-          lastOrderDate: c.lastOrderDate,
-          firstOrderDate: c.firstOrderDate,
-          lifetime: c.lifetime,
-          recency: c.recency,
-          frequency: c.frequency,
-          monetary: c.monetary,
-          R_Score: c.R_Score,
-          F_Score: c.F_Score,
-          M_Score: c.M_Score,
-          RFM_Score: c.RFM_Score,
-          RFM_Total: c.RFM_Total,
-          segment: c.segment,
-          // CLV fields
-          aov: c.aov,
-          purchaseFrequency: c.purchaseFrequency,
-          historicalCLV: c.historicalCLV,
-          churnProbability: c.churnProbability,
-          churnRisk: c.churnRisk,
-          predictedCLV: c.predictedCLV,
-          lifetimeCLV: c.lifetimeCLV,
-          clvSegment: c.clvSegment,
-          additionalFields: c.additionalFields
-          // Vynechat orderDates a orderValues - jsou velké a nejsou potřeba pro export
-        })),
-        stats: {
-          total: stats.total,
-          totalRevenue: stats.totalValue,
-          avgOrderValue: stats.avgValue,
-          avgOrdersPerCustomer: stats.avgOrders
-        },
-        segments: stats.segments
+  // Batch export pro velké datasety
+  const performBatchExport = async (optimizedCustomers: any[]) => {
+    const BATCH_SIZE = 500;
+    const batches = [];
+
+    for (let i = 0; i < optimizedCustomers.length; i += BATCH_SIZE) {
+      batches.push(optimizedCustomers.slice(i, i + BATCH_SIZE));
+    }
+
+    console.log(`📦 Batch export: ${batches.length} dávek po ${BATCH_SIZE} zákazníků`);
+
+    let spreadsheetId = '';
+    let spreadsheetUrl = '';
+
+    // První batch - vytvoří spreadsheet
+    setProcessingPhase(`Export dávky 1/${batches.length}...`);
+
+    const firstBatchData = {
+      customers: batches[0],
+      stats: {
+        total: stats.total,
+        totalRevenue: stats.totalValue,
+        avgOrderValue: stats.avgValue,
+        avgOrdersPerCustomer: stats.avgOrders
+      },
+      segments: stats.segments,
+      isFirstBatch: true,
+      totalBatches: batches.length
+    };
+
+    const firstResponse = await fetch('/api/sheets/export', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(firstBatchData)
+    });
+
+    if (!firstResponse.ok) {
+      throw new Error(`First batch failed with status ${firstResponse.status}`);
+    }
+
+    const firstResult = await firstResponse.json();
+    spreadsheetId = firstResult.spreadsheetId;
+    spreadsheetUrl = firstResult.url;
+
+    // Následující batche - přidávají data
+    for (let i = 1; i < batches.length; i++) {
+      setProcessingPhase(`Export dávky ${i + 1}/${batches.length}...`);
+
+      const batchData = {
+        customers: batches[i],
+        spreadsheetId,
+        batchNumber: i,
+        isFirstBatch: false
       };
 
       const response = await fetch('/api/sheets/export', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(exportData)
+        body: JSON.stringify(batchData)
       });
 
-      if (response.status === 413) {
-        alert('⚠️ Příliš velké množství dat pro export. Zkuste exportovat menší dataset pomocí filtrů.');
-        return;
-      }
-
       if (!response.ok) {
-        throw new Error(`Export failed with status ${response.status}`);
+        throw new Error(`Batch ${i + 1} failed with status ${response.status}`);
       }
+    }
 
-      const result = await response.json();
+    return spreadsheetUrl;
+  };
 
-      if (result.success) {
-        // Uložit URL a zobrazit success modal
-        setSpreadsheetUrl(result.url);
-        setShowSuccessModal(true);
+  // Single export pro menší datasety
+  const performSingleExport = async (optimizedCustomers: any[]) => {
+    const exportData = {
+      customers: optimizedCustomers,
+      stats: {
+        total: stats.total,
+        totalRevenue: stats.totalValue,
+        avgOrderValue: stats.avgValue,
+        avgOrdersPerCustomer: stats.avgOrders
+      },
+      segments: stats.segments,
+      isFirstBatch: true,
+      totalBatches: 1
+    };
+
+    const response = await fetch('/api/sheets/export', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(exportData)
+    });
+
+    if (response.status === 413) {
+      throw new Error('PAYLOAD_TOO_LARGE');
+    }
+
+    if (!response.ok) {
+      throw new Error(`Export failed with status ${response.status}`);
+    }
+
+    const result = await response.json();
+    return result.url;
+  };
+
+  // Hlavní funkce pro export (hybrid: komprese + batch fallback)
+  const performExportToSheetsInternal = async () => {
+    setIsExportingToSheets(true);
+    setProcessingPhase('Příprava dat...');
+
+    try {
+      // 1. Optimalizace dat (komprese)
+      const optimizedCustomers = customers.map(optimizeCustomerData);
+
+      // 2. Zkontrolovat velikost payloadu
+      const testPayload = JSON.stringify({
+        customers: optimizedCustomers,
+        stats: {},
+        segments: {}
+      });
+      const payloadSize = new Blob([testPayload]).size;
+      const payloadMB = (payloadSize / (1024 * 1024)).toFixed(2);
+
+      console.log(`📊 Payload size: ${payloadMB} MB (${optimizedCustomers.length} zákazníků)`);
+
+      let spreadsheetUrl = '';
+
+      // 3. Rozhodnout mezi single/batch export
+      const MAX_PAYLOAD_SIZE = 3 * 1024 * 1024; // 3 MB limit
+
+      if (payloadSize > MAX_PAYLOAD_SIZE) {
+        console.log(`⚠️ Payload > 3 MB, použiji batch export`);
+        spreadsheetUrl = await performBatchExport(optimizedCustomers);
       } else {
-        alert('Chyba při exportu do Google Sheets');
+        console.log(`✅ Payload < 3 MB, použiji single export`);
+        try {
+          spreadsheetUrl = await performSingleExport(optimizedCustomers);
+        } catch (error: any) {
+          // Fallback na batch pokud single selže s 413
+          if (error.message === 'PAYLOAD_TOO_LARGE') {
+            console.log(`⚠️ Single export selhal (413), fallback na batch`);
+            spreadsheetUrl = await performBatchExport(optimizedCustomers);
+          } else {
+            throw error;
+          }
+        }
       }
+
+      // 4. Zobrazit success modal
+      setSpreadsheetUrl(spreadsheetUrl);
+      setShowSuccessModal(true);
+
     } catch (error) {
       console.error('Export error:', error);
-      alert('Chyba při exportu do Google Sheets');
+      alert('Chyba při exportu do Google Sheets. Zkuste to prosím znovu.');
     } finally {
       setIsExportingToSheets(false);
+      setProcessingPhase('');
     }
   };
 
@@ -439,7 +554,9 @@ export default function Dashboard({ customers, onReset }: DashboardProps) {
               {isExportingToSheets ? (
                 <>
                   <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-                  <span className="text-base sm:text-sm">Exportuji...</span>
+                  <span className="text-base sm:text-sm">
+                    {processingPhase || 'Exportuji...'}
+                  </span>
                 </>
               ) : (
                 <>

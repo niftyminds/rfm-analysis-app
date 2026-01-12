@@ -545,3 +545,88 @@ async function applyFormatting(
     requestBody: { requests }
   });
 }
+
+// Export funkce pro append batch dat do existujícího spreadsheetu
+export async function appendBatchToSpreadsheet(
+  accessToken: string,
+  spreadsheetId: string,
+  customers: any[] // Optimalizované customers s timestamps
+) {
+  const { sheets } = await createSheetsClient(accessToken);
+
+  // Převést timestamps zpět na Date objekty pro formatDate funkci
+  const normalizedCustomers: Customer[] = customers.map(c => ({
+    ...c,
+    firstOrderDate: c.firstOrderDate ? new Date(c.firstOrderDate) : null,
+    lastOrderDate: c.lastOrderDate ? new Date(c.lastOrderDate) : null,
+    // orderDates a orderValues jsou už v optimalizovaném formátu (timestamps/rounded)
+    // ale nepotřebujeme je pro sheets append
+  }));
+
+  // 1. Append do "Zákazníci" sheetu
+  const customerRows = normalizedCustomers.map(c => {
+    const baseRow = [
+      c.email,
+      c.firstName || '',
+      c.lastName || '',
+      c.orderCount,
+      Math.round(c.totalValue * 100) / 100,
+      formatDate(c.firstOrderDate),
+      formatDate(c.lastOrderDate),
+      c.recency,
+      c.lifetime,
+      c.R_Score,
+      c.F_Score,
+      c.M_Score,
+      c.RFM_Score,
+      c.segment
+    ];
+
+    // Přidání additionalFields pokud existují
+    if (c.additionalFields) {
+      const fieldValues = Object.values(c.additionalFields);
+      baseRow.push(...fieldValues);
+    }
+
+    return baseRow;
+  });
+
+  await sheets.spreadsheets.values.append({
+    spreadsheetId,
+    range: 'Zákazníci!A2', // A2 = skip header
+    valueInputOption: 'RAW',
+    requestBody: {
+      values: customerRows
+    }
+  });
+
+  // 2. Append do "CLV Analýza" sheetu
+  // Seřadit podle lifetimeCLV (nejvyšší první)
+  const sortedCustomers = [...normalizedCustomers].sort((a, b) => b.lifetimeCLV - a.lifetimeCLV);
+
+  const clvRows = sortedCustomers.map(c => [
+    c.email,
+    c.firstName || '',
+    c.lastName || '',
+    c.clvSegment,
+    Math.round(c.lifetimeCLV),
+    Math.round(c.historicalCLV),
+    Math.round(c.predictedCLV),
+    Math.round(c.aov),
+    c.purchaseFrequency.toFixed(2),
+    (c.churnProbability * 100).toFixed(1),
+    c.churnRisk,
+    c.segment
+  ]);
+
+  await sheets.spreadsheets.values.append({
+    spreadsheetId,
+    range: 'CLV Analýza!A2', // A2 = skip header
+    valueInputOption: 'RAW',
+    requestBody: {
+      values: clvRows
+    }
+  });
+
+  console.log(`✅ Appended ${customers.length} customers to spreadsheet ${spreadsheetId}`);
+}
