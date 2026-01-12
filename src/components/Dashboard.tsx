@@ -202,9 +202,38 @@ export default function Dashboard({ customers, onReset }: DashboardProps) {
     setIsExportingToSheets(true);
 
     try {
-      // Příprava dat pro export
+      // Příprava dat pro export - odstraň velká pole pro snížení velikosti payloadu
       const exportData = {
-        customers: customers,
+        customers: customers.map(c => ({
+          email: c.email,
+          firstName: c.firstName,
+          lastName: c.lastName,
+          orderCount: c.orderCount,
+          totalValue: c.totalValue,
+          lastOrderDate: c.lastOrderDate,
+          firstOrderDate: c.firstOrderDate,
+          lifetime: c.lifetime,
+          recency: c.recency,
+          frequency: c.frequency,
+          monetary: c.monetary,
+          R_Score: c.R_Score,
+          F_Score: c.F_Score,
+          M_Score: c.M_Score,
+          RFM_Score: c.RFM_Score,
+          RFM_Total: c.RFM_Total,
+          segment: c.segment,
+          // CLV fields
+          aov: c.aov,
+          purchaseFrequency: c.purchaseFrequency,
+          historicalCLV: c.historicalCLV,
+          churnProbability: c.churnProbability,
+          churnRisk: c.churnRisk,
+          predictedCLV: c.predictedCLV,
+          lifetimeCLV: c.lifetimeCLV,
+          clvSegment: c.clvSegment,
+          additionalFields: c.additionalFields
+          // Vynechat orderDates a orderValues - jsou velké a nejsou potřeba pro export
+        })),
         stats: {
           total: stats.total,
           totalRevenue: stats.totalValue,
@@ -219,6 +248,15 @@ export default function Dashboard({ customers, onReset }: DashboardProps) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(exportData)
       });
+
+      if (response.status === 413) {
+        alert('⚠️ Příliš velké množství dat pro export. Zkuste exportovat menší dataset pomocí filtrů.');
+        return;
+      }
+
+      if (!response.ok) {
+        throw new Error(`Export failed with status ${response.status}`);
+      }
 
       const result = await response.json();
 
@@ -238,36 +276,44 @@ export default function Dashboard({ customers, onReset }: DashboardProps) {
   };
 
   // Helper pro čekání na dokončení OAuth s timeout
-  const waitForOAuthCompletion = (popup: Window): Promise<boolean> => {
+  const waitForOAuthCompletion = (popup: Window | null): Promise<boolean> => {
     return new Promise((resolve) => {
+      const startTime = Date.now();
       const checkAuthInterval = setInterval(async () => {
         try {
-          // Zkontrolovat, jestli se popup zavřel
-          if (popup.closed) {
+          // Poll /api/auth/check místo kontroly popup.closed (COOP policy fix)
+          const authCheck = await fetch('/api/auth/check');
+          const authData = await authCheck.json();
+
+          if (authData.authenticated) {
             clearInterval(checkAuthInterval);
+            if (popup && !popup.closed) {
+              try {
+                popup.close();
+              } catch (e) {
+                // Ignore COOP errors when closing
+              }
+            }
+            resolve(true);
+          }
 
-            // Zkontrolovat autentizaci s malým delay (cookie se může nastavit později)
-            await new Promise(r => setTimeout(r, 500));
-
-            const authCheck = await fetch('/api/auth/check');
-            const authData = await authCheck.json();
-            resolve(authData.authenticated);
+          // Zkontrolovat timeout
+          if (Date.now() - startTime > 300000) { // 5 minut
+            clearInterval(checkAuthInterval);
+            if (popup && !popup.closed) {
+              try {
+                popup.close();
+              } catch (e) {
+                // Ignore COOP errors when closing
+              }
+            }
+            resolve(false);
           }
         } catch (error) {
           console.error('Auth check error:', error);
-          clearInterval(checkAuthInterval);
-          resolve(false);
+          // Pokračovat v pollování i při chybách
         }
-      }, 500); // Zkráceno z 1000ms na 500ms pro lepší UX
-
-      // Timeout po 5 minutách - automaticky zavřít popup a vrátit false
-      setTimeout(() => {
-        clearInterval(checkAuthInterval);
-        if (!popup.closed) {
-          popup.close();
-        }
-        resolve(false);
-      }, 300000); // 5 minut
+      }, 1000); // Poll každou sekundu
     });
   };
 
