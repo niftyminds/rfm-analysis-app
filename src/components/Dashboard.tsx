@@ -9,6 +9,7 @@ import CustomerTable from './CustomerTable';
 import FilterPanel from './FilterPanel';
 import ExportModal from './ExportModal';
 import ExportSuccessModal from './ExportSuccessModal';
+import BatchProgressModal from './BatchProgressModal';
 import CLVDistributionChart from './CLVDistributionChart';
 import CLVTrendChart from './CLVTrendChart';
 import TopCLVCustomers from './TopCLVCustomers';
@@ -34,11 +35,15 @@ export default function Dashboard({ customers, onReset }: DashboardProps) {
   const [advancedFilters, setAdvancedFilters] = useState<AdvancedFilters>(DEFAULT_FILTERS);
   const [isExportingToSheets, setIsExportingToSheets] = useState(false);
   const [isGoogleAuthenticated, setIsGoogleAuthenticated] = useState(false);
+  const [savedEmail, setSavedEmail] = useState<string>(''); // Manuálně zadaný email z localStorage
   const [showExportModal, setShowExportModal] = useState(false);
   const [exportType, setExportType] = useState<'csv' | 'sheets'>('csv');
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [spreadsheetUrl, setSpreadsheetUrl] = useState('');
   const [processingPhase, setProcessingPhase] = useState('');
+  const [showBatchProgressModal, setShowBatchProgressModal] = useState(false);
+  const [currentBatch, setCurrentBatch] = useState(0);
+  const [totalBatches, setTotalBatches] = useState(0);
   const stats: Stats = useMemo(() => {
     const segments: Record<string, number> = {};
     const clvSegments: Record<string, number> = {};
@@ -190,12 +195,19 @@ export default function Dashboard({ customers, onReset }: DashboardProps) {
     handleExportCSVInternal(filteredCustomers, suffix);
   };
 
-  // Zkontrolovat autentizaci při mount
+  // Zkontrolovat autentizaci a načíst uložený email při mount
   useEffect(() => {
+    // Kontrola Google auth
     fetch('/api/auth/check')
       .then(res => res.json())
       .then(data => setIsGoogleAuthenticated(data.authenticated))
       .catch(() => setIsGoogleAuthenticated(false));
+
+    // Načíst uložený email z localStorage
+    const storedEmail = localStorage.getItem('rfm_user_email');
+    if (storedEmail) {
+      setSavedEmail(storedEmail);
+    }
   }, []);
 
   // Helper funkce pro optimalizaci dat (komprese)
@@ -243,11 +255,16 @@ export default function Dashboard({ customers, onReset }: DashboardProps) {
 
     console.log(`📦 Batch export: ${batches.length} dávek po ${BATCH_SIZE} zákazníků`);
 
+    // Show batch progress modal
+    setTotalBatches(batches.length);
+    setShowBatchProgressModal(true);
+
     let spreadsheetId = '';
     let spreadsheetUrl = '';
 
     // První batch - vytvoří spreadsheet
-    setProcessingPhase(`Export dávky 1/${batches.length}...`);
+    setCurrentBatch(1);
+    setProcessingPhase(`Vytvářím spreadsheet a exportuji dávku 1/${batches.length}...`);
 
     const firstBatchData = {
       customers: batches[0],
@@ -269,6 +286,7 @@ export default function Dashboard({ customers, onReset }: DashboardProps) {
     });
 
     if (!firstResponse.ok) {
+      setShowBatchProgressModal(false);
       throw new Error(`First batch failed with status ${firstResponse.status}`);
     }
 
@@ -278,7 +296,8 @@ export default function Dashboard({ customers, onReset }: DashboardProps) {
 
     // Následující batche - přidávají data
     for (let i = 1; i < batches.length; i++) {
-      setProcessingPhase(`Export dávky ${i + 1}/${batches.length}...`);
+      setCurrentBatch(i + 1);
+      setProcessingPhase(`Přidávám dávku ${i + 1}/${batches.length}...`);
 
       const batchData = {
         customers: batches[i],
@@ -294,9 +313,13 @@ export default function Dashboard({ customers, onReset }: DashboardProps) {
       });
 
       if (!response.ok) {
+        setShowBatchProgressModal(false);
         throw new Error(`Batch ${i + 1} failed with status ${response.status}`);
       }
     }
+
+    // Hide batch progress modal
+    setShowBatchProgressModal(false);
 
     return spreadsheetUrl;
   };
@@ -470,11 +493,31 @@ export default function Dashboard({ customers, onReset }: DashboardProps) {
   // Wrapper functions for lead generation modal
   const handleExportClick = (type: 'csv' | 'sheets') => {
     setExportType(type);
+
+    // Kontrola: Pokud už máme identitu (Google auth NEBO uložený email), skipnout modal
+    if (isGoogleAuthenticated || savedEmail) {
+      // Přímo exportovat bez modalu
+      if (type === 'csv') {
+        handleExportCSVInternal();
+      } else {
+        handleExportToSheetsInternal().catch((error) => {
+          console.error('Export error:', error);
+          alert('Chyba při exportu do Google Sheets. Zkuste to prosím znovu.');
+        });
+      }
+      return;
+    }
+
+    // Nemáme identitu → zobrazit modal pro sběr emailu
     setShowExportModal(true);
   };
 
   const handleEmailSubmit = async (email: string, newsletter: boolean) => {
-    // Uložit lead
+    // Uložit email do localStorage (pro příští exporty)
+    localStorage.setItem('rfm_user_email', email);
+    setSavedEmail(email);
+
+    // Uložit lead do DB
     const response = await fetch('/api/leads', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -514,6 +557,11 @@ export default function Dashboard({ customers, onReset }: DashboardProps) {
     }
   };
 
+  const handleChangeEmail = () => {
+    localStorage.removeItem('rfm_user_email');
+    setSavedEmail('');
+  };
+
   return (
     <div className="space-y-6 sm:space-y-8">
       {/* Header */}
@@ -524,8 +572,8 @@ export default function Dashboard({ customers, onReset }: DashboardProps) {
             <p className="text-sm sm:text-base text-gray-600">RFM segmentace {stats.total.toLocaleString('cs-CZ')} zákazníků</p>
           </div>
           <div className="flex flex-col gap-3 w-full sm:w-auto">
-            {/* Google Account Status Badge */}
-            {isGoogleAuthenticated && (
+            {/* User Identity Badge */}
+            {(isGoogleAuthenticated || savedEmail) && (
               <div className="flex items-center justify-between sm:justify-end gap-2 bg-green-50 border border-green-200 rounded-lg px-3 py-2">
                 <div className="flex items-center gap-2">
                   <div className="flex items-center justify-center w-6 h-6 bg-green-100 rounded-full">
@@ -533,13 +581,15 @@ export default function Dashboard({ customers, onReset }: DashboardProps) {
                       <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/>
                     </svg>
                   </div>
-                  <span className="text-sm font-medium text-green-800">Přihlášen do Google</span>
+                  <span className="text-sm font-medium text-green-800">
+                    {isGoogleAuthenticated ? 'Přihlášen do Google' : savedEmail}
+                  </span>
                 </div>
                 <button
-                  onClick={handleLogout}
+                  onClick={isGoogleAuthenticated ? handleLogout : handleChangeEmail}
                   className="text-xs text-green-700 hover:text-green-900 font-medium underline"
                 >
-                  Odhlásit se
+                  {isGoogleAuthenticated ? 'Odhlásit se' : 'Změnit email'}
                 </button>
               </div>
             )}
@@ -792,6 +842,14 @@ export default function Dashboard({ customers, onReset }: DashboardProps) {
         onClose={() => setShowExportModal(false)}
         onSubmit={handleEmailSubmit}
         exportType={exportType}
+      />
+
+      {/* Batch Progress Modal */}
+      <BatchProgressModal
+        isOpen={showBatchProgressModal}
+        currentBatch={currentBatch}
+        totalBatches={totalBatches}
+        phase={processingPhase}
       />
 
       {/* Success Modal */}
