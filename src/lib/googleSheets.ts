@@ -6,8 +6,8 @@ interface Customer {
   lastName?: string;
   orderCount: number;
   totalValue: number;
-  firstOrderDate: Date | string | null;
-  lastOrderDate: Date | string | null;
+  firstOrderDate: Date | string | number | null;
+  lastOrderDate: Date | string | number | null;
   recency: number;
   lifetime: number;
   R_Score: number;
@@ -27,9 +27,15 @@ interface Customer {
   clvSegment: 'High Value' | 'Medium Value' | 'Low Value';
 }
 
-// Helper funkce pro formátování data (podporuje Date objekty i ISO strings)
-function formatDate(date: Date | string | null): string {
+// Helper funkce pro formátování data (podporuje Date objekty, ISO strings i timestamps)
+function formatDate(date: Date | string | number | null): string {
   if (!date) return '';
+
+  // Pokud je to timestamp (number)
+  if (typeof date === 'number') {
+    const dateObj = new Date(date);
+    return `${dateObj.getFullYear()}-${String(dateObj.getMonth() + 1).padStart(2, '0')}-${String(dateObj.getDate()).padStart(2, '0')}`;
+  }
 
   // Pokud je to už ISO string (např. "2023-01-15T00:00:00.000Z")
   if (typeof date === 'string') {
@@ -554,14 +560,8 @@ export async function appendBatchToSpreadsheet(
 ) {
   const { sheets } = await createSheetsClient(accessToken);
 
-  // Převést timestamps zpět na Date objekty pro formatDate funkci
-  const normalizedCustomers: Customer[] = customers.map(c => ({
-    ...c,
-    firstOrderDate: c.firstOrderDate ? new Date(c.firstOrderDate) : null,
-    lastOrderDate: c.lastOrderDate ? new Date(c.lastOrderDate) : null,
-    // orderDates a orderValues jsou už v optimalizovaném formátu (timestamps/rounded)
-    // ale nepotřebujeme je pro sheets append
-  }));
+  // Customers už mají timestamps - formatDate() je přímo podporuje
+  const normalizedCustomers: Customer[] = customers;
 
   // 1. Append do "Zákazníci" sheetu
   const customerRows = normalizedCustomers.map(c => {
