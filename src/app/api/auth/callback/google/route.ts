@@ -76,11 +76,19 @@ export async function GET(request: NextRequest) {
       }
     });
 
+    // Nastavení cookie pro OAuth token
+    // DŮLEŽITÉ: Pro OAuth popup je potřeba sameSite: 'none' + secure: true
+    // protože OAuth callback přichází z jiné domény (accounts.google.com)
+    const isProduction = process.env.NODE_ENV === 'production';
+
     response.cookies.set('google_access_token', tokens.access_token!, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      maxAge: 3600 // 1 hodina
+      // PRODUCTION: secure=true + sameSite='none' pro cross-origin OAuth
+      // DEVELOPMENT (localhost): secure=false + sameSite='lax' protože localhost je HTTP
+      secure: isProduction,
+      sameSite: isProduction ? 'none' : 'lax',
+      maxAge: 3600, // 1 hodina
+      path: '/' // Explicitně nastavit path pro celou aplikaci
     });
 
     return response;

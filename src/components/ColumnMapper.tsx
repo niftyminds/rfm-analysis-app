@@ -63,7 +63,7 @@ export default function ColumnMapper({ columns, previewData, onMapping, onBack }
     if (!mapping.orderNumber) newErrors.push('Vyberte sloupec pro číslo objednávky');
     if (!mapping.orderDate) newErrors.push('Vyberte sloupec pro datum objednávky');
     if (!mapping.orderValue) newErrors.push('Vyberte sloupec pro hodnotu objednávky');
-    if (!mapping.customerName) newErrors.push('Vyberte sloupec pro jméno zákazníka');
+    // customerName je volitelné - není požadováno
     if (!mapping.customerEmail) newErrors.push('Vyberte sloupec pro email zákazníka');
 
     if (newErrors.length > 0) {
@@ -102,7 +102,7 @@ export default function ColumnMapper({ columns, previewData, onMapping, onBack }
     { key: 'orderNumber' as keyof ColumnMapping, label: 'Číslo objednávky', description: 'Unikátní identifikátor objednávky' },
     { key: 'orderDate' as keyof ColumnMapping, label: 'Datum objednávky', description: 'Datum vytvoření objednávky' },
     { key: 'orderValue' as keyof ColumnMapping, label: 'Hodnota objednávky', description: 'Celková hodnota objednávky (bez DPH)' },
-    { key: 'customerName' as keyof ColumnMapping, label: 'Jméno zákazníka', description: 'Celé jméno nebo příjmení zákazníka' },
+    { key: 'customerName' as keyof ColumnMapping, label: 'Jméno zákazníka (volitelné)', description: 'Celé jméno nebo příjmení zákazníka - není povinné, stačí email jako identifikátor' },
     { key: 'customerEmail' as keyof ColumnMapping, label: 'Email zákazníka', description: 'Emailová adresa zákazníka' }
   ];
 

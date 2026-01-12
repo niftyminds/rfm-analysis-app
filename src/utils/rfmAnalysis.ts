@@ -144,7 +144,7 @@ export function processCSVData(data: CSVRow[], mapping: ColumnMapping): Customer
     const orderNum = row[mapping.orderNumber];
     const date = parseCzechDate(row[mapping.orderDate]);
     const amount = parseAmount(row[mapping.orderValue]);
-    const name = (row[mapping.customerName] || '').trim();
+    const name = mapping.customerName ? (row[mapping.customerName] || '').trim() : '';
 
     if (!ordersByEmail[email]) {
       ordersByEmail[email] = {
@@ -247,7 +247,16 @@ export function processCSVData(data: CSVRow[], mapping: ColumnMapping): Customer
       segment: '',
       orderDates,
       orderValues,
-      additionalFields: Object.keys(additionalFields).length > 0 ? additionalFields : undefined
+      additionalFields: Object.keys(additionalFields).length > 0 ? additionalFields : undefined,
+      // CLV properties (calculated in worker)
+      aov: 0,
+      purchaseFrequency: 0,
+      historicalCLV: 0,
+      churnProbability: 0,
+      churnRisk: 'low',
+      predictedCLV: 0,
+      lifetimeCLV: 0,
+      clvSegment: 'Low Value'
     });
   });
   

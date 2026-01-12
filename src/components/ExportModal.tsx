@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { X, Mail, Download, Shield, Check } from 'lucide-react';
 
 interface ExportModalProps {
@@ -21,6 +21,16 @@ export default function ExportModal({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
 
+  // Reset state při otevření/zavření modalu
+  useEffect(() => {
+    if (isOpen) {
+      // Reset při otevření
+      setEmail('');
+      setError('');
+      setIsSubmitting(false);
+    }
+  }, [isOpen]);
+
   if (!isOpen) return null;
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -40,6 +50,8 @@ export default function ExportModal({
       // Modal se zavře po úspěšném submitu v parent komponentě
     } catch (err: any) {
       setError(err.message || 'Něco se pokazilo. Zkuste to znovu.');
+    } finally {
+      // VŽDY resetovat loading stav (i při úspěchu)
       setIsSubmitting(false);
     }
   };

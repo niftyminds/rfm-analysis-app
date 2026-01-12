@@ -2,15 +2,18 @@
 
 import { useState, useMemo } from 'react';
 import { FileSpreadsheet, Users, AlertCircle, X, Search } from 'lucide-react';
-import { DataFilters } from '@/types';
+import { DataFilters, CLVSettings } from '@/types';
+import CLVSettingsComponent from './CLVSettings';
 
 interface DataPreviewProps {
   data: any[];
   columnMapping: {
     customerEmail: string;
-    customerName: string;
+    customerName?: string; // Volitelné - může být undefined
     orderValue: string;
   };
+  clvSettings: CLVSettings;
+  onClvSettingsChange: (settings: CLVSettings) => void;
   onConfirm: (filters: DataFilters) => void;
   onCancel: () => void;
 }
@@ -22,7 +25,7 @@ interface CustomerRecord {
   totalValue: number;
 }
 
-export default function DataPreview({ data, columnMapping, onConfirm, onCancel }: DataPreviewProps) {
+export default function DataPreview({ data, columnMapping, clvSettings, onClvSettingsChange, onConfirm, onCancel }: DataPreviewProps) {
   const [filters, setFilters] = useState<DataFilters>({
     excludeTestData: true,
     excludeByKeywords: ['test', 'demo', 'admin', 'spam', 'example'],
@@ -39,7 +42,8 @@ export default function DataPreview({ data, columnMapping, onConfirm, onCancel }
     // Agreguj podle emailu
     data.forEach(row => {
       const email = (row[columnMapping.customerEmail] || '').toString().toLowerCase().trim();
-      const name = (row[columnMapping.customerName] || '').toString().trim();
+      // Jméno je volitelné - pokud není v mappingu, použij prázdný string
+      const name = columnMapping.customerName ? (row[columnMapping.customerName] || '').toString().trim() : '';
       const valueStr = (row[columnMapping.orderValue] || '0').toString().replace(/\s/g, '').replace(',', '.');
       const value = parseFloat(valueStr) || 0;
 
@@ -326,7 +330,7 @@ export default function DataPreview({ data, columnMapping, onConfirm, onCancel }
                       />
                       <div className="flex-1 min-w-0">
                         <h4 className="font-semibold text-gray-900 text-base truncate">
-                          {record.name}
+                          {record.name || record.email}
                         </h4>
                         <p className="text-sm text-gray-600 truncate mt-0.5">
                           {record.email}
@@ -390,7 +394,7 @@ export default function DataPreview({ data, columnMapping, onConfirm, onCancel }
                           />
                         </td>
                         <td className="py-3 px-4 font-medium text-gray-900">
-                          {record.name}
+                          {record.name || record.email}
                         </td>
                         <td className="py-3 px-4 text-gray-600 text-sm">
                           {record.email}
@@ -417,6 +421,14 @@ export default function DataPreview({ data, columnMapping, onConfirm, onCancel }
             )}
           </div>
         )}
+
+        {/* CLV Settings */}
+        <div className="mb-4 sm:mb-6">
+          <CLVSettingsComponent
+            settings={clvSettings}
+            onSettingsChange={onClvSettingsChange}
+          />
+        </div>
 
         {/* Info box */}
         <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 sm:p-6 mb-4 sm:mb-6">

@@ -2,8 +2,8 @@ import { google } from 'googleapis';
 
 interface Customer {
   email: string;
-  firstName: string;
-  lastName: string;
+  firstName?: string;
+  lastName?: string;
   orderCount: number;
   totalValue: number;
   firstOrderDate: Date | string | null;
@@ -16,6 +16,15 @@ interface Customer {
   RFM_Score: string;
   segment: string;
   additionalFields?: Record<string, string>;
+  // CLV Metrics
+  aov: number;
+  purchaseFrequency: number;
+  historicalCLV: number;
+  churnProbability: number;
+  churnRisk: 'low' | 'medium' | 'high';
+  predictedCLV: number;
+  lifetimeCLV: number;
+  clvSegment: 'High Value' | 'Medium Value' | 'Low Value';
 }
 
 // Helper funkce pro formátování data (podporuje Date objekty i ISO strings)
@@ -79,12 +88,13 @@ export async function createSpreadsheet(
   const spreadsheet = await sheets.spreadsheets.create({
     requestBody: {
       properties: {
-        title: `RFM Analýza - ${timestamp}`,
+        title: `RFM & CLV Analýza - ${timestamp}`,
         locale: 'cs_CZ',
         timeZone: 'Europe/Prague'
       },
       sheets: [
         { properties: { title: 'Zákazníci', gridProperties: { frozenRowCount: 1 } } },
+        { properties: { title: 'CLV Analýza', gridProperties: { frozenRowCount: 1 } } },
         { properties: { title: 'Statistiky' } },
         { properties: { title: 'Segmenty' } }
       ]
@@ -100,20 +110,24 @@ export async function createSpreadsheet(
   // Získat skutečná sheet IDs z vytvořeného spreadsheetu
   const sheetIds = {
     zakaznici: spreadsheet.data.sheets?.[0]?.properties?.sheetId || 0,
-    statistiky: spreadsheet.data.sheets?.[1]?.properties?.sheetId || 1,
-    segmenty: spreadsheet.data.sheets?.[2]?.properties?.sheetId || 2,
+    clv: spreadsheet.data.sheets?.[1]?.properties?.sheetId || 1,
+    statistiky: spreadsheet.data.sheets?.[2]?.properties?.sheetId || 2,
+    segmenty: spreadsheet.data.sheets?.[3]?.properties?.sheetId || 3,
   };
 
   // 2. Naplnění Sheet 1: Zákazníci
   await populateCustomersSheet(sheets, spreadsheetId, customers);
 
-  // 3. Naplnění Sheet 2: Statistiky
+  // 3. Naplnění Sheet 2: CLV Analýza
+  await populateCLVSheet(sheets, spreadsheetId, customers);
+
+  // 4. Naplnění Sheet 3: Statistiky
   await populateStatsSheet(sheets, spreadsheetId, stats);
 
-  // 4. Naplnění Sheet 3: Segmenty
+  // 5. Naplnění Sheet 4: Segmenty
   await populateSegmentsSheet(sheets, spreadsheetId, segments);
 
-  // 5. Aplikace formátování
+  // 6. Aplikace formátování
   await applyFormatting(sheets, spreadsheetId, customers.length, sheetIds);
 
   return spreadsheetId;
@@ -151,8 +165,8 @@ async function populateCustomersSheet(
   const rows = customers.map(c => {
     const baseRow = [
       c.email,
-      c.firstName,
-      c.lastName,
+      c.firstName || '',
+      c.lastName || '',
       c.orderCount,
       Math.round(c.totalValue * 100) / 100,
       formatDate(c.firstOrderDate),
@@ -177,6 +191,56 @@ async function populateCustomersSheet(
   await sheets.spreadsheets.values.update({
     spreadsheetId,
     range: 'Zákazníci!A1',
+    valueInputOption: 'RAW',
+    requestBody: {
+      values: [headers, ...rows]
+    }
+  });
+}
+
+async function populateCLVSheet(
+  sheets: any,
+  spreadsheetId: string,
+  customers: Customer[]
+) {
+  // Hlavička
+  const headers = [
+    'Email',
+    'Jméno',
+    'Příjmení',
+    'CLV Segment',
+    'Lifetime CLV (Kč)',
+    'Historical CLV (Kč)',
+    'Predicted CLV (Kč)',
+    'Average Order Value (Kč)',
+    'Purchase Frequency (objednávek/měsíc)',
+    'Churn Probability (%)',
+    'Churn Risk',
+    'RFM Segment'
+  ];
+
+  // Seřadit zákazníky podle Lifetime CLV (nejvyšší první)
+  const sortedCustomers = [...customers].sort((a, b) => b.lifetimeCLV - a.lifetimeCLV);
+
+  // Data řádky
+  const rows = sortedCustomers.map(c => [
+    c.email,
+    c.firstName || '',
+    c.lastName || '',
+    c.clvSegment,
+    Math.round(c.lifetimeCLV),
+    Math.round(c.historicalCLV),
+    Math.round(c.predictedCLV),
+    Math.round(c.aov),
+    c.purchaseFrequency.toFixed(2),
+    (c.churnProbability * 100).toFixed(1),
+    c.churnRisk,
+    c.segment
+  ]);
+
+  await sheets.spreadsheets.values.update({
+    spreadsheetId,
+    range: 'CLV Analýza!A1',
     valueInputOption: 'RAW',
     requestBody: {
       values: [headers, ...rows]
@@ -233,7 +297,7 @@ async function applyFormatting(
   sheets: any,
   spreadsheetId: string,
   rowCount: number,
-  sheetIds: { zakaznici: number; statistiky: number; segmenty: number }
+  sheetIds: { zakaznici: number; clv: number; statistiky: number; segmenty: number }
 ) {
   // Mapa barev pro segmenty
   const segmentColors: Record<string, { red: number; green: number; blue: number }> = {
@@ -281,7 +345,41 @@ async function applyFormatting(
       }
     },
 
-    // 3. Formátování hlavičky Statistiky
+    // 3. Formátování hlavičky CLV Analýza (bold, background)
+    {
+      repeatCell: {
+        range: {
+          sheetId: sheetIds.clv,
+          startRowIndex: 0,
+          endRowIndex: 1
+        },
+        cell: {
+          userEnteredFormat: {
+            backgroundColor: { red: 0.13, green: 0.59, blue: 0.95 }, // modrá pro CLV
+            textFormat: {
+              foregroundColor: { red: 1, green: 1, blue: 1 },
+              bold: true
+            },
+            horizontalAlignment: 'CENTER'
+          }
+        },
+        fields: 'userEnteredFormat(backgroundColor,textFormat,horizontalAlignment)'
+      }
+    },
+
+    // 4. Auto-resize sloupců CLV Analýza
+    {
+      autoResizeDimensions: {
+        dimensions: {
+          sheetId: sheetIds.clv,
+          dimension: 'COLUMNS',
+          startIndex: 0,
+          endIndex: 12
+        }
+      }
+    },
+
+    // 5. Formátování hlavičky Statistiky
     {
       repeatCell: {
         range: {
@@ -302,7 +400,7 @@ async function applyFormatting(
       }
     },
 
-    // 4. Auto-resize sloupců Statistiky
+    // 6. Auto-resize sloupců Statistiky
     {
       autoResizeDimensions: {
         dimensions: {
@@ -314,7 +412,7 @@ async function applyFormatting(
       }
     },
 
-    // 5. Formátování hlavičky Segmenty
+    // 7. Formátování hlavičky Segmenty
     {
       repeatCell: {
         range: {
@@ -335,7 +433,7 @@ async function applyFormatting(
       }
     },
 
-    // 6. Auto-resize sloupců Segmenty
+    // 8. Auto-resize sloupců Segmenty
     {
       autoResizeDimensions: {
         dimensions: {
@@ -348,7 +446,7 @@ async function applyFormatting(
     }
   ];
 
-  // Přidání conditional formatting pro každý segment
+  // Přidání conditional formatting pro každý RFM segment
   Object.entries(segmentColors).forEach((segment, index) => {
     const [segmentName, color] = segment;
     requests.push({
@@ -372,6 +470,72 @@ async function applyFormatting(
           }
         },
         index
+      }
+    });
+  });
+
+  // Conditional formatting pro CLV Segmenty (sloupec D = index 3)
+  const clvSegmentColors = {
+    'High Value': { red: 0.13, green: 0.59, blue: 0.95 }, // modrá
+    'Medium Value': { red: 0.60, green: 0.80, blue: 0.92 }, // světle modrá
+    'Low Value': { red: 0.70, green: 0.70, blue: 0.70 } // šedá
+  };
+
+  Object.entries(clvSegmentColors).forEach(([segment, color], index) => {
+    requests.push({
+      addConditionalFormatRule: {
+        rule: {
+          ranges: [{
+            sheetId: sheetIds.clv,
+            startRowIndex: 1,
+            endRowIndex: rowCount + 1,
+            startColumnIndex: 3, // CLV Segment sloupec (index 3)
+            endColumnIndex: 4
+          }],
+          booleanRule: {
+            condition: {
+              type: 'TEXT_CONTAINS',
+              values: [{ userEnteredValue: segment }]
+            },
+            format: {
+              backgroundColor: color
+            }
+          }
+        },
+        index: index + 50 // Offset aby nekolidovalo s RFM segmenty
+      }
+    });
+  });
+
+  // Conditional formatting pro Churn Risk (sloupec K = index 10)
+  const churnRiskColors = {
+    'low': { red: 0.22, green: 0.73, blue: 0.29 }, // zelená
+    'medium': { red: 0.98, green: 0.74, blue: 0.26 }, // oranžová
+    'high': { red: 0.91, green: 0.30, blue: 0.24 } // červená
+  };
+
+  Object.entries(churnRiskColors).forEach(([risk, color], index) => {
+    requests.push({
+      addConditionalFormatRule: {
+        rule: {
+          ranges: [{
+            sheetId: sheetIds.clv,
+            startRowIndex: 1,
+            endRowIndex: rowCount + 1,
+            startColumnIndex: 10, // Churn Risk sloupec (index 10)
+            endColumnIndex: 11
+          }],
+          booleanRule: {
+            condition: {
+              type: 'TEXT_CONTAINS',
+              values: [{ userEnteredValue: risk }]
+            },
+            format: {
+              backgroundColor: color
+            }
+          }
+        },
+        index: index + 60 // Offset aby nekolidovalo
       }
     });
   });
