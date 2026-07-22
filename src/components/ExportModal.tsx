@@ -64,35 +64,35 @@ export default function ExportModal({
     <>
       {/* Backdrop */}
       <div
-        className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 animate-fadeIn"
+        className="fixed inset-0 bg-black/50 z-40 animate-fadeIn"
         onClick={onClose}
       />
 
       {/* Modal */}
       <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
         <div
-          className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-8 animate-slideUp relative"
+          className="bg-card border border-black/10 max-w-md w-full p-8 animate-slideUp relative"
           onClick={(e) => e.stopPropagation()}
         >
           {/* Close button */}
           <button
             onClick={onClose}
-            className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors"
+            className="absolute top-4 right-4 text-mute hover:text-ink transition-colors duration-200 ease-brand"
             aria-label="Zavřít"
           >
             <X size={24} />
           </button>
 
           {/* Icon */}
-          <div className="w-16 h-16 bg-gradient-to-br from-indigo-100 to-purple-100 rounded-2xl flex items-center justify-center mx-auto mb-6">
-            <Download className="w-8 h-8 text-indigo-600" />
+          <div className="w-16 h-16 bg-cream-deep border border-black/10 flex items-center justify-center mx-auto mb-6">
+            <Download className="w-8 h-8 text-ink" />
           </div>
 
           {/* Heading */}
-          <h2 className="text-2xl font-bold text-gray-900 text-center mb-2">
+          <h2 className="text-2xl font-black uppercase tracking-tight text-ink text-center mb-2">
             Skvělá práce! 🎉
           </h2>
-          <p className="text-gray-600 text-center mb-6">
+          <p className="text-ink-soft text-center mb-6">
             Vaše RFM analýza je hotová. Zadejte email pro stažení výsledků do <strong>{exportTypeText}</strong>.
           </p>
 
@@ -100,11 +100,11 @@ export default function ExportModal({
           <form onSubmit={handleSubmit} className="space-y-4">
             {/* Email input */}
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="email" className="block font-mono text-[11px] uppercase tracking-[0.14em] text-mute mb-2">
                 Email
               </label>
               <div className="relative">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-mute" />
                 <input
                   id="email"
                   type="email"
@@ -112,7 +112,7 @@ export default function ExportModal({
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="vas@email.cz"
                   required
-                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+                  className="w-full pl-10 pr-4 py-3 bg-card border border-black/10 focus:border-ink focus:ring-1 focus:ring-ink focus:outline-none transition-colors duration-200 ease-brand"
                   disabled={isSubmitting}
                 />
               </div>
@@ -124,17 +124,17 @@ export default function ExportModal({
                 type="checkbox"
                 checked={newsletter}
                 onChange={(e) => setNewsletter(e.target.checked)}
-                className="mt-1 w-5 h-5 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
+                className="mt-1 w-5 h-5 accent-ink border-black/10 focus:ring-1 focus:ring-ink"
                 disabled={isSubmitting}
               />
-              <span className="text-sm text-gray-600 group-hover:text-gray-900 transition-colors">
+              <span className="text-sm text-ink-soft group-hover:text-ink transition-colors duration-200 ease-brand">
                 Chci dostávat tipy pro lepší customer retention a RFM analýzu (1x týdně, kdykoli se odhlásíte)
               </span>
             </label>
 
             {/* Error message */}
             {error && (
-              <div className="bg-red-50 border border-red-200 rounded-lg p-3 text-sm text-red-600">
+              <div className="bg-red-50 border border-red-200 p-3 text-sm text-red-600">
                 {error}
               </div>
             )}
@@ -143,11 +143,11 @@ export default function ExportModal({
             <button
               type="submit"
               disabled={isSubmitting}
-              className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-semibold py-3 px-6 rounded-lg shadow-lg hover:shadow-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              className="btn-brand btn-ink w-full disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
               {isSubmitting ? (
                 <>
-                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-lime-deep"></div>
                   Zpracovávám...
                 </>
               ) : (
@@ -159,12 +159,12 @@ export default function ExportModal({
             </button>
 
             {/* Trust signals */}
-            <div className="pt-4 border-t border-gray-200 space-y-2">
-              <div className="flex items-center gap-2 text-xs text-gray-500">
+            <div className="pt-4 border-t border-line space-y-2">
+              <div className="flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.14em] text-mute">
                 <Shield size={14} />
                 <span>GDPR compliant • Žádný spam</span>
               </div>
-              <div className="flex items-center gap-2 text-xs text-gray-500">
+              <div className="flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.14em] text-mute">
                 <Check size={14} />
                 <span>2,000+ spokojených uživatelů</span>
               </div>

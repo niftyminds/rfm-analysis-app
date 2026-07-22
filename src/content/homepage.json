@@ -1,8 +1,8 @@
 {
   "hero": {
-    "badge": "🚀 Nová verze 2.0",
-    "heading": "RFM analýza eshopu 15 vteřin",
-    "subheading": "",
+    "badge": "Nová verze 2.0",
+    "heading": "RFM analýza eshopu",
+    "subheading": "za 15 vteřin",
     "description": "Profesionální RFM analýza bez instalace a registrace. Nahrajte CSV soubor z vašeho e-shopu a získejte detailní segmentaci zákazníků včetně export do Google Sheets.",
     "primaryCta": {
       "text": "Spustit analýzu zdarma",
@@ -30,7 +30,7 @@
     "description": "Podívejte se na krátké video, jak jednoduše segmentovat zákazníky pomocí RFM analýzy."
   },
   "stats": {
-    "enabled": false,
+    "enabled": true,
     "items": [
       {
         "value": "10 000+",

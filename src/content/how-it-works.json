@@ -11,7 +11,7 @@
     },
     {
       "number": 2,
-      "icon": "Settings",
+      "icon": "Columns",
       "title": "Mapujte sloupce",
       "description": "Přiřaďte sloupce z vašeho CSV (email, datum, částka). Systém vám pomůže s automatickou detekcí.",
       "color": "purple"

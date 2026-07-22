@@ -168,7 +168,7 @@ export default function DualFileUpload({ onDataReady }: DualFileUploadProps) {
       : 'Obsahuje: email/ID, jméno, příjmení, telefon, adresa';
 
     return (
-      <div className="border-2 border-dashed border-gray-300 rounded-xl p-6 hover:border-indigo-500 transition-colors">
+      <div className="border-2 border-dashed border-black/20 p-6 hover:border-ink transition-colors duration-200 ease-brand">
         <input
           type="file"
           accept=".csv"
@@ -185,10 +185,10 @@ export default function DualFileUpload({ onDataReady }: DualFileUploadProps) {
             htmlFor={`file-${type}`}
             className="flex flex-col items-center cursor-pointer"
           >
-            <Upload className="w-12 h-12 text-gray-400 mb-3" />
-            <h3 className="font-semibold text-gray-900 mb-1">{title}</h3>
-            <p className="text-sm text-gray-600 text-center mb-4">{description}</p>
-            <span className="text-sm text-indigo-600 font-medium">
+            <Upload className="w-12 h-12 text-mute mb-3" />
+            <h3 className="font-black uppercase tracking-tight text-ink mb-1">{title}</h3>
+            <p className="text-sm text-mute text-center mb-4">{description}</p>
+            <span className="text-sm text-ink font-medium underline">
               Klikněte pro výběr souboru
             </span>
           </label>
@@ -196,19 +196,22 @@ export default function DualFileUpload({ onDataReady }: DualFileUploadProps) {
           <div className="space-y-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <FileText className="w-5 h-5 text-green-600" />
+                <FileText className="w-5 h-5 text-ink" />
                 <div>
-                  <p className="font-medium text-gray-900">{file.name}</p>
-                  <p className="text-xs text-gray-600">
+                  <p className="font-medium text-ink flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-lime-deep flex-shrink-0"></span>
+                    {file.name}
+                  </p>
+                  <p className="text-xs font-mono text-mute">
                     {data?.length || 0} řádků
                   </p>
                 </div>
               </div>
               <button
                 onClick={onRemove}
-                className="p-1 hover:bg-gray-100 rounded transition-colors"
+                className="p-1 hover:bg-cream-deep transition-colors duration-200 ease-brand"
               >
-                <X className="w-5 h-5 text-gray-400" />
+                <X className="w-5 h-5 text-mute" />
               </button>
             </div>
           </div>
@@ -240,10 +243,10 @@ export default function DualFileUpload({ onDataReady }: DualFileUploadProps) {
 
       {/* Error message */}
       {error && (
-        <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-start gap-3">
+        <div className="bg-card border border-red-600/40 p-4 flex items-start gap-3">
           <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
           <div>
-            <p className="font-medium text-red-900">Chyba</p>
+            <p className="font-medium text-red-700">Chyba</p>
             <p className="text-sm text-red-700">{error}</p>
           </div>
         </div>
@@ -251,14 +254,14 @@ export default function DualFileUpload({ onDataReady }: DualFileUploadProps) {
 
       {/* Step 2: Select Merge Key */}
       {step === 'select-key' && commonColumns.length > 0 && (
-        <div className="bg-blue-50 border border-blue-200 rounded-xl p-6 space-y-4">
+        <div className="bg-cream-deep border border-black/10 p-6 space-y-4">
           <div className="flex items-start gap-3">
-            <LinkIcon className="w-6 h-6 text-blue-600 flex-shrink-0 mt-0.5" />
+            <LinkIcon className="w-6 h-6 text-ink flex-shrink-0 mt-0.5" />
             <div className="flex-1">
-              <h3 className="font-semibold text-blue-900 mb-2">
+              <h3 className="font-black uppercase tracking-tight text-ink mb-2">
                 Vyberte klíč pro spojení dat
               </h3>
-              <p className="text-sm text-blue-700 mb-4">
+              <p className="text-sm text-mute mb-4">
                 Nalezeno {commonColumns.length} společných sloupců. Vyberte, podle kterého se mají data sloučit.
               </p>
 
@@ -266,7 +269,7 @@ export default function DualFileUpload({ onDataReady }: DualFileUploadProps) {
                 {commonColumns.map((column) => (
                   <label
                     key={column}
-                    className="flex items-center gap-3 p-3 bg-white rounded-lg border border-blue-200 hover:border-blue-400 cursor-pointer transition-colors"
+                    className="flex items-center gap-3 p-3 bg-card border border-black/10 hover:border-ink cursor-pointer transition-colors duration-200 ease-brand"
                   >
                     <input
                       type="radio"
@@ -274,12 +277,12 @@ export default function DualFileUpload({ onDataReady }: DualFileUploadProps) {
                       value={column}
                       checked={selectedMergeKey === column}
                       onChange={(e) => setSelectedMergeKey(e.target.value)}
-                      className="w-4 h-4 text-indigo-600"
+                      className="w-4 h-4 accent-ink"
                     />
                     <div className="flex-1">
-                      <span className="font-medium text-gray-900">{column}</span>
+                      <span className="font-medium text-ink">{column}</span>
                       {column === suggestMergeKey(commonColumns) && (
-                        <span className="ml-2 text-xs bg-indigo-100 text-indigo-700 px-2 py-1 rounded">
+                        <span className="ml-2 font-mono text-[11px] uppercase tracking-[0.16em] bg-lime text-ink px-2 py-1">
                           Doporučeno
                         </span>
                       )}
@@ -291,11 +294,11 @@ export default function DualFileUpload({ onDataReady }: DualFileUploadProps) {
               <button
                 onClick={handleMerge}
                 disabled={!selectedMergeKey || isProcessing}
-                className="mt-4 w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                className="btn-brand btn-ink mt-4 w-full disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isProcessing ? (
                   <>
-                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-lime"></div>
                     Slučuji data...
                   </>
                 ) : (
@@ -312,32 +315,32 @@ export default function DualFileUpload({ onDataReady }: DualFileUploadProps) {
 
       {/* Step 3: Merge Preview */}
       {step === 'preview' && mergeStats && (
-        <div className="bg-green-50 border border-green-200 rounded-xl p-6">
+        <div className="bg-lime/20 border border-black/10 p-6">
           <div className="flex items-start gap-3">
-            <CheckCircle className="w-6 h-6 text-green-600 flex-shrink-0 mt-0.5" />
+            <CheckCircle className="w-6 h-6 text-ink flex-shrink-0 mt-0.5" />
             <div className="flex-1">
-              <h3 className="font-semibold text-green-900 mb-2">
+              <h3 className="font-black uppercase tracking-tight text-ink mb-2">
                 ✅ Sloučení dokončeno
               </h3>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
                 <div>
-                  <p className="text-sm text-green-700">Celkem objednávek</p>
-                  <p className="text-2xl font-bold text-green-900">{mergeStats.totalOrders}</p>
+                  <p className="font-mono text-[11px] uppercase tracking-[0.14em] text-mute">Celkem objednávek</p>
+                  <p className="text-2xl font-black tracking-tight text-ink">{mergeStats.totalOrders}</p>
                 </div>
                 <div>
-                  <p className="text-sm text-green-700">Spárováno</p>
-                  <p className="text-2xl font-bold text-green-900">{mergeStats.matchedCustomers}</p>
+                  <p className="font-mono text-[11px] uppercase tracking-[0.14em] text-mute">Spárováno</p>
+                  <p className="text-2xl font-black tracking-tight text-ink">{mergeStats.matchedCustomers}</p>
                 </div>
                 <div>
-                  <p className="text-sm text-green-700">Nespárováno</p>
-                  <p className="text-2xl font-bold text-orange-600">{mergeStats.unmatchedOrders}</p>
+                  <p className="font-mono text-[11px] uppercase tracking-[0.14em] text-mute">Nespárováno</p>
+                  <p className="text-2xl font-black tracking-tight text-ink">{mergeStats.unmatchedOrders}</p>
                 </div>
                 <div>
-                  <p className="text-sm text-green-700">Úspěšnost</p>
-                  <p className="text-2xl font-bold text-green-900">{mergeStats.matchRate.toFixed(1)}%</p>
+                  <p className="font-mono text-[11px] uppercase tracking-[0.14em] text-mute">Úspěšnost</p>
+                  <p className="text-2xl font-black tracking-tight text-ink">{mergeStats.matchRate.toFixed(1)}%</p>
                 </div>
               </div>
-              <p className="text-sm text-green-700 mt-4">
+              <p className="text-sm text-ink-soft mt-4">
                 Pokračuji na mapování sloupců...
               </p>
             </div>

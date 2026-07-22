@@ -176,73 +176,73 @@ export default function DataPreview({ data, columnMapping, clvSettings, onClvSet
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 p-4 sm:p-6 lg:p-8">
+    <div className="min-h-screen bg-cream p-4 sm:p-6 lg:p-8">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
-        <div className="bg-white rounded-xl sm:rounded-2xl shadow-xl p-4 sm:p-6 lg:p-8 mb-4 sm:mb-6">
-          <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">
+        <div className="card-brand p-4 sm:p-6 lg:p-8 mb-4 sm:mb-6">
+          <h2 className="text-2xl sm:text-3xl font-black uppercase tracking-tight text-ink mb-2">
             🔍 Kontrola dat před analýzou
           </h2>
-          <p className="text-sm sm:text-base text-gray-600">
+          <p className="text-sm sm:text-base text-mute">
             Zkontroluj a vylučte testovací objednávky pro přesnější RFM analýzu
           </p>
         </div>
 
         {/* Statistiky */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 mb-4 sm:mb-6">
-          <div className="bg-white rounded-xl p-4 sm:p-6 shadow-lg">
+          <div className="card-brand p-4 sm:p-6">
             <div className="flex items-center gap-2 sm:gap-3 mb-2">
-              <FileSpreadsheet className="text-blue-600 flex-shrink-0" size={20} />
-              <span className="text-xs sm:text-sm font-medium text-gray-700">Celkem řádků</span>
+              <FileSpreadsheet className="text-ink flex-shrink-0" size={20} />
+              <span className="font-mono text-[11px] sm:text-xs uppercase tracking-[0.14em] text-mute">Celkem řádků</span>
             </div>
-            <p className="text-2xl sm:text-3xl font-bold text-blue-900">
+            <p className="text-2xl sm:text-3xl font-black tracking-tight text-ink">
               {analysis.totalRows.toLocaleString('cs-CZ')}
             </p>
           </div>
 
-          <div className="bg-white rounded-xl p-4 sm:p-6 shadow-lg">
+          <div className="card-brand p-4 sm:p-6">
             <div className="flex items-center gap-2 sm:gap-3 mb-2">
-              <Users className="text-green-600 flex-shrink-0" size={20} />
-              <span className="text-xs sm:text-sm font-medium text-gray-700">Unikátní zákazníci</span>
+              <Users className="text-ink flex-shrink-0" size={20} />
+              <span className="font-mono text-[11px] sm:text-xs uppercase tracking-[0.14em] text-mute">Unikátní zákazníci</span>
             </div>
-            <p className="text-2xl sm:text-3xl font-bold text-green-900">
+            <p className="text-2xl sm:text-3xl font-black tracking-tight text-ink">
               {analysis.uniqueCustomers.toLocaleString('cs-CZ')}
             </p>
           </div>
 
-          <div className="bg-white rounded-xl p-4 sm:p-6 shadow-lg">
+          <div className="card-brand p-4 sm:p-6">
             <div className="flex items-center gap-2 sm:gap-3 mb-2">
-              <AlertCircle className="text-orange-600 flex-shrink-0" size={20} />
-              <span className="text-xs sm:text-sm font-medium text-gray-700">Suspektní záznamy</span>
+              <AlertCircle className="text-ink flex-shrink-0" size={20} />
+              <span className="font-mono text-[11px] sm:text-xs uppercase tracking-[0.14em] text-mute">Suspektní záznamy</span>
             </div>
-            <p className="text-2xl sm:text-3xl font-bold text-orange-900">
+            <p className="text-2xl sm:text-3xl font-black tracking-tight text-ink">
               {analysis.suspiciousCount}
             </p>
           </div>
         </div>
 
         {/* Nastavení keywordů */}
-        <div className="bg-white rounded-xl sm:rounded-2xl shadow-xl p-4 sm:p-6 lg:p-8 mb-4 sm:mb-6">
-          <h3 className="text-xl font-bold text-gray-900 mb-4">
+        <div className="card-brand p-4 sm:p-6 lg:p-8 mb-4 sm:mb-6">
+          <h3 className="text-xl font-black uppercase tracking-tight text-ink mb-4">
             🔧 Nastavení detekce
           </h3>
 
           <div className="space-y-6">
             {/* Keywords */}
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-3">
+              <label className="block font-mono text-xs uppercase tracking-[0.14em] text-ink mb-3">
                 Klíčová slova pro detekci (v názvu nebo emailu):
               </label>
               <div className="flex flex-wrap gap-2 mb-3">
                 {filters.excludeByKeywords.map(keyword => (
                   <span
                     key={keyword}
-                    className="inline-flex items-center gap-2 px-3 py-1.5 bg-orange-100 text-orange-800 rounded-full text-sm font-medium"
+                    className="chip-mono bg-cream-deep text-ink"
                   >
                     {keyword}
                     <button
                       onClick={() => removeKeyword(keyword)}
-                      className="hover:bg-orange-200 rounded-full p-0.5"
+                      className="hover:bg-lime p-0.5 transition-colors duration-200 ease-brand"
                     >
                       <X size={14} />
                     </button>
@@ -257,17 +257,17 @@ export default function DataPreview({ data, columnMapping, clvSettings, onClvSet
                   onChange={(e) => setCustomKeyword(e.target.value)}
                   onKeyPress={(e) => e.key === 'Enter' && addKeywordAndExclude()}
                   placeholder="např. michal@example.com, test, demo..."
-                  className="flex-1 px-4 py-3 sm:py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 text-base text-gray-900 placeholder:text-gray-700 min-h-[48px] sm:min-h-0"
+                  className="flex-1 px-4 py-3 sm:py-2 bg-card border border-black/10 focus:ring-1 focus:ring-ink focus:border-ink text-base text-ink placeholder:text-mute min-h-[48px] sm:min-h-0"
                 />
                 <button
                   onClick={addKeywordAndExclude}
-                  className="px-4 sm:px-6 py-3 sm:py-2 bg-red-600 hover:bg-red-700 active:bg-red-800 text-white rounded-lg font-medium flex items-center justify-center gap-2 min-h-[48px] sm:min-h-0 whitespace-nowrap"
+                  className="btn-brand btn-ink min-h-[48px] sm:min-h-0 whitespace-nowrap"
                 >
                   <Search size={16} />
                   <span>Najít a vyloučit</span>
                 </button>
               </div>
-              <p className="text-xs text-gray-500 mt-2">
+              <p className="text-xs text-mute mt-2">
                 💡 Tip: Hledání funguje v emailu i jméně (např. &quot;test&quot; najde &quot;test@example.com&quot; i &quot;Test User&quot;)
               </p>
             </div>
@@ -276,13 +276,13 @@ export default function DataPreview({ data, columnMapping, clvSettings, onClvSet
 
         {/* Detekované suspektní záznamy */}
         {analysis.suspiciousRecords.length > 0 && (
-          <div className="bg-white rounded-xl sm:rounded-2xl shadow-xl p-4 sm:p-6 lg:p-8 mb-4 sm:mb-6">
+          <div className="card-brand p-4 sm:p-6 lg:p-8 mb-4 sm:mb-6">
             <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-4 sm:mb-6">
               <div className="flex-1">
-                <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-2">
+                <h3 className="text-lg sm:text-xl font-black uppercase tracking-tight text-ink mb-2">
                   ⚠️ Detekované testovací objednávky
                 </h3>
-                <p className="text-sm text-gray-600">
+                <p className="text-sm text-mute">
                   Kliknutím na řádek přepneš vyloučení/zahrnutí zákazníka
                 </p>
               </div>
@@ -292,7 +292,7 @@ export default function DataPreview({ data, columnMapping, clvSettings, onClvSet
                     const allEmails = analysis.suspiciousRecords.map(r => r.email);
                     setFilters(prev => ({ ...prev, manualExcludeEmails: allEmails }));
                   }}
-                  className="px-4 py-3 sm:py-2 text-sm bg-orange-100 hover:bg-orange-200 active:bg-orange-300 text-orange-800 rounded-lg font-medium min-h-[48px] sm:min-h-0 whitespace-nowrap"
+                  className="btn-brand btn-ink text-xs min-h-[48px] sm:min-h-0 whitespace-nowrap"
                 >
                   Vyloučit vše
                 </button>
@@ -300,7 +300,7 @@ export default function DataPreview({ data, columnMapping, clvSettings, onClvSet
                   onClick={() => {
                     setFilters(prev => ({ ...prev, manualExcludeEmails: [] }));
                   }}
-                  className="px-4 py-3 sm:py-2 text-sm bg-gray-100 hover:bg-gray-200 active:bg-gray-300 text-gray-700 rounded-lg font-medium min-h-[48px] sm:min-h-0 whitespace-nowrap"
+                  className="btn-brand btn-outline-ink text-xs min-h-[48px] sm:min-h-0 whitespace-nowrap"
                 >
                   Zrušit výběr
                 </button>
@@ -315,10 +315,10 @@ export default function DataPreview({ data, columnMapping, clvSettings, onClvSet
                   <div
                     key={record.email}
                     onClick={() => toggleExcludeEmail(record.email)}
-                    className={`border rounded-lg p-4 cursor-pointer transition-colors active:scale-[0.98] ${
+                    className={`border p-4 cursor-pointer transition-colors duration-200 ease-brand active:scale-[0.98] ${
                       isExcluded
-                        ? 'bg-red-50 border-red-200 hover:bg-red-100'
-                        : 'bg-white border-gray-200 hover:bg-gray-50'
+                        ? 'bg-red-50 border-red-600/40 hover:bg-red-100'
+                        : 'bg-card border-black/10 hover:bg-cream-deep'
                     }`}
                   >
                     <div className="flex items-start gap-3 mb-3">
@@ -326,13 +326,13 @@ export default function DataPreview({ data, columnMapping, clvSettings, onClvSet
                         type="checkbox"
                         checked={isExcluded}
                         onChange={() => { }}
-                        className="w-5 h-5 text-red-600 rounded cursor-pointer mt-0.5 flex-shrink-0"
+                        className="w-5 h-5 accent-ink cursor-pointer mt-0.5 flex-shrink-0"
                       />
                       <div className="flex-1 min-w-0">
-                        <h4 className="font-semibold text-gray-900 text-base truncate">
+                        <h4 className="font-semibold text-ink text-base truncate">
                           {record.name || record.email}
                         </h4>
-                        <p className="text-sm text-gray-600 truncate mt-0.5">
+                        <p className="text-sm text-mute truncate mt-0.5">
                           {record.email}
                         </p>
                       </div>
@@ -340,20 +340,20 @@ export default function DataPreview({ data, columnMapping, clvSettings, onClvSet
 
                     <div className="grid grid-cols-2 gap-3 pl-8">
                       <div>
-                        <p className="text-xs text-gray-500 mb-0.5">Objednávky</p>
-                        <p className="font-semibold text-gray-900">{record.orderCount}</p>
+                        <p className="font-mono text-[11px] uppercase tracking-[0.14em] text-mute mb-0.5">Objednávky</p>
+                        <p className="font-mono font-semibold text-ink">{record.orderCount}</p>
                       </div>
                       <div>
-                        <p className="text-xs text-gray-500 mb-0.5">Celková hodnota</p>
-                        <p className="font-semibold text-gray-900">
+                        <p className="font-mono text-[11px] uppercase tracking-[0.14em] text-mute mb-0.5">Celková hodnota</p>
+                        <p className="font-mono font-semibold text-ink">
                           {Math.round(record.totalValue).toLocaleString('cs-CZ')} Kč
                         </p>
                       </div>
                     </div>
 
                     {isExcluded && (
-                      <div className="mt-3 pt-3 border-t border-red-200 pl-8">
-                        <p className="text-xs font-medium text-red-800">
+                      <div className="mt-3 pt-3 border-t border-red-600/20 pl-8">
+                        <p className="text-xs font-medium text-red-700">
                           ✓ Tento záznam bude vyloučen z analýzy
                         </p>
                       </div>
@@ -367,12 +367,12 @@ export default function DataPreview({ data, columnMapping, clvSettings, onClvSet
             <div className="hidden lg:block overflow-x-auto">
               <table className="w-full">
                 <thead>
-                  <tr className="border-b-2 border-gray-200">
-                    <th className="text-left py-3 px-4 font-semibold text-gray-700 w-12"></th>
-                    <th className="text-left py-3 px-4 font-semibold text-gray-700">Jméno</th>
-                    <th className="text-left py-3 px-4 font-semibold text-gray-700">Email</th>
-                    <th className="text-right py-3 px-4 font-semibold text-gray-700">Objednávky</th>
-                    <th className="text-right py-3 px-4 font-semibold text-gray-700">Celková hodnota</th>
+                  <tr className="border-b border-black/10 bg-cream-deep">
+                    <th className="text-left py-3 px-4 font-mono text-[11px] uppercase tracking-[0.14em] text-mute w-12"></th>
+                    <th className="text-left py-3 px-4 font-mono text-[11px] uppercase tracking-[0.14em] text-mute">Jméno</th>
+                    <th className="text-left py-3 px-4 font-mono text-[11px] uppercase tracking-[0.14em] text-mute">Email</th>
+                    <th className="text-right py-3 px-4 font-mono text-[11px] uppercase tracking-[0.14em] text-mute">Objednávky</th>
+                    <th className="text-right py-3 px-4 font-mono text-[11px] uppercase tracking-[0.14em] text-mute">Celková hodnota</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -382,27 +382,27 @@ export default function DataPreview({ data, columnMapping, clvSettings, onClvSet
                       <tr
                         key={record.email}
                         onClick={() => toggleExcludeEmail(record.email)}
-                        className={`border-b border-gray-100 cursor-pointer transition-colors
-                                  ${isExcluded ? 'bg-red-50 hover:bg-red-100' : 'hover:bg-gray-50'}`}
+                        className={`border-b border-line cursor-pointer transition-colors duration-200 ease-brand
+                                  ${isExcluded ? 'bg-red-50 hover:bg-red-100' : 'hover:bg-cream-deep/50'}`}
                       >
                         <td className="py-3 px-4">
                           <input
                             type="checkbox"
                             checked={isExcluded}
                             onChange={() => { }}
-                            className="w-5 h-5 text-red-600 rounded cursor-pointer"
+                            className="w-5 h-5 accent-ink cursor-pointer"
                           />
                         </td>
-                        <td className="py-3 px-4 font-medium text-gray-900">
+                        <td className="py-3 px-4 font-medium text-ink">
                           {record.name || record.email}
                         </td>
-                        <td className="py-3 px-4 text-gray-600 text-sm">
+                        <td className="py-3 px-4 text-mute text-sm">
                           {record.email}
                         </td>
-                        <td className="py-3 px-4 text-right font-semibold text-gray-900">
+                        <td className="py-3 px-4 text-right font-mono font-semibold text-ink">
                           {record.orderCount}
                         </td>
-                        <td className="py-3 px-4 text-right font-semibold text-gray-900">
+                        <td className="py-3 px-4 text-right font-mono font-semibold text-ink">
                           {Math.round(record.totalValue).toLocaleString('cs-CZ')} Kč
                         </td>
                       </tr>
@@ -413,8 +413,8 @@ export default function DataPreview({ data, columnMapping, clvSettings, onClvSet
             </div>
 
             {filters.manualExcludeEmails.length > 0 && (
-              <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg">
-                <p className="text-sm font-semibold text-red-900">
+              <div className="mt-4 p-4 bg-red-50 border border-red-600/40">
+                <p className="text-sm font-semibold text-red-700">
                   🗑️ Vyloučeno: {filters.manualExcludeEmails.length} zákazníků
                 </p>
               </div>
@@ -431,10 +431,10 @@ export default function DataPreview({ data, columnMapping, clvSettings, onClvSet
         </div>
 
         {/* Info box */}
-        <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 sm:p-6 mb-4 sm:mb-6">
+        <div className="bg-cream-deep border border-black/10 p-4 sm:p-6 mb-4 sm:mb-6">
           <div className="flex items-start gap-2 sm:gap-3">
-            <AlertCircle className="text-blue-600 flex-shrink-0 mt-0.5" size={18} />
-            <div className="text-xs sm:text-sm text-blue-900">
+            <AlertCircle className="text-ink flex-shrink-0 mt-0.5" size={18} />
+            <div className="text-xs sm:text-sm text-ink-soft">
               <p className="font-semibold mb-2">💡 Důležité:</p>
               <ul className="space-y-1 list-disc list-inside">
                 <li>Testovací objednávky často mají vysoké hodnoty (statisíce Kč)</li>
@@ -450,13 +450,13 @@ export default function DataPreview({ data, columnMapping, clvSettings, onClvSet
         <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
           <button
             onClick={onCancel}
-            className="flex-1 px-4 sm:px-6 py-3 sm:py-4 bg-gray-100 hover:bg-gray-200 active:bg-gray-300 text-gray-700 rounded-lg sm:rounded-xl font-semibold transition-colors min-h-[52px] text-base"
+            className="btn-brand btn-outline-ink flex-1 min-h-[52px]"
           >
             ← Nahrát jiný soubor
           </button>
           <button
             onClick={() => onConfirm(filters)}
-            className="flex-1 px-4 sm:px-6 py-3 sm:py-4 bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white rounded-lg sm:rounded-xl font-semibold transition-colors shadow-lg min-h-[52px] text-base"
+            className="btn-brand btn-ink flex-1 min-h-[52px]"
           >
             Pokračovat v analýze
             {filters.manualExcludeEmails.length > 0 &&

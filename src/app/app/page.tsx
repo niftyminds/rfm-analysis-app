@@ -157,21 +157,21 @@ export default function Home() {
   };
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 flex flex-col">
+    <main className="min-h-screen bg-cream flex flex-col">
       {/* Header */}
-      <header className="bg-white border-b border-gray-200 shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
+      <header className="bg-cream border-b border-line">
+        <div className="max-w-page mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
           <div className="flex items-center justify-between gap-3 sm:gap-6">
             {/* Left: Title */}
             <div className="flex-1 min-w-0">
-              <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 truncate">RFM Analýza</h1>
-              <p className="text-sm sm:text-base text-gray-600 mt-1 hidden sm:block">Zákaznická segmentace & marketing insights</p>
+              <h1 className="text-xl sm:text-2xl lg:text-3xl font-black uppercase tracking-tight text-ink truncate">RFM Analýza</h1>
+              <p className="text-sm sm:text-base text-mute mt-1 hidden sm:block">Zákaznická segmentace & marketing insights</p>
             </div>
 
             {/* Center: Home Icon */}
             <Link
               href="/"
-              className="group flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 bg-indigo-50 hover:bg-indigo-100 text-indigo-600 hover:text-indigo-700 rounded-xl transition-all hover:scale-110 shadow-sm hover:shadow-md flex-shrink-0"
+              className="group flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 bg-card border border-black/10 text-ink hover:bg-lime transition-colors duration-200 ease-brand flex-shrink-0"
               title="Zpět na hlavní stránku"
             >
               <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -192,7 +192,7 @@ export default function Home() {
       </header>
 
       {/* Content */}
-      <div className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="flex-1 max-w-page w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {step === 'upload' && (
           <FileUpload onCSVLoaded={handleCSVLoaded} setLoading={setLoading} />
         )}
@@ -224,34 +224,34 @@ export default function Home() {
 
       {/* Loading Overlay with Progress Bar */}
       {loading && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full">
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <div className="bg-card border border-black/10 p-8 max-w-md w-full">
             {/* Icon */}
             <div className="flex justify-center mb-6">
               <div className="relative">
-                <div className="w-20 h-20 bg-indigo-100 rounded-full flex items-center justify-center">
-                  <svg className="w-10 h-10 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="w-20 h-20 bg-cream-deep rounded-full flex items-center justify-center">
+                  <svg className="w-10 h-10 text-ink" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                   </svg>
                 </div>
                 {/* Rotating ring */}
-                <div className="absolute inset-0 border-4 border-transparent border-t-indigo-600 rounded-full animate-spin"></div>
+                <div className="absolute inset-0 border-4 border-transparent border-t-ink rounded-full animate-spin"></div>
               </div>
             </div>
 
             {/* Text */}
             <div className="text-center space-y-4">
-              <h3 className="text-2xl font-bold text-gray-900">
+              <h3 className="text-2xl font-black uppercase tracking-tight text-ink">
                 Zpracovávám RFM analýzu
               </h3>
 
               {/* Progress percentage */}
-              <div className="text-4xl font-bold text-indigo-600">
+              <div className="text-4xl font-black text-ink tracking-tight font-mono">
                 {Math.round(processingProgress)}%
               </div>
 
               {/* Phase indicator */}
-              <div className="text-sm font-medium text-gray-600">
+              <div className="text-sm font-medium text-mute font-mono">
                 {processingPhase === 'aggregation' && '📊 Agregace objednávek...'}
                 {processingPhase === 'customer_creation' && '👥 Vytváření zákazníků...'}
                 {processingPhase === 'rfm_scoring' && '🎯 Výpočet RFM skóre...'}
@@ -260,28 +260,28 @@ export default function Home() {
               </div>
 
               {/* Progress bar */}
-              <div className="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
+              <div className="w-full bg-cream-deep h-3 overflow-hidden">
                 <div
-                  className="h-full bg-gradient-to-r from-indigo-500 to-purple-600 transition-all duration-300 ease-out"
+                  className="h-full bg-lime-deep transition-all duration-300 ease-brand"
                   style={{ width: `${processingProgress}%` }}
                 ></div>
               </div>
 
               {/* Data info */}
-              <p className="text-sm text-gray-500 mt-4">
+              <p className="text-sm text-mute mt-4">
                 Zpracovávám {csvData.length.toLocaleString('cs-CZ')} řádků dat
               </p>
 
               {/* Animated dots */}
-              <div className="flex items-center justify-center gap-2 text-sm text-gray-400">
+              <div className="flex items-center justify-center gap-2 text-sm text-mute">
                 <div className="flex gap-1">
-                  <span className="w-2 h-2 bg-indigo-600 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></span>
-                  <span className="w-2 h-2 bg-indigo-600 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></span>
-                  <span className="w-2 h-2 bg-indigo-600 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></span>
+                  <span className="w-2 h-2 bg-ink rounded-full"></span>
+                  <span className="w-2 h-2 bg-ink rounded-full"></span>
+                  <span className="w-2 h-2 bg-ink rounded-full"></span>
                 </div>
               </div>
 
-              <p className="text-xs text-gray-400 mt-2">
+              <p className="text-xs text-mute mt-2">
                 Web Worker zajišťuje plynulý chod prohlížeče
               </p>
             </div>

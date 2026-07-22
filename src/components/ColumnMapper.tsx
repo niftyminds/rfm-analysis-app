@@ -108,14 +108,14 @@ export default function ColumnMapper({ columns, previewData, onMapping, onBack }
 
   return (
     <div className="max-w-5xl mx-auto">
-      <div className="bg-white rounded-xl sm:rounded-2xl shadow-xl p-4 sm:p-6 lg:p-8">
+      <div className="card-brand p-4 sm:p-6 lg:p-8">
         {/* Header */}
         <div className="text-center mb-6 sm:mb-8">
-          <Table className="mx-auto h-12 w-12 sm:h-16 sm:w-16 text-indigo-600 mb-3 sm:mb-4" />
-          <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">
+          <Table className="mx-auto h-12 w-12 sm:h-16 sm:w-16 text-ink mb-3 sm:mb-4" />
+          <h2 className="text-xl sm:text-2xl font-black uppercase tracking-tight text-ink mb-2">
             Mapování sloupců CSV
           </h2>
-          <p className="text-sm sm:text-base text-gray-600">
+          <p className="text-sm sm:text-base text-mute">
             Přiřaďte sloupce z vašeho CSV souboru k požadovaným polím
           </p>
         </div>
@@ -123,31 +123,31 @@ export default function ColumnMapper({ columns, previewData, onMapping, onBack }
         {/* Column Mapping Form */}
         <div className="space-y-4 sm:space-y-6 mb-6 sm:mb-8">
           {fields.map(field => (
-            <div key={field.key} className="border border-gray-200 rounded-lg p-4">
-              <label className="block text-sm font-semibold text-gray-900 mb-1">
+            <div key={field.key} className="border border-black/10 p-4">
+              <label className="block font-mono text-xs uppercase tracking-[0.14em] text-ink mb-1">
                 {field.label}
               </label>
-              <p className="text-xs text-gray-600 mb-3">{field.description}</p>
+              <p className="text-xs text-mute mb-3">{field.description}</p>
               <select
                 value={mapping[field.key]}
                 onChange={(e) => handleChange(field.key, e.target.value)}
-                className="w-full px-4 py-3 sm:py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-base min-h-[48px] sm:min-h-0 text-gray-900"
+                className="w-full px-4 py-3 sm:py-2 bg-card border border-black/10 focus:ring-1 focus:ring-ink focus:border-ink text-base min-h-[48px] sm:min-h-0 text-ink"
               >
-                <option value="" className="text-gray-700">-- Vyberte sloupec --</option>
+                <option value="" className="text-ink-soft">-- Vyberte sloupec --</option>
                 {columns.map(col => (
-                  <option key={col} value={col} className="text-gray-900">{col}</option>
+                  <option key={col} value={col} className="text-ink">{col}</option>
                 ))}
               </select>
 
               {/* Preview */}
               {mapping[field.key] && previewData.length > 0 && (
-                <div className="mt-3 bg-gray-50 rounded-md p-3">
-                  <p className="text-xs font-medium text-gray-700 mb-2">Náhled dat:</p>
+                <div className="mt-3 bg-cream-deep p-3">
+                  <p className="font-mono text-[11px] uppercase tracking-[0.14em] text-mute mb-2">Náhled dat:</p>
                   <div className="space-y-1">
                     {previewData.slice(0, 3).map((row, idx) => {
                       const columnName = mapping[field.key] as string;
                       return (
-                        <p key={idx} className="text-xs text-gray-600 truncate">
+                        <p key={idx} className="text-xs text-ink-soft truncate">
                           {row[columnName] || '(prázdné)'}
                         </p>
                       );
@@ -160,11 +160,11 @@ export default function ColumnMapper({ columns, previewData, onMapping, onBack }
 
         {/* Additional Fields Selection */}
         {availableAdditionalColumns.length > 0 && (
-          <div className="mt-8 border-t border-gray-200 pt-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">
+          <div className="mt-8 border-t border-line pt-6">
+            <h3 className="text-lg font-black uppercase tracking-tight text-ink mb-2">
               Dodatečné sloupce (volitelné)
             </h3>
-            <p className="text-sm text-gray-600 mb-4">
+            <p className="text-sm text-mute mb-4">
               Vyberte další sloupce z CSV, které chcete zahrnout do analýzy
             </p>
 
@@ -172,22 +172,22 @@ export default function ColumnMapper({ columns, previewData, onMapping, onBack }
               {availableAdditionalColumns.map(col => (
                 <label
                   key={col}
-                  className="flex items-center gap-2 p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors"
+                  className="flex items-center gap-2 p-3 border border-black/10 hover:bg-cream-deep cursor-pointer transition-colors duration-200 ease-brand"
                 >
                   <input
                     type="checkbox"
                     checked={selectedAdditionalFields.has(col)}
                     onChange={() => toggleAdditionalField(col)}
-                    className="w-4 h-4 text-indigo-600 rounded focus:ring-indigo-500"
+                    className="w-4 h-4 accent-ink"
                   />
-                  <span className="text-sm text-gray-900">{col}</span>
+                  <span className="text-sm text-ink">{col}</span>
                 </label>
               ))}
             </div>
 
             {selectedAdditionalFields.size > 0 && (
-              <div className="mt-4 p-3 bg-indigo-50 border border-indigo-200 rounded-lg">
-                <p className="text-sm font-semibold text-indigo-900">
+              <div className="mt-4 p-3 bg-lime/20 border border-black/10">
+                <p className="text-sm font-semibold text-ink">
                   ✓ Vybráno: {selectedAdditionalFields.size} dodatečných sloupců
                 </p>
               </div>
@@ -198,11 +198,11 @@ export default function ColumnMapper({ columns, previewData, onMapping, onBack }
 
         {/* Errors */}
         {errors.length > 0 && (
-          <div className="mb-6 bg-red-50 border border-red-200 rounded-lg p-4">
+          <div className="mb-6 bg-card border border-red-600/40 p-4">
             <div className="flex items-start gap-3">
               <AlertCircle className="text-red-600 flex-shrink-0 mt-0.5" size={20} />
               <div>
-                <p className="text-sm font-semibold text-red-800 mb-1">Chyba v mapování:</p>
+                <p className="text-sm font-semibold text-red-700 mb-1">Chyba v mapování:</p>
                 <ul className="text-sm text-red-700 space-y-1">
                   {errors.map((error, idx) => (
                     <li key={idx}>• {error}</li>
@@ -214,39 +214,39 @@ export default function ColumnMapper({ columns, previewData, onMapping, onBack }
         )}
 
         {/* Preview Table */}
-        <div className="mb-8 bg-blue-50 border border-blue-200 rounded-lg p-4">
-          <h3 className="font-semibold text-blue-900 mb-3">Náhled CSV dat (první 3 řádky):</h3>
+        <div className="mb-8 bg-cream-deep border border-black/10 p-4">
+          <h3 className="font-black uppercase tracking-tight text-ink mb-3">Náhled CSV dat (první 3 řádky):</h3>
           <div className="overflow-x-auto">
             <table className="min-w-full text-xs">
               <thead>
-                <tr className="border-b border-blue-300">
+                <tr className="border-b border-black/10">
                   {columns.slice(0, 6).map(col => (
-                    <th key={col} className="text-left py-2 px-2 font-semibold text-blue-900">
+                    <th key={col} className="text-left py-2 px-2 font-mono text-[11px] uppercase tracking-[0.14em] text-mute">
                       {col}
                     </th>
                   ))}
                   {columns.length > 6 && (
-                    <th className="text-left py-2 px-2 font-semibold text-blue-900">...</th>
+                    <th className="text-left py-2 px-2 font-mono text-[11px] uppercase tracking-[0.14em] text-mute">...</th>
                   )}
                 </tr>
               </thead>
               <tbody>
                 {previewData.slice(0, 3).map((row, idx) => (
-                  <tr key={idx} className="border-b border-blue-200">
+                  <tr key={idx} className="border-b border-line">
                     {columns.slice(0, 6).map(col => (
-                      <td key={col} className="py-2 px-2 text-blue-800">
+                      <td key={col} className="py-2 px-2 text-ink-soft">
                         {row[col] || '-'}
                       </td>
                     ))}
                     {columns.length > 6 && (
-                      <td className="py-2 px-2 text-blue-800">...</td>
+                      <td className="py-2 px-2 text-ink-soft">...</td>
                     )}
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
-          <p className="text-xs text-blue-700 mt-2">
+          <p className="text-xs font-mono text-mute mt-2">
             Celkem sloupců: {columns.length} | Celkem řádků: {previewData.length}
           </p>
         </div>
@@ -255,13 +255,13 @@ export default function ColumnMapper({ columns, previewData, onMapping, onBack }
         <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-3">
           <button
             onClick={onBack}
-            className="px-6 py-3 sm:py-2 bg-gray-100 hover:bg-gray-200 active:bg-gray-300 text-gray-700 hover:text-gray-900 font-semibold transition-colors text-center min-h-[48px] sm:min-h-0 rounded-lg"
+            className="btn-brand btn-outline-ink min-h-[48px] sm:min-h-0"
           >
             ← Zpět
           </button>
           <button
             onClick={validateAndSubmit}
-            className="flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white px-6 sm:px-8 py-3 rounded-lg font-semibold transition-colors shadow-lg min-h-[52px] text-base"
+            className="btn-brand btn-ink min-h-[52px]"
           >
             Analyzovat data
             <ArrowRight size={20} />

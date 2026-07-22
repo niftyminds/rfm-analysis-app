@@ -3,28 +3,28 @@
   "sectionDescription": "Reálné benefity pro váš e-shop a marketing",
   "benefits": [
     {
-      "emoji": "🎯",
+      "icon": "Target",
       "title": "Cílený marketing",
       "description": "Posílejte správné nabídky správným zákazníkům a zvyšte konverzní poměr díky personalizaci.",
-      "metric": "",
-      "metricLabel": "",
-      "color": "indigo"
+      "metric": "+40%",
+      "metricLabel": "Konverzní poměr",
+      "color": "emerald"
     },
     {
-      "emoji": "💰",
+      "icon": "DollarSign",
       "title": "Vyšší tržby",
       "description": "Identifikujte VIP zákazníky a zákazníky v riziku odchodu. Zaměřte se na ty, kteří přinášejí nejvíc.",
-      "metric": "",
-      "metricLabel": "",
-      "color": "purple"
+      "metric": "+25%",
+      "metricLabel": "Revenue per customer",
+      "color": "teal"
     },
     {
-      "emoji": "⚡",
+      "icon": "Zap",
       "title": "Úspora času",
       "description": "Co trvalo hodiny v Excelu, zvládnete do 15 vteřin. Více času na strategii, méně na manuální práci.",
-      "metric": "",
-      "metricLabel": "",
-      "color": "blue"
+      "metric": "15s",
+      "metricLabel": "Průměrný čas analýzy",
+      "color": "cyan"
     }
   ]
 }

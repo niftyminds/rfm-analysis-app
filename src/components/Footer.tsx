@@ -5,13 +5,22 @@ export default function Footer() {
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer className="bg-white border-t border-gray-200 mt-auto">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+    <footer className="bg-ink text-cream mt-auto">
+      <div className="max-w-page mx-auto px-5 md:px-8 py-12 md:py-16">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-10 md:gap-8">
           {/* Brand */}
           <div>
-            <h3 className="text-lg font-bold text-gray-900 mb-3">RFM Analýza</h3>
-            <p className="text-sm text-gray-600 leading-relaxed">
+            <div className="font-black tracking-tight text-xl mb-3">
+              RFM Analýza
+            </div>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/logo-niftyminds.svg"
+              alt="nifty — minds"
+              className="h-[17px] w-auto invert mb-5"
+            />
+
+            <p className="text-sm text-cream/60 leading-relaxed max-w-xs">
               Moderní nástroj pro segmentaci zákazníků pomocí RFM analýzy.
               Zpracování dat probíhá pouze ve vašem prohlížeči bez ukládání na serverech.
             </p>
@@ -19,12 +28,14 @@ export default function Footer() {
 
           {/* Právní odkazy */}
           <div>
-            <h3 className="text-lg font-bold text-gray-900 mb-3">Právní informace</h3>
-            <ul className="space-y-2">
+            <h3 className="font-mono text-[11px] uppercase tracking-[0.16em] text-cream/40 mb-5">
+              Právní informace
+            </h3>
+            <ul className="space-y-3">
               <li>
                 <Link
                   href="/terms"
-                  className="text-sm text-gray-600 hover:text-indigo-600 transition-colors"
+                  className="text-sm text-cream/70 hover:text-lime transition-colors duration-200 ease-brand"
                 >
                   Podmínky používání
                 </Link>
@@ -32,7 +43,7 @@ export default function Footer() {
               <li>
                 <Link
                   href="/privacy"
-                  className="text-sm text-gray-600 hover:text-indigo-600 transition-colors"
+                  className="text-sm text-cream/70 hover:text-lime transition-colors duration-200 ease-brand"
                 >
                   Ochrana osobních údajů
                 </Link>
@@ -42,24 +53,26 @@ export default function Footer() {
 
           {/* Kontakt */}
           <div>
-            <h3 className="text-lg font-bold text-gray-900 mb-3">Kontakt</h3>
-            <ul className="space-y-2 text-sm text-gray-600">
+            <h3 className="font-mono text-[11px] uppercase tracking-[0.16em] text-cream/40 mb-5">
+              Kontakt
+            </h3>
+            <ul className="space-y-3 text-sm">
               <li>
                 <a
-                  href="mailto:info@niftyminds.agency"
-                  className="hover:text-indigo-600 transition-colors"
+                  href="mailto:hello@niftyminds.cz"
+                  className="text-cream/70 hover:text-lime transition-colors duration-200 ease-brand"
                 >
-                  info@niftyminds.agency
+                  hello@niftyminds.cz
                 </a>
               </li>
               <li>
                 <a
-                  href="https://niftyminds.agency"
+                  href="https://www.niftyminds.cz"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="hover:text-indigo-600 transition-colors"
+                  className="text-cream/70 hover:text-lime transition-colors duration-200 ease-brand"
                 >
-                  niftyminds.agency
+                  www.niftyminds.cz
                 </a>
               </li>
             </ul>
@@ -67,18 +80,18 @@ export default function Footer() {
         </div>
 
         {/* Copyright */}
-        <div className="mt-8 pt-8 border-t border-gray-200">
-          <div className="flex flex-col md:flex-row justify-between items-center gap-2 md:gap-4">
-            <p className="text-sm text-gray-600 text-center md:text-left">
-              © {currentYear} NiftyMinds Agency. Všechna práva vyhrazena.
+        <div className="mt-12 pt-8 border-t border-white/10">
+          <div className="flex flex-col md:flex-row justify-between items-center gap-3 md:gap-4">
+            <p className="font-mono text-[11px] uppercase tracking-[0.14em] text-cream/40 text-center md:text-left">
+              © {currentYear} HNK CZ s.r.o. · Všechna práva vyhrazena
             </p>
-            <p className="text-sm text-gray-500 text-center md:text-right">
+            <p className="font-mono text-[11px] uppercase tracking-[0.14em] text-cream/40 text-center md:text-right">
               Powered by{' '}
               <a
                 href="https://niftyminds.cz/?utm_source=rfm-analysis&utm_medium=app"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-indigo-600 font-semibold hover:text-indigo-700 transition-colors underline"
+                className="text-lime hover:text-lime-deep transition-colors duration-200"
               >
                 niftyminds.cz
               </a>

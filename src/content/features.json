@@ -6,37 +6,37 @@
       "icon": "Upload",
       "title": "Jednoduchý CSV import",
       "description": "Nahrajte CSV soubor z vašeho e-shopu (Shopify, WooCommerce, vlastní systém). Podporujeme všechny běžné formáty.",
-      "color": "indigo"
+      "color": "emerald"
     },
     {
       "icon": "Zap",
       "title": "Automatická RFM segmentace",
       "description": "Algoritmus automaticky vypočítá Recency, Frequency a Monetary skóre pro každého zákazníka a přiřadí segmenty.",
-      "color": "purple"
+      "color": "teal"
     },
     {
       "icon": "BarChart3",
       "title": "Interaktivní dashboard",
       "description": "Vizualizace dat pomocí grafů a tabulek. Filtrujte zákazníky podle segmentů, hodnoty nebo aktivity.",
-      "color": "blue"
+      "color": "cyan"
     },
     {
-      "icon": "Download",
+      "icon": "FileSpreadsheet",
       "title": "Export do Google Sheets",
       "description": "Exportujte výsledky přímo do Google Sheets pro další práci s daty a sdílení s týmem.",
-      "color": "green"
+      "color": "emerald"
     },
     {
-      "icon": "Shield",
+      "icon": "ShieldCheck",
       "title": "100% soukromí dat",
       "description": "Vaše data se zpracovávají pouze ve vašem prohlížeči. Neukládáme je na servery ani je nesdílíme.",
-      "color": "red"
+      "color": "rose"
     },
     {
       "icon": "Sparkles",
       "title": "Zdarma bez omezení",
       "description": "Plná funkčnost zdarma. Bez registrace, bez limitů na počet zákazníků nebo analýz.",
-      "color": "yellow"
+      "color": "amber"
     }
   ]
 }

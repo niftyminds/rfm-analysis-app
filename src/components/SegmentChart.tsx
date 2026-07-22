@@ -23,6 +23,8 @@ const SEGMENT_COLORS: Record<string, string> = {
   'Lost': '#6b7280'
 };
 
+const MONO_TICK = { fill: '#6B6760', fontSize: 11, fontFamily: 'var(--font-jetbrains-mono), monospace' };
+
 export default function SegmentChart({ segments, total, selectedSegments = [], onSegmentClick, filteredCount }: SegmentChartProps) {
   const data = Object.entries(segments)
     .map(([name, count]) => ({
@@ -39,38 +41,38 @@ export default function SegmentChart({ segments, total, selectedSegments = [], o
   };
 
   return (
-    <div className="bg-white rounded-2xl shadow-xl p-8">
-      <h2 className="text-2xl font-bold text-gray-900 mb-6">Segmentace zákazníků</h2>
-      
+    <div className="card-brand p-8">
+      <h2 className="text-2xl font-black uppercase tracking-tight text-ink mb-6">Segmentace zákazníků</h2>
+
       <div className="h-96 mb-8">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={data}>
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis 
-              dataKey="name" 
+            <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.08)" />
+            <XAxis
+              dataKey="name"
               angle={-45}
               textAnchor="end"
               height={120}
               interval={0}
-              style={{ fontSize: '12px' }}
+              tick={MONO_TICK}
             />
-            <YAxis />
-            <Tooltip 
+            <YAxis tick={MONO_TICK} />
+            <Tooltip
               content={({ active, payload }) => {
                 if (active && payload && payload.length) {
                   const data = payload[0].payload;
                   return (
-                    <div className="bg-white p-4 rounded-lg shadow-lg border border-gray-200">
-                      <p className="font-semibold text-gray-900">{data.name}</p>
-                      <p className="text-gray-600">Počet: {data.count}</p>
-                      <p className="text-gray-600">Podíl: {data.percentage}%</p>
+                    <div className="bg-card p-4 border border-black/10">
+                      <p className="font-bold text-ink">{data.name}</p>
+                      <p className="text-ink-soft font-mono text-sm">Počet: {data.count}</p>
+                      <p className="text-ink-soft font-mono text-sm">Podíl: {data.percentage}%</p>
                     </div>
                   );
                 }
                 return null;
               }}
             />
-            <Bar dataKey="count" radius={[8, 8, 0, 0]}>
+            <Bar dataKey="count">
               {data.map((entry, index) => (
                 <Cell key={`cell-${index}`} fill={SEGMENT_COLORS[entry.name] || '#6b7280'} />
               ))}
@@ -80,14 +82,14 @@ export default function SegmentChart({ segments, total, selectedSegments = [], o
       </div>
 
       {/* Instrukční box */}
-      <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+      <div className="mb-6 p-4 bg-cream-deep border border-line">
         <div className="flex items-start gap-3">
-          <div className="text-blue-600 text-xl">💡</div>
+          <div className="text-xl">💡</div>
           <div>
-            <p className="text-sm text-blue-900 font-medium">
+            <p className="text-sm text-ink font-medium">
               Klikněte na 1 nebo více karet pro výběr segmentů
             </p>
-            <p className="text-xs text-blue-700 mt-1">
+            <p className="text-xs text-mute mt-1">
               Vybrané segmenty budou zobrazeny v tabulce a budete je moci exportovat do CSV
             </p>
           </div>
@@ -104,22 +106,21 @@ export default function SegmentChart({ segments, total, selectedSegments = [], o
             <div
               key={segment.name}
               onClick={() => handleCardClick(segment.name)}
-              className={`relative rounded-xl p-4 border-2 transition-all duration-200 cursor-pointer ${
+              className={`relative p-4 border-2 transition-all duration-200 ease-brand cursor-pointer ${
                 isActive
-                  ? 'border-4 shadow-xl ring-2 ring-offset-2 scale-105'
-                  : 'hover:scale-105 hover:shadow-lg'
+                  ? 'border-4'
+                  : 'hover:-translate-y-0.5'
               }`}
               style={{
                 borderColor: color,
-                backgroundColor: isActive ? `${color}20` : `${color}15`,
-                ...(isActive && { '--tw-ring-color': color } as any)
+                backgroundColor: isActive ? `${color}20` : `${color}15`
               }}
               title="Klikni pro filtrování"
             >
               {/* Checkmark badge */}
               {isActive && (
                 <div
-                  className="absolute top-2 right-2 bg-white rounded-full p-1 shadow-md"
+                  className="absolute top-2 right-2 bg-card p-1"
                   style={{ borderColor: color, borderWidth: '2px' }}
                 >
                   <Check className="w-4 h-4" style={{ color }} />
@@ -130,18 +131,18 @@ export default function SegmentChart({ segments, total, selectedSegments = [], o
                 <span className={isActive ? 'font-bold' : 'font-semibold'} style={{ color }}>
                   {segment.name}
                 </span>
-                <span className="text-2xl font-bold" style={{ color }}>{segment.count}</span>
+                <span className="text-2xl font-black tracking-tight" style={{ color }}>{segment.count}</span>
               </div>
-              <div className="mt-2 bg-white bg-opacity-50 rounded-full h-2">
+              <div className="mt-2 bg-card h-2">
                 <div
-                  className="rounded-full h-2 transition-all duration-500"
+                  className="h-2 transition-all duration-500 ease-brand"
                   style={{
                     width: `${segment.percentage}%`,
                     backgroundColor: color
                   }}
                 ></div>
               </div>
-              <p className="text-sm mt-1 font-medium" style={{ color }}>{segment.percentage}%</p>
+              <p className="text-sm mt-1 font-mono font-medium" style={{ color }}>{segment.percentage}%</p>
             </div>
           );
         })}
@@ -149,17 +150,17 @@ export default function SegmentChart({ segments, total, selectedSegments = [], o
 
       {/* Status bar */}
       {selectedSegments.length > 0 && (
-        <div className="mt-6 p-4 bg-indigo-50 border border-indigo-200 rounded-lg">
+        <div className="mt-6 p-4 bg-cream-deep border border-line">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2">
             <div className="flex items-center gap-2 flex-wrap">
-              <span className="text-sm font-semibold text-indigo-900">
+              <span className="text-sm font-semibold text-ink">
                 → Vybráno: {selectedSegments.length} {selectedSegments.length === 1 ? 'segment' : selectedSegments.length < 5 ? 'segmenty' : 'segmentů'}
               </span>
               <div className="flex gap-1 flex-wrap">
                 {selectedSegments.map(seg => (
                   <span
                     key={seg}
-                    className="px-2 py-1 bg-white rounded text-xs font-medium border"
+                    className="px-2 py-1 bg-card text-xs font-medium border"
                     style={{
                       color: SEGMENT_COLORS[seg] || '#6b7280',
                       borderColor: SEGMENT_COLORS[seg] || '#6b7280'
@@ -171,7 +172,7 @@ export default function SegmentChart({ segments, total, selectedSegments = [], o
               </div>
             </div>
             {filteredCount !== undefined && (
-              <span className="text-sm text-indigo-700">
+              <span className="text-sm text-mute font-mono">
                 Zobrazeno {filteredCount.toLocaleString('cs-CZ')} z {total.toLocaleString('cs-CZ')} zákazníků
               </span>
             )}

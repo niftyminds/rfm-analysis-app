@@ -31,21 +31,21 @@ export default function CLVSettingsComponent({ settings, onSettingsChange }: CLV
   };
 
   return (
-    <div className="bg-gradient-to-br from-emerald-50 to-teal-50 rounded-xl p-6 border-2 border-emerald-200">
+    <div className="bg-cream-deep p-6 border border-black/10">
       <div className="flex items-center gap-3 mb-4">
-        <div className="bg-emerald-600 rounded-lg p-2">
-          <DollarSign className="text-white" size={24} />
+        <div className="bg-ink p-2">
+          <DollarSign className="text-lime" size={24} />
         </div>
         <div>
-          <h3 className="text-lg font-bold text-gray-900">CLV Nastavení</h3>
-          <p className="text-sm text-gray-600">Konfigurace predikce Customer Lifetime Value</p>
+          <h3 className="text-lg font-black uppercase tracking-tight text-ink">CLV Nastavení</h3>
+          <p className="text-sm text-mute">Konfigurace predikce Customer Lifetime Value</p>
         </div>
       </div>
 
       <div className="space-y-4">
         {/* Profit Margin */}
-        <div className="bg-white rounded-lg p-4 shadow-sm">
-          <label className="block text-sm font-semibold text-gray-700 mb-2">
+        <div className="bg-card p-4 border border-black/10">
+          <label className="block text-sm font-semibold text-ink-soft mb-2">
             Profit Margin (zisková marže)
           </label>
           <div className="flex items-center gap-4">
@@ -56,22 +56,22 @@ export default function CLVSettingsComponent({ settings, onSettingsChange }: CLV
               step="5"
               value={settings.profitMargin * 100}
               onChange={(e) => handleProfitMarginChange(Number(e.target.value))}
-              className="flex-1 h-2 bg-emerald-200 rounded-lg appearance-none cursor-pointer accent-emerald-600"
+              className="flex-1 h-2 bg-cream-deep appearance-none cursor-pointer accent-ink"
             />
-            <div className="bg-emerald-100 rounded-lg px-4 py-2 min-w-[80px] text-center">
-              <span className="text-2xl font-bold text-emerald-700">
+            <div className="bg-lime px-4 py-2 min-w-[80px] text-center">
+              <span className="text-2xl font-black tracking-tight text-ink">
                 {(settings.profitMargin * 100).toFixed(0)}%
               </span>
             </div>
           </div>
-          <p className="text-xs text-gray-500 mt-2">
+          <p className="text-xs text-mute mt-2">
             Jaká část z tržeb je čistý zisk? Typicky 20-40% pro e-commerce.
           </p>
         </div>
 
         {/* Projection Months */}
-        <div className="bg-white rounded-lg p-4 shadow-sm">
-          <label className="block text-sm font-semibold text-gray-700 mb-2">
+        <div className="bg-card p-4 border border-black/10">
+          <label className="block text-sm font-semibold text-ink-soft mb-2">
             Projekce na měsíců
           </label>
           <div className="grid grid-cols-4 gap-2">
@@ -79,36 +79,36 @@ export default function CLVSettingsComponent({ settings, onSettingsChange }: CLV
               <button
                 key={months}
                 onClick={() => handleProjectionMonthsChange(months)}
-                className={`py-3 px-4 rounded-lg font-semibold transition-all ${
+                className={`py-3 px-4 font-mono font-semibold transition-all duration-200 ease-brand ${
                   settings.projectionMonths === months
-                    ? 'bg-emerald-600 text-white shadow-lg scale-105'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    ? 'bg-lime text-ink'
+                    : 'bg-cream-deep text-ink-soft hover:bg-lime-deep'
                 }`}
               >
                 {months}
               </button>
             ))}
           </div>
-          <p className="text-xs text-gray-500 mt-2">
+          <p className="text-xs text-mute mt-2">
             Predikce budoucí hodnoty zákazníka na vybraný počet měsíců.
           </p>
         </div>
 
         {/* Churn Analysis Toggle */}
-        <div className="bg-white rounded-lg p-4 shadow-sm">
+        <div className="bg-card p-4 border border-black/10">
           <div className="flex items-start gap-3">
             <input
               type="checkbox"
               id="churnAnalysis"
               checked={settings.includeChurnAnalysis}
               onChange={handleChurnAnalysisToggle}
-              className="mt-1 w-5 h-5 text-emerald-600 rounded focus:ring-emerald-500 cursor-pointer"
+              className="mt-1 w-5 h-5 accent-ink focus:ring-ink cursor-pointer"
             />
             <div className="flex-1">
-              <label htmlFor="churnAnalysis" className="block text-sm font-semibold text-gray-700 cursor-pointer">
+              <label htmlFor="churnAnalysis" className="block text-sm font-semibold text-ink-soft cursor-pointer">
                 Zahrnout analýzu churn rizika
               </label>
-              <p className="text-xs text-gray-500 mt-1">
+              <p className="text-xs text-mute mt-1">
                 Vypočítá pravděpodobnost odchodu zákazníka na základě recency a průměrného intervalu mezi objednávkami.
               </p>
             </div>
@@ -117,14 +117,14 @@ export default function CLVSettingsComponent({ settings, onSettingsChange }: CLV
       </div>
 
       {/* Info Box */}
-      <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+      <div className="mt-4 p-3 bg-card border border-line">
         <div className="flex items-start gap-2">
-          <AlertCircle className="text-blue-600 flex-shrink-0 mt-0.5" size={16} />
+          <AlertCircle className="text-ink flex-shrink-0 mt-0.5" size={16} />
           <div>
-            <p className="text-xs text-blue-900 font-medium">
+            <p className="text-xs text-ink font-medium">
               Tato nastavení ovlivňují výpočet predikovaného CLV
             </p>
-            <p className="text-xs text-blue-700 mt-1">
+            <p className="text-xs text-mute mt-1">
               Po změně nastavení bude nutné znovu zpracovat data.
             </p>
           </div>

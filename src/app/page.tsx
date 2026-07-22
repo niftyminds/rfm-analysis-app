@@ -4,6 +4,8 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import * as LucideIcons from 'lucide-react';
+import Navigation from '@/components/Navigation';
+import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 
 // Import JSON content
 import homepageContent from '@/content/homepage.json';
@@ -11,196 +13,190 @@ import featuresContent from '@/content/features.json';
 import howItWorksContent from '@/content/how-it-works.json';
 import benefitsContent from '@/content/benefits.json';
 import faqContent from '@/content/faq.json';
-import settingsContent from '@/content/settings.json';
 
-// Icon mapping helper
-const iconMap: { [key: string]: React.ComponentType<any> } = {
+// Lucide icon mapping - using semantically appropriate icons
+const iconMap: Record<string, LucideIcons.LucideIcon> = {
   Upload: LucideIcons.Upload,
   Zap: LucideIcons.Zap,
   BarChart3: LucideIcons.BarChart3,
-  Download: LucideIcons.Download,
-  Shield: LucideIcons.Shield,
+  FileSpreadsheet: LucideIcons.FileSpreadsheet,
+  ShieldCheck: LucideIcons.ShieldCheck,
   Sparkles: LucideIcons.Sparkles,
-  Settings: LucideIcons.Settings,
+  Columns: LucideIcons.Columns,
   TrendingUp: LucideIcons.TrendingUp,
-  ChevronDown: LucideIcons.ChevronDown,
-  ChevronUp: LucideIcons.ChevronUp,
+  Target: LucideIcons.Target,
+  DollarSign: LucideIcons.DollarSign,
+  // Legacy names for backwards compat with JSON
+  Download: LucideIcons.FileSpreadsheet,
+  Shield: LucideIcons.ShieldCheck,
+  Settings: LucideIcons.Columns,
 };
 
-// Helper function to get icon component
-const getIcon = (iconName: string) => {
-  const Icon = iconMap[iconName];
-  return Icon ? <Icon className="w-6 h-6" /> : null;
-};
+// Shared reveal transition (800ms, brand easing, 18px rise)
+const revealClass = (isVisible: boolean) =>
+  `transition-all duration-[800ms] ease-brand ${
+    isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-[18px]'
+  }`;
 
 export default function LandingPage() {
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(null);
+
+  // Scroll animations for different sections
+  const featuresAnimation = useScrollAnimation({ threshold: 0.1 });
+  const howItWorksAnimation = useScrollAnimation({ threshold: 0.1 });
+  const benefitsAnimation = useScrollAnimation({ threshold: 0.1 });
+  const faqAnimation = useScrollAnimation({ threshold: 0.1 });
 
   const toggleFaq = (index: number) => {
     setOpenFaqIndex(openFaqIndex === index ? null : index);
   };
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-cream text-ink-soft">
+      {/* Navigation */}
+      <Navigation />
+
       {/* Hero Section */}
-      <section className="relative bg-gradient-to-br from-indigo-600 via-purple-600 to-indigo-700 text-white overflow-hidden">
-        {/* Decorative background */}
-        <div className="absolute inset-0 bg-grid-white/[0.05] bg-[size:60px_60px]" />
+      <section className="pt-14 md:pt-16 border-b border-line">
+        <div className="max-w-page mx-auto px-5 md:px-8 pt-14 sm:pt-20 md:pt-28 pb-16 md:pb-24">
+          {/* Badge */}
+          <div className="chip-mono mb-8">
+            <span className="w-1.5 h-1.5 bg-lime-deep" aria-hidden="true" />
+            {homepageContent.hero.badge}
+          </div>
 
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 py-16 sm:py-20 md:py-32">
-          <div className="flex flex-col md:grid md:grid-cols-2 gap-8 md:gap-12 md:items-center">
-            {/* Top: Badge + Heading (mobile order 1, desktop order 1) */}
-            <div className="text-center md:text-left order-1">
-              <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-full px-4 py-2 mb-6">
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                </svg>
-                <span className="text-sm font-medium">{homepageContent.hero.badge}</span>
-              </div>
-
-              <h1 className="text-3xl sm:text-4xl md:text-6xl font-bold mb-6 md:mb-8 leading-tight">
+          <div className="grid md:grid-cols-12 gap-10 md:gap-8 items-end">
+            <div className="md:col-span-7">
+              <h1 className="font-black uppercase text-ink tracking-[-0.03em] leading-[0.92] text-[clamp(2.75rem,8vw,6.5rem)]">
                 {homepageContent.hero.heading}
-                <br />
-                <span className="text-indigo-200">{homepageContent.hero.subheading}</span>
+                {homepageContent.hero.subheading && (
+                  <>
+                    <br />
+                    <span className="bg-lime px-2 md:px-3 box-decoration-clone">
+                      {homepageContent.hero.subheading}
+                    </span>
+                  </>
+                )}
               </h1>
-
-              {/* Description, CTA, Trust badges - shown on desktop only here */}
-              <div className="hidden md:block">
-                <p className="text-lg sm:text-xl md:text-2xl text-indigo-100 mb-8 leading-relaxed">
-                  {homepageContent.hero.description}
-                </p>
-
-                <div className="flex flex-col sm:flex-row gap-4 justify-center md:justify-start">
-                  <Link
-                    href={homepageContent.hero.primaryCta.link}
-                    className="group inline-flex items-center justify-center gap-2 bg-white text-indigo-600 px-6 sm:px-8 py-3 sm:py-4 rounded-xl font-bold text-base sm:text-lg shadow-xl hover:shadow-2xl hover:scale-105 transition-all"
-                  >
-                    <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                    </svg>
-                    {homepageContent.hero.primaryCta.text}
-                    <svg className="w-4 h-4 sm:w-5 sm:h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                    </svg>
-                  </Link>
-
-                  <a
-                    href={homepageContent.hero.secondaryCta.link}
-                    className="inline-flex items-center justify-center gap-2 bg-white/10 backdrop-blur-sm text-white px-6 sm:px-8 py-3 sm:py-4 rounded-xl font-bold text-base sm:text-lg border-2 border-white/30 hover:bg-white/20 transition-all"
-                  >
-                    {homepageContent.hero.secondaryCta.text}
-                  </a>
-                </div>
-
-                {/* Trust badges */}
-                <div className="mt-8 flex flex-wrap gap-4 sm:gap-6 justify-center md:justify-start text-sm text-indigo-200">
-                  {homepageContent.hero.trustBadges.map((badge, i) => (
-                    <div key={i} className="flex items-center gap-2">
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                      </svg>
-                      <span>{badge}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
             </div>
 
-            {/* Screenshot (mobile order 2, desktop order 2) */}
-            <div className="relative order-2">
-              <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-2 shadow-2xl border border-white/20">
-                <div className="bg-white rounded-xl p-2 sm:p-2.5 shadow-inner">
-                  <div className="aspect-video bg-gradient-to-br from-gray-100 to-gray-200 rounded-lg overflow-hidden">
-                    {homepageContent.hero.screenshot.src !== '/dashboard-preview.png' ? (
-                      <Image
-                        src={homepageContent.hero.screenshot.src}
-                        alt={homepageContent.hero.screenshot.alt}
-                        width={1920}
-                        height={1080}
-                        className="w-full h-full object-cover object-top rounded-lg"
-                      />
-                    ) : (
-                      <div className="text-center text-gray-400 px-4">
-                        <svg className="w-12 h-12 sm:w-16 sm:h-16 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                        </svg>
-                        <p className="text-xs sm:text-sm">{homepageContent.hero.screenshot.alt}</p>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
-
-              {/* Floating stats */}
-              <div className="absolute -bottom-4 -left-4 sm:-bottom-6 sm:-left-6 bg-white rounded-xl shadow-xl p-3 sm:p-4 animate-float hidden sm:block">
-                <div className="text-xs sm:text-sm text-gray-600">Champions</div>
-                <div className="text-xl sm:text-2xl font-bold text-green-600">142</div>
-              </div>
-
-              <div className="absolute -top-4 -right-4 sm:-top-6 sm:-right-6 bg-white rounded-xl shadow-xl p-3 sm:p-4 animate-float-delayed hidden sm:block">
-                <div className="text-xs sm:text-sm text-gray-600">At Risk</div>
-                <div className="text-xl sm:text-2xl font-bold text-orange-600">89</div>
-              </div>
-            </div>
-
-            {/* Bottom: Description + CTA + Trust badges (mobile only, order 3) */}
-            <div className="text-center md:hidden order-3">
-              <p className="text-lg sm:text-xl text-indigo-100 mb-8 leading-relaxed">
+            <div className="md:col-span-5">
+              <p className="text-[clamp(1.05rem,1.2vw,1.25rem)] leading-relaxed text-ink-soft max-w-xl">
                 {homepageContent.hero.description}
               </p>
 
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <div className="mt-8 flex flex-col sm:flex-row gap-3">
                 <Link
                   href={homepageContent.hero.primaryCta.link}
-                  className="group inline-flex items-center justify-center gap-2 bg-white text-indigo-600 px-6 sm:px-8 py-3 sm:py-4 rounded-xl font-bold text-base sm:text-lg shadow-xl hover:shadow-2xl hover:scale-105 transition-all"
+                  className="btn-brand btn-ink group"
                 >
-                  <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                  </svg>
                   {homepageContent.hero.primaryCta.text}
-                  <svg className="w-4 h-4 sm:w-5 sm:h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                  </svg>
+                  <LucideIcons.ArrowRight
+                    className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-200 ease-brand"
+                    aria-hidden="true"
+                  />
                 </Link>
-
                 <a
                   href={homepageContent.hero.secondaryCta.link}
-                  className="inline-flex items-center justify-center gap-2 bg-white/10 backdrop-blur-sm text-white px-6 sm:px-8 py-3 sm:py-4 rounded-xl font-bold text-base sm:text-lg border-2 border-white/30 hover:bg-white/20 transition-all"
+                  className="btn-brand btn-outline-ink"
                 >
                   {homepageContent.hero.secondaryCta.text}
                 </a>
               </div>
 
               {/* Trust badges */}
-              <div className="mt-8 flex flex-wrap gap-4 sm:gap-6 justify-center text-sm text-indigo-200">
+              <div className="mt-8 flex flex-wrap gap-2">
                 {homepageContent.hero.trustBadges.map((badge, i) => (
-                  <div key={i} className="flex items-center gap-2">
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                    </svg>
-                    <span>{badge}</span>
-                  </div>
+                  <span key={i} className="chip-mono text-mute">
+                    <LucideIcons.Check className="w-3 h-3 text-ink" aria-hidden="true" />
+                    {badge}
+                  </span>
                 ))}
               </div>
+            </div>
+          </div>
+
+          {/* Screenshot */}
+          <div className="relative mt-14 md:mt-20">
+            <div className="border border-black/10 bg-card">
+              {/* Top bar */}
+              <div className="flex items-center justify-between px-4 py-2.5 border-b border-line">
+                <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-mute">
+                  rfm-analyza.app
+                </span>
+                <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-mute hidden sm:inline">
+                  Dashboard · Live náhled
+                </span>
+              </div>
+
+              <div className="bg-cream-deep overflow-hidden">
+                {homepageContent.hero.screenshot.src !== '/dashboard-preview.png' ? (
+                  <Image
+                    src={homepageContent.hero.screenshot.src}
+                    alt={homepageContent.hero.screenshot.alt}
+                    width={1920}
+                    height={1080}
+                    className="w-full h-auto grayscale hover:grayscale-0 transition-[filter] duration-500 ease-brand"
+                  />
+                ) : (
+                  <div className="aspect-video text-center text-mute px-4 flex flex-col items-center justify-center h-full">
+                    <LucideIcons.BarChart3 className="w-12 h-12 sm:w-16 sm:h-16 mb-4" aria-hidden="true" />
+                    <p className="font-mono text-xs uppercase tracking-[0.14em]">
+                      {homepageContent.hero.screenshot.alt}
+                    </p>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Floating stats */}
+            <div className="absolute -bottom-5 left-4 sm:-left-4 card-brand px-4 py-3 hidden sm:block">
+              <div className="font-mono text-[10px] uppercase tracking-[0.16em] text-mute">Champions</div>
+              <div className="text-2xl font-black text-ink">142</div>
+            </div>
+            <div className="absolute -top-5 right-4 sm:-right-4 card-brand px-4 py-3 hidden sm:block">
+              <div className="font-mono text-[10px] uppercase tracking-[0.16em] text-mute">At Risk</div>
+              <div className="text-2xl font-black text-ink">89</div>
             </div>
           </div>
         </div>
       </section>
 
+      {/* Stats Section - Social Proof */}
+      {homepageContent.stats.enabled && (
+        <section className="border-b border-line">
+          <div className="max-w-page mx-auto px-5 md:px-8">
+            <div className="grid grid-cols-1 sm:grid-cols-3 divide-y sm:divide-y-0 sm:divide-x divide-line">
+              {homepageContent.stats.items.map((stat, i) => (
+                <div key={i} className="py-10 sm:py-14 sm:px-8 first:pl-0 last:pr-0">
+                  <div className="text-4xl sm:text-5xl font-black text-ink tracking-tight mb-3">
+                    {stat.value}
+                  </div>
+                  <div className="eyebrow">
+                    {stat.label}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
       {/* Video Section (Optional) */}
       {homepageContent.video.enabled && (
-        <section className="py-16 sm:py-20 bg-gray-50">
-          <div className="max-w-5xl mx-auto px-4 sm:px-6">
-            <div className="text-center mb-8">
-              <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+        <section className="border-b border-line bg-cream-deep">
+          <div className="max-w-5xl mx-auto px-5 md:px-8 py-16 sm:py-24">
+            <div className="mb-10">
+              <div className="eyebrow mb-4">Video / 2 minuty</div>
+              <h2 className="display-heading text-[clamp(1.75rem,3.5vw,3.25rem)] mb-4">
                 {homepageContent.video.title}
               </h2>
-              <p className="text-lg sm:text-xl text-gray-600">
+              <p className="text-lg text-mute max-w-2xl">
                 {homepageContent.video.description}
               </p>
             </div>
 
-            <div className="aspect-video bg-black rounded-lg overflow-hidden border border-gray-200">
+            <div className="aspect-video bg-ink border border-black/10 overflow-hidden">
               {homepageContent.video.platform === 'youtube' && (
                 <iframe
                   src={`https://www.youtube.com/embed/${homepageContent.video.videoId}`}
@@ -222,50 +218,49 @@ export default function LandingPage() {
         </section>
       )}
 
-      {/* Stats Section (Optional) */}
-      {homepageContent.stats.enabled && (
-        <section className="py-12 sm:py-16 bg-white border-y border-gray-200">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6">
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 text-center">
-              {homepageContent.stats.items.map((stat, i) => (
-                <div key={i}>
-                  <div className="text-3xl sm:text-4xl font-bold text-indigo-600 mb-2">
-                    {stat.value}
-                  </div>
-                  <div className="text-sm sm:text-base text-gray-600">
-                    {stat.label}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-      )}
-
-      {/* Features Section */}
-      <section className="py-16 sm:py-20 bg-gray-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6">
-          <div className="text-center mb-12 sm:mb-16">
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+      {/* Features Section - Bento Grid */}
+      <section id="features" className="border-b border-line scroll-mt-20">
+        <div className="max-w-page mx-auto px-5 md:px-8 py-16 sm:py-24">
+          <div
+            ref={featuresAnimation.ref}
+            className={`mb-12 sm:mb-16 ${revealClass(featuresAnimation.isVisible)}`}
+          >
+            <div className="eyebrow mb-4">Funkce</div>
+            <h2 className="display-heading text-[clamp(1.75rem,3.5vw,3.25rem)] mb-4 max-w-3xl">
               {featuresContent.sectionTitle}
             </h2>
-            <p className="text-lg sm:text-xl text-gray-600 max-w-2xl mx-auto">
+            <p className="text-lg text-mute max-w-2xl">
               {featuresContent.sectionDescription}
             </p>
           </div>
 
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+          {/* Bento Grid Layout */}
+          <div className="grid grid-cols-1 md:grid-cols-6 lg:grid-cols-12 gap-4 md:gap-5">
             {featuresContent.features.map((feature, i) => {
-              const Icon = iconMap[feature.icon];
+              // Define grid spans for Bento layout
+              const gridSpans = [
+                'md:col-span-4 lg:col-span-6', // Feature 0 - larger featured card
+                'md:col-span-2 lg:col-span-3', // Feature 1
+                'md:col-span-3 lg:col-span-3', // Feature 2
+                'md:col-span-3 lg:col-span-4', // Feature 3
+                'md:col-span-2 lg:col-span-4', // Feature 4
+                'md:col-span-4 lg:col-span-4', // Feature 5
+              ];
+
+              const isLarge = i === 0;
+
               return (
-                <div key={i} className="bg-white rounded-2xl p-6 sm:p-8 shadow-lg hover:shadow-xl transition-shadow border border-gray-100">
-                  <div className={`w-12 h-12 bg-${feature.color}-100 rounded-xl flex items-center justify-center text-${feature.color}-600 mb-4`}>
-                    {Icon && <Icon className="w-6 h-6" />}
+                <div
+                  key={i}
+                  className={`${gridSpans[i]} group card-brand p-6 ${isLarge ? 'sm:p-10' : 'sm:p-8'} hover:border-ink transition-colors duration-200 ease-brand`}
+                >
+                  <div className="inline-flex items-center justify-center w-11 h-11 border-2 border-ink text-ink mb-6 group-hover:bg-lime transition-colors duration-200 ease-brand">
+                    {iconMap[feature.icon] && React.createElement(iconMap[feature.icon], { size: isLarge ? 24 : 20 })}
                   </div>
-                  <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-3">
+                  <h3 className={`${isLarge ? 'text-xl sm:text-2xl' : 'text-lg'} font-black uppercase tracking-tight text-ink mb-3`}>
                     {feature.title}
                   </h3>
-                  <p className="text-sm sm:text-base text-gray-600 leading-relaxed">
+                  <p className={`text-sm ${isLarge ? 'sm:text-base' : ''} text-mute leading-relaxed`}>
                     {feature.description}
                   </p>
                 </div>
@@ -276,72 +271,86 @@ export default function LandingPage() {
       </section>
 
       {/* How It Works */}
-      <section id="how-it-works" className="py-16 sm:py-20 bg-white scroll-mt-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6">
-          <div className="text-center mb-12 sm:mb-16">
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+      <section id="how-it-works" className="border-b border-line bg-cream-deep scroll-mt-20">
+        <div className="max-w-page mx-auto px-5 md:px-8 py-16 sm:py-24">
+          <div
+            ref={howItWorksAnimation.ref}
+            className={`mb-12 sm:mb-16 ${revealClass(howItWorksAnimation.isVisible)}`}
+          >
+            <div className="eyebrow mb-4">Postup / 3 kroky</div>
+            <h2 className="display-heading text-[clamp(1.75rem,3.5vw,3.25rem)] mb-4">
               {howItWorksContent.sectionTitle}
             </h2>
-            <p className="text-lg sm:text-xl text-gray-600">
+            <p className="text-lg text-mute max-w-2xl">
               {howItWorksContent.sectionDescription}
             </p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-8 sm:gap-12 relative">
-            {/* Connection line */}
-            <div className="hidden md:block absolute top-1/4 left-1/3 right-1/3 h-0.5 bg-gradient-to-r from-indigo-200 via-purple-200 to-indigo-200" />
-
-            {howItWorksContent.steps.map((step, i) => {
-              const Icon = iconMap[step.icon];
-              return (
-                <div key={i} className="relative">
-                  <div className={`bg-gradient-to-br from-${step.color}-50 to-purple-50 rounded-2xl p-6 sm:p-8 text-center border-2 border-${step.color}-100`}>
-                    <div className={`w-14 h-14 sm:w-16 sm:h-16 bg-${step.color}-600 text-white rounded-full flex items-center justify-center text-2xl font-bold mx-auto mb-6 shadow-lg`}>
-                      {step.number}
-                    </div>
-
-                    <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center text-indigo-600 mx-auto mb-4 shadow">
-                      {Icon && <Icon className="w-8 h-8" />}
-                    </div>
-
-                    <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-3">
-                      {step.title}
-                    </h3>
-                    <p className="text-sm sm:text-base text-gray-600 leading-relaxed">
-                      {step.description}
-                    </p>
+          <div className="grid md:grid-cols-3 gap-4 md:gap-5">
+            {howItWorksContent.steps.map((step, i) => (
+              <div key={i} className="card-brand p-6 sm:p-8">
+                <div className="flex items-start justify-between mb-8">
+                  <span className="font-mono font-bold text-4xl text-ink/15">
+                    {String(step.number).padStart(2, '0')}
+                  </span>
+                  <div className="inline-flex items-center justify-center w-11 h-11 border-2 border-ink text-ink">
+                    {iconMap[step.icon] && React.createElement(iconMap[step.icon], { size: 22 })}
                   </div>
                 </div>
-              );
-            })}
+
+                <h3 className="text-lg sm:text-xl font-black uppercase tracking-tight text-ink mb-3">
+                  {step.title}
+                </h3>
+                <p className="text-sm sm:text-base text-mute leading-relaxed">
+                  {step.description}
+                </p>
+              </div>
+            ))}
           </div>
         </div>
       </section>
 
       {/* Benefits */}
-      <section className="py-16 sm:py-20 bg-gradient-to-br from-gray-50 to-gray-100">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6">
-          <div className="text-center mb-12 sm:mb-16">
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+      <section className="border-b border-line">
+        <div className="max-w-page mx-auto px-5 md:px-8 py-16 sm:py-24">
+          <div
+            ref={benefitsAnimation.ref}
+            className={`mb-12 sm:mb-16 ${revealClass(benefitsAnimation.isVisible)}`}
+          >
+            <div className="eyebrow mb-4">Přínosy</div>
+            <h2 className="display-heading text-[clamp(1.75rem,3.5vw,3.25rem)] mb-4">
               {benefitsContent.sectionTitle}
             </h2>
-            <p className="text-lg sm:text-xl text-gray-600">
+            <p className="text-lg text-mute max-w-2xl">
               {benefitsContent.sectionDescription}
             </p>
           </div>
 
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-5">
             {benefitsContent.benefits.map((benefit, i) => (
-              <div key={i} className="bg-white rounded-2xl p-6 sm:p-8 shadow-xl text-center hover:scale-105 transition-transform">
-                <div className="text-4xl sm:text-5xl mb-4">{benefit.emoji}</div>
-                <div className={`text-3xl sm:text-4xl font-bold text-${benefit.color}-600 mb-2`}>
-                  {benefit.metric}
+              <div
+                key={i}
+                className="group card-brand p-8 hover:border-ink transition-colors duration-200 ease-brand"
+              >
+                <div className="inline-flex items-center justify-center w-11 h-11 border-2 border-ink text-ink mb-6 group-hover:bg-lime transition-colors duration-200 ease-brand">
+                  {iconMap[benefit.icon] && React.createElement(iconMap[benefit.icon], { size: 22 })}
                 </div>
-                <div className="text-sm text-gray-500 mb-4">{benefit.metricLabel}</div>
-                <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-3">
+
+                {benefit.metric && (
+                  <div className="text-4xl sm:text-5xl font-black text-ink tracking-tight mb-1">
+                    {benefit.metric}
+                  </div>
+                )}
+                {benefit.metricLabel && (
+                  <div className="eyebrow mb-5">
+                    {benefit.metricLabel}
+                  </div>
+                )}
+
+                <h3 className="text-lg sm:text-xl font-black uppercase tracking-tight text-ink mb-3">
                   {benefit.title}
                 </h3>
-                <p className="text-sm sm:text-base text-gray-600">
+                <p className="text-sm sm:text-base text-mute leading-relaxed">
                   {benefit.description}
                 </p>
               </div>
@@ -352,67 +361,115 @@ export default function LandingPage() {
 
       {/* FAQ Section (Optional) */}
       {faqContent.enabled && (
-        <section className="py-16 sm:py-20 bg-white">
-          <div className="max-w-4xl mx-auto px-4 sm:px-6">
-            <div className="text-center mb-12">
-              <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+        <section id="faq" className="border-b border-line scroll-mt-20">
+          <div className="max-w-4xl mx-auto px-5 md:px-8 py-16 sm:py-24">
+            <div
+              ref={faqAnimation.ref}
+              className={`mb-12 ${revealClass(faqAnimation.isVisible)}`}
+            >
+              <div className="eyebrow mb-4">FAQ</div>
+              <h2 className="display-heading text-[clamp(1.75rem,3.5vw,3.25rem)] mb-4">
                 {faqContent.sectionTitle}
               </h2>
-              <p className="text-lg sm:text-xl text-gray-600">
+              <p className="text-lg text-mute">
                 {faqContent.sectionDescription}
               </p>
             </div>
 
-            <div className="space-y-4">
-              {faqContent.faqs.map((faq, i) => (
-                <div key={i} className="bg-gray-50 rounded-xl border border-gray-200 overflow-hidden">
-                  <button
-                    onClick={() => toggleFaq(i)}
-                    className="w-full px-6 py-4 text-left flex items-center justify-between hover:bg-gray-100 transition-colors"
-                  >
-                    <span className="text-lg font-semibold text-gray-900 pr-8">
-                      {faq.question}
-                    </span>
-                    {openFaqIndex === i ? (
-                      <LucideIcons.ChevronUp className="w-5 h-5 text-gray-500 flex-shrink-0" />
-                    ) : (
-                      <LucideIcons.ChevronDown className="w-5 h-5 text-gray-500 flex-shrink-0" />
-                    )}
-                  </button>
-                  {openFaqIndex === i && (
-                    <div className="px-6 pb-4 text-gray-600 leading-relaxed">
-                      <div dangerouslySetInnerHTML={{ __html: faq.answer.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>') }} />
+            <div className="border-t border-line">
+              {faqContent.faqs.map((faq, i) => {
+                const isOpen = openFaqIndex === i;
+                return (
+                  <div key={i} className="border-b border-line">
+                    <button
+                      onClick={() => toggleFaq(i)}
+                      className="w-full py-5 text-left flex items-center justify-between gap-6 group"
+                      aria-expanded={isOpen}
+                    >
+                      <span className="flex items-baseline gap-4">
+                        <span className="font-mono text-xs text-mute shrink-0">
+                          {String(i + 1).padStart(2, '0')}
+                        </span>
+                        <span className={`text-base sm:text-lg font-bold transition-colors duration-200 ${
+                          isOpen ? 'text-ink' : 'text-ink-soft group-hover:text-ink'
+                        }`}>
+                          {faq.question}
+                        </span>
+                      </span>
+                      <span
+                        className={`shrink-0 inline-flex items-center justify-center w-8 h-8 border border-ink transition-all duration-200 ease-brand ${
+                          isOpen ? 'rotate-180 bg-lime' : 'rotate-0 group-hover:bg-lime'
+                        }`}
+                      >
+                        <LucideIcons.ChevronDown className="w-4 h-4 text-ink" aria-hidden="true" />
+                      </span>
+                    </button>
+                    <div
+                      className={`overflow-hidden transition-all duration-500 ease-brand ${
+                        isOpen ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
+                      }`}
+                    >
+                      <div className="pb-6 pl-9 pr-4 text-mute leading-relaxed">
+                        <div dangerouslySetInnerHTML={{ __html: faq.answer.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>') }} />
+                      </div>
                     </div>
-                  )}
-                </div>
-              ))}
+                  </div>
+                );
+              })}
             </div>
           </div>
         </section>
       )}
 
       {/* Final CTA Section */}
-      <section className="py-16 sm:py-20 bg-gradient-to-br from-indigo-600 to-purple-700 text-white">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 text-center">
-          <h2 className="text-2xl sm:text-3xl md:text-5xl font-bold mb-6">
+      <section className="bg-ink text-cream">
+        <div className="max-w-page mx-auto px-5 md:px-8 py-20 sm:py-32">
+          <div className="chip-mono border-white/15 text-cream/60 mb-8">
+            <span className="w-1.5 h-1.5 bg-lime" aria-hidden="true" />
+            Připraveno k použití
+          </div>
+
+          <h2 className="font-black uppercase tracking-[-0.03em] leading-[0.95] text-cream text-[clamp(2.25rem,5.5vw,5.25rem)] mb-6 max-w-4xl">
             {homepageContent.finalCta.heading}
           </h2>
-          <p className="text-lg sm:text-xl md:text-2xl text-indigo-100 mb-10">
+          <p className="text-lg sm:text-xl text-cream/60 mb-12 max-w-2xl leading-relaxed">
             {homepageContent.finalCta.description}
           </p>
 
-          <Link
-            href={homepageContent.finalCta.buttonLink}
-            className="inline-flex items-center gap-3 bg-white text-indigo-600 px-8 sm:px-10 py-4 sm:py-5 rounded-xl font-bold text-lg sm:text-xl shadow-2xl hover:scale-105 transition-transform"
-          >
-            <svg className="w-6 h-6 sm:w-7 sm:h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-            </svg>
-            {homepageContent.finalCta.buttonText}
-            <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
-            </svg>
-          </Link>
+          <div className="flex flex-col sm:flex-row gap-4 sm:items-center">
+            <Link
+              href={homepageContent.finalCta.buttonLink}
+              className="btn-brand btn-lime group"
+            >
+              {homepageContent.finalCta.buttonText}
+              <LucideIcons.ArrowRight
+                className="w-4 h-4 group-hover:translate-x-1 transition-transform duration-200 ease-brand"
+                aria-hidden="true"
+              />
+            </Link>
+
+            <a
+              href="#features"
+              className="inline-flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.16em] text-cream/60 hover:text-lime transition-colors duration-200 ease-brand sm:ml-4"
+              onClick={(e) => {
+                e.preventDefault();
+                document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' });
+              }}
+            >
+              Zobrazit funkce
+              <LucideIcons.ArrowDown className="w-3.5 h-3.5" aria-hidden="true" />
+            </a>
+          </div>
+
+          {/* Trust indicators */}
+          <div className="mt-14 pt-8 border-t border-white/10 flex flex-wrap gap-x-8 gap-y-3">
+            {['Bez registrace', '100% zdarma', 'Data zůstávají u vás'].map((item) => (
+              <div key={item} className="flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.16em] text-cream/50">
+                <LucideIcons.Check className="w-3.5 h-3.5 text-lime" aria-hidden="true" />
+                <span>{item}</span>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
     </div>

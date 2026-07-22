@@ -48,13 +48,13 @@ export default function SegmentFilter({
   const isFiltered = selectedSegments.length > 0 && selectedSegments.length < segments.length;
 
   return (
-    <div className="bg-white rounded-xl shadow-md p-6 mb-6">
+    <div className="card-brand p-6 mb-6">
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-3">
-          <Filter className="text-indigo-600" size={20} />
-          <h3 className="text-lg font-semibold text-gray-900">Filtrovat podle segmentu</h3>
+          <Filter className="text-ink" size={20} />
+          <h3 className="text-lg font-black uppercase tracking-tight text-ink">Filtrovat podle segmentu</h3>
           {selectedSegments.length > 0 && selectedSegments.length < segments.length && (
-            <span className="bg-indigo-100 text-indigo-700 px-3 py-1 rounded-full text-xs font-medium">
+            <span className="bg-lime text-ink px-3 py-1 font-mono text-[11px] uppercase tracking-[0.14em] font-medium">
               {selectedSegments.length} vybraných
             </span>
           )}
@@ -63,13 +63,13 @@ export default function SegmentFilter({
         <div className="flex gap-2">
           <button
             onClick={handleSelectAll}
-            className="text-sm text-indigo-600 hover:text-indigo-800 font-medium px-3 py-1 rounded-md hover:bg-indigo-50 transition-colors"
+            className="text-sm text-ink font-medium px-3 py-1 hover:bg-lime transition-colors duration-200 ease-brand"
           >
             Vybrat vše
           </button>
           <button
             onClick={handleClearAll}
-            className="text-sm text-gray-600 hover:text-gray-800 font-medium px-3 py-1 rounded-md hover:bg-gray-100 transition-colors flex items-center gap-1"
+            className="text-sm text-mute hover:text-ink font-medium px-3 py-1 hover:bg-cream-deep transition-colors duration-200 ease-brand flex items-center gap-1"
           >
             <X size={14} />
             Zrušit výběr
@@ -86,17 +86,17 @@ export default function SegmentFilter({
           return (
             <label
               key={segment}
-              className={`flex items-center gap-3 p-3 rounded-lg border-2 cursor-pointer transition-all ${
+              className={`flex items-center gap-3 p-3 border-2 cursor-pointer transition-all duration-200 ease-brand ${
                 isSelected
                   ? `${colorClass} border-opacity-100`
-                  : 'bg-gray-50 text-gray-600 border-gray-200 hover:border-gray-300'
+                  : 'bg-cream-deep text-mute border-black/10 hover:border-black/30'
               }`}
             >
               <input
                 type="checkbox"
                 checked={isSelected}
                 onChange={() => handleToggleSegment(segment)}
-                className="w-4 h-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
+                className="w-4 h-4 accent-ink border-black/10 focus:ring-ink"
               />
               <span className="text-sm font-medium flex-1">{segment}</span>
             </label>
@@ -106,10 +106,10 @@ export default function SegmentFilter({
 
       {/* Filter Status */}
       {isFiltered && (
-        <div className="mt-4 pt-4 border-t border-gray-200">
-          <p className="text-sm text-gray-600">
-            Zobrazeno <span className="font-semibold text-gray-900">{filteredCount.toLocaleString('cs-CZ')}</span> z{' '}
-            <span className="font-semibold text-gray-900">{totalCount.toLocaleString('cs-CZ')}</span> zákazníků
+        <div className="mt-4 pt-4 border-t border-line">
+          <p className="text-sm text-mute">
+            Zobrazeno <span className="font-mono font-semibold text-ink">{filteredCount.toLocaleString('cs-CZ')}</span> z{' '}
+            <span className="font-mono font-semibold text-ink">{totalCount.toLocaleString('cs-CZ')}</span> zákazníků
           </p>
         </div>
       )}

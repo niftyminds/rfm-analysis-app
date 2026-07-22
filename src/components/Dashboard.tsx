@@ -565,29 +565,29 @@ export default function Dashboard({ customers, onReset }: DashboardProps) {
   return (
     <div className="space-y-6 sm:space-y-8">
       {/* Header */}
-      <div className="bg-white rounded-xl sm:rounded-2xl shadow-xl p-4 sm:p-6 lg:p-8">
+      <div className="bg-card border border-black/10 p-4 sm:p-6 lg:p-8">
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4 mb-4 sm:mb-6">
           <div className="flex-1 min-w-0">
-            <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">Výsledky analýzy</h2>
-            <p className="text-sm sm:text-base text-gray-600">RFM segmentace {stats.total.toLocaleString('cs-CZ')} zákazníků</p>
+            <h2 className="text-2xl sm:text-3xl font-black uppercase tracking-tight text-ink mb-2">Výsledky analýzy</h2>
+            <p className="text-sm sm:text-base text-mute">RFM segmentace {stats.total.toLocaleString('cs-CZ')} zákazníků</p>
           </div>
           <div className="flex flex-col gap-3 w-full sm:w-auto">
             {/* User Identity Badge */}
             {(isGoogleAuthenticated || savedEmail) && (
-              <div className="flex items-center justify-between sm:justify-end gap-2 bg-green-50 border border-green-200 rounded-lg px-3 py-2">
+              <div className="flex items-center justify-between sm:justify-end gap-2 bg-lime border border-black/10 px-3 py-2">
                 <div className="flex items-center gap-2">
-                  <div className="flex items-center justify-center w-6 h-6 bg-green-100 rounded-full">
-                    <svg className="w-4 h-4 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                  <div className="flex items-center justify-center w-6 h-6 text-ink">
+                    <svg className="w-4 h-4 text-ink" fill="currentColor" viewBox="0 0 20 20">
                       <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"/>
                     </svg>
                   </div>
-                  <span className="text-sm font-medium text-green-800">
+                  <span className="text-sm font-medium text-ink">
                     {isGoogleAuthenticated ? 'Přihlášen do Google' : savedEmail}
                   </span>
                 </div>
                 <button
                   onClick={isGoogleAuthenticated ? handleLogout : handleChangeEmail}
-                  className="text-xs text-green-700 hover:text-green-900 font-medium underline"
+                  className="text-xs text-ink hover:text-ink-soft font-medium underline"
                 >
                   {isGoogleAuthenticated ? 'Odhlásit se' : 'Změnit email'}
                 </button>
@@ -599,11 +599,11 @@ export default function Dashboard({ customers, onReset }: DashboardProps) {
             <button
               onClick={() => handleExportClick('sheets')}
               disabled={isExportingToSheets}
-              className="flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 active:bg-green-800 text-white px-4 py-3 sm:py-2 rounded-lg font-semibold transition-colors shadow-lg disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px]"
+              className="btn-brand btn-ink flex items-center justify-center gap-2 px-4 py-3 sm:py-2 disabled:opacity-50 disabled:cursor-not-allowed min-h-[44px]"
             >
               {isExportingToSheets ? (
                 <>
-                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-lime-deep"></div>
                   <span className="text-base sm:text-sm">
                     {processingPhase || 'Exportuji...'}
                   </span>
@@ -621,7 +621,7 @@ export default function Dashboard({ customers, onReset }: DashboardProps) {
             </button>
             <button
               onClick={onReset}
-              className="flex items-center justify-center gap-2 bg-gray-100 hover:bg-gray-200 active:bg-gray-300 text-gray-700 px-4 py-3 sm:py-2 rounded-lg font-medium transition-colors min-h-[44px]"
+              className="btn-brand btn-outline-ink flex items-center justify-center gap-2 px-4 py-3 sm:py-2 min-h-[44px]"
             >
               <RefreshCw size={18} />
               <span className="text-base sm:text-sm">Nový soubor</span>
@@ -632,12 +632,12 @@ export default function Dashboard({ customers, onReset }: DashboardProps) {
 
       {/* Info box o Google OAuth */}
         {!isGoogleAuthenticated && (
-          <div className="mb-4 sm:mb-6 bg-blue-50 border border-blue-200 rounded-lg p-3 sm:p-4">
+          <div className="mb-4 sm:mb-6 bg-cream-deep border border-black/10 p-3 sm:p-4">
             <div className="flex items-start gap-2">
-              <svg className="w-4 h-4 sm:w-5 sm:h-5 mt-0.5 flex-shrink-0 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+              <svg className="w-4 h-4 sm:w-5 sm:h-5 mt-0.5 flex-shrink-0 text-ink" fill="currentColor" viewBox="0 0 20 20">
                 <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd"/>
               </svg>
-              <div className="text-xs sm:text-sm text-blue-800">
+              <div className="text-xs sm:text-sm text-ink-soft">
                 <strong>První přihlášení:</strong> Google zobrazí varování "unverified app".
                 Klikněte na <span className="font-semibold">Advanced</span> → <span className="font-semibold">Go to RFM Analýza (unsafe)</span>.
                 Aplikace má přístup pouze k souborům, které vytvoří.
@@ -648,106 +648,106 @@ export default function Dashboard({ customers, onReset }: DashboardProps) {
 
         {/* Stats Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 sm:gap-6">
-          <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-4 sm:p-6 border border-blue-200">
+          <div className="bg-cream-deep p-4 sm:p-6 border border-black/10">
             <div className="flex items-center gap-2 sm:gap-3 mb-2">
-              <Users className="text-blue-600 flex-shrink-0" size={20} />
-              <span className="text-xs sm:text-sm font-medium text-blue-700">Celkem zákazníků</span>
+              <Users className="text-ink flex-shrink-0" size={20} />
+              <span className="eyebrow">Celkem zákazníků</span>
             </div>
-            <p className="text-2xl sm:text-3xl font-bold text-blue-900">{stats.total.toLocaleString('cs-CZ')}</p>
+            <p className="text-2xl sm:text-3xl font-black text-ink tracking-tight">{stats.total.toLocaleString('cs-CZ')}</p>
           </div>
 
-          <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-xl p-4 sm:p-6 border border-green-200">
+          <div className="bg-cream-deep p-4 sm:p-6 border border-black/10">
             <div className="flex items-center gap-2 sm:gap-3 mb-2">
-              <DollarSign className="text-green-600 flex-shrink-0" size={20} />
-              <span className="text-xs sm:text-sm font-medium text-green-700">Celková hodnota</span>
+              <DollarSign className="text-ink flex-shrink-0" size={20} />
+              <span className="eyebrow">Celková hodnota</span>
             </div>
-            <p className="text-2xl sm:text-3xl font-bold text-green-900">
+            <p className="text-2xl sm:text-3xl font-black text-ink tracking-tight">
               {Math.round(stats.totalValue).toLocaleString('cs-CZ')} Kč
             </p>
           </div>
 
-          <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl p-4 sm:p-6 border border-purple-200">
+          <div className="bg-cream-deep p-4 sm:p-6 border border-black/10">
             <div className="flex items-center gap-2 sm:gap-3 mb-2">
-              <TrendingUp className="text-purple-600 flex-shrink-0" size={20} />
-              <span className="text-xs sm:text-sm font-medium text-purple-700">Prům. objednávek</span>
+              <TrendingUp className="text-ink flex-shrink-0" size={20} />
+              <span className="eyebrow">Prům. objednávek</span>
             </div>
-            <p className="text-2xl sm:text-3xl font-bold text-purple-900">{stats.avgOrders.toFixed(2)}</p>
+            <p className="text-2xl sm:text-3xl font-black text-ink tracking-tight">{stats.avgOrders.toFixed(2)}</p>
           </div>
 
-          <div className="bg-gradient-to-br from-orange-50 to-orange-100 rounded-xl p-4 sm:p-6 border border-orange-200">
+          <div className="bg-cream-deep p-4 sm:p-6 border border-black/10">
             <div className="flex items-center gap-2 sm:gap-3 mb-2">
-              <DollarSign className="text-orange-600 flex-shrink-0" size={20} />
-              <span className="text-xs sm:text-sm font-medium text-orange-700">Prům. hodnota</span>
+              <DollarSign className="text-ink flex-shrink-0" size={20} />
+              <span className="eyebrow">Prům. hodnota</span>
             </div>
-            <p className="text-2xl sm:text-3xl font-bold text-orange-900">
+            <p className="text-2xl sm:text-3xl font-black text-ink tracking-tight">
               {Math.round(stats.avgValue).toLocaleString('cs-CZ')} Kč
             </p>
           </div>
 
-          <div className="bg-gradient-to-br from-amber-50 to-amber-100 rounded-xl p-4 sm:p-6 border border-amber-200">
+          <div className="bg-cream-deep p-4 sm:p-6 border border-black/10">
             <div className="flex items-center gap-2 sm:gap-3 mb-2">
-              <Calendar className="text-amber-600 flex-shrink-0" size={20} />
-              <span className="text-xs sm:text-sm font-medium text-amber-700">Prům. dny od poslední obj.</span>
+              <Calendar className="text-ink flex-shrink-0" size={20} />
+              <span className="eyebrow">Prům. dny od poslední obj.</span>
             </div>
-            <p className="text-2xl sm:text-3xl font-bold text-amber-900">
+            <p className="text-2xl sm:text-3xl font-black text-ink tracking-tight">
               {Math.round(stats.avgRecency).toLocaleString('cs-CZ')} dní
             </p>
-            <p className="text-xs text-amber-700 mt-1">Průměrná recency všech zákazníků</p>
+            <p className="text-xs text-mute mt-1">Průměrná recency všech zákazníků</p>
           </div>
         </div>
 
         {/* CLV Metrics Section */}
         <div className="mt-6 sm:mt-8">
-          <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+          <h3 className="text-lg sm:text-xl font-black uppercase tracking-tight text-ink mb-4 flex items-center gap-2">
             <span>💰</span>
             Customer Lifetime Value (CLV) Metriky
           </h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
             {/* Average CLV */}
-            <div className="bg-gradient-to-br from-emerald-50 to-emerald-100 rounded-xl p-4 sm:p-6 border border-emerald-200">
+            <div className="bg-cream-deep p-4 sm:p-6 border border-black/10">
               <div className="flex items-center gap-2 sm:gap-3 mb-2">
-                <DollarSign className="text-emerald-600 flex-shrink-0" size={20} />
-                <span className="text-xs sm:text-sm font-medium text-emerald-700">Průměrné CLV</span>
+                <DollarSign className="text-ink flex-shrink-0" size={20} />
+                <span className="eyebrow">Průměrné CLV</span>
               </div>
-              <p className="text-2xl sm:text-3xl font-bold text-emerald-900">
+              <p className="text-2xl sm:text-3xl font-black text-ink tracking-tight">
                 {Math.round(stats.avgCLV).toLocaleString('cs-CZ')} Kč
               </p>
-              <p className="text-xs text-emerald-700 mt-1">Historické + predikované</p>
+              <p className="text-xs text-mute mt-1">Historické + predikované</p>
             </div>
 
             {/* Total Predicted CLV */}
-            <div className="bg-gradient-to-br from-teal-50 to-teal-100 rounded-xl p-4 sm:p-6 border border-teal-200">
+            <div className="bg-cream-deep p-4 sm:p-6 border border-black/10">
               <div className="flex items-center gap-2 sm:gap-3 mb-2">
-                <TrendingUp className="text-teal-600 flex-shrink-0" size={20} />
-                <span className="text-xs sm:text-sm font-medium text-teal-700">Celkové predikované CLV</span>
+                <TrendingUp className="text-ink flex-shrink-0" size={20} />
+                <span className="eyebrow">Celkové predikované CLV</span>
               </div>
-              <p className="text-2xl sm:text-3xl font-bold text-teal-900">
+              <p className="text-2xl sm:text-3xl font-black text-ink tracking-tight">
                 {Math.round(stats.totalPredictedCLV).toLocaleString('cs-CZ')} Kč
               </p>
-              <p className="text-xs text-teal-700 mt-1">Projekce na 12 měsíců</p>
+              <p className="text-xs text-mute mt-1">Projekce na 12 měsíců</p>
             </div>
 
             {/* High Value Customers */}
-            <div className="bg-gradient-to-br from-cyan-50 to-cyan-100 rounded-xl p-4 sm:p-6 border border-cyan-200">
+            <div className="bg-cream-deep p-4 sm:p-6 border border-black/10">
               <div className="flex items-center gap-2 sm:gap-3 mb-2">
-                <Users className="text-cyan-600 flex-shrink-0" size={20} />
-                <span className="text-xs sm:text-sm font-medium text-cyan-700">High Value zákazníků</span>
+                <Users className="text-ink flex-shrink-0" size={20} />
+                <span className="eyebrow">High Value zákazníků</span>
               </div>
-              <p className="text-2xl sm:text-3xl font-bold text-cyan-900">
+              <p className="text-2xl sm:text-3xl font-black text-ink tracking-tight">
                 {stats.highValueCustomers.toLocaleString('cs-CZ')}
               </p>
-              <p className="text-xs text-cyan-700 mt-1">
+              <p className="text-xs text-mute mt-1">
                 {((stats.highValueCustomers / stats.total) * 100).toFixed(1)}% z celkového počtu
               </p>
             </div>
 
             {/* Average Churn Probability */}
-            <div className={`bg-gradient-to-br rounded-xl p-4 sm:p-6 border ${
+            <div className={`p-4 sm:p-6 border ${
               stats.avgChurnProbability < 0.3
-                ? 'from-green-50 to-green-100 border-green-200'
+                ? 'bg-green-50 border-green-200'
                 : stats.avgChurnProbability < 0.6
-                ? 'from-yellow-50 to-yellow-100 border-yellow-200'
-                : 'from-red-50 to-red-100 border-red-200'
+                ? 'bg-yellow-50 border-yellow-200'
+                : 'bg-red-50 border-red-200'
             }`}>
               <div className="flex items-center gap-2 sm:gap-3 mb-2">
                 <svg className={`w-5 h-5 flex-shrink-0 ${
@@ -759,7 +759,7 @@ export default function Dashboard({ customers, onReset }: DashboardProps) {
                 }`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                 </svg>
-                <span className={`text-xs sm:text-sm font-medium ${
+                <span className={`font-mono text-[0.72rem] uppercase tracking-[0.14em] ${
                   stats.avgChurnProbability < 0.3
                     ? 'text-green-700'
                     : stats.avgChurnProbability < 0.6
@@ -767,7 +767,7 @@ export default function Dashboard({ customers, onReset }: DashboardProps) {
                     : 'text-red-700'
                 }`}>Prům. churn riziko</span>
               </div>
-              <p className={`text-2xl sm:text-3xl font-bold ${
+              <p className={`text-2xl sm:text-3xl font-black tracking-tight ${
                 stats.avgChurnProbability < 0.3
                   ? 'text-green-900'
                   : stats.avgChurnProbability < 0.6

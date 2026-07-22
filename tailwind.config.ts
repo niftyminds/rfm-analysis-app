@@ -7,40 +7,34 @@ const config: Config = {
     "./src/app/**/*.{js,ts,jsx,tsx,mdx}",
     "./src/content/**/*.json",
   ],
-  safelist: [
-    // Background colors
-    'bg-indigo-100', 'bg-indigo-600',
-    'bg-blue-100', 'bg-blue-600',
-    'bg-purple-100', 'bg-purple-600',
-    'bg-green-100', 'bg-green-600',
-    'bg-red-100', 'bg-red-600',
-    'bg-yellow-100', 'bg-yellow-600',
-    'bg-orange-100', 'bg-orange-600',
-    // Text colors
-    'text-indigo-600',
-    'text-blue-600',
-    'text-purple-600',
-    'text-green-600',
-    'text-red-600',
-    'text-yellow-600',
-    'text-orange-600',
-    // Border colors
-    'border-indigo-100',
-    'border-blue-100',
-    'border-purple-100',
-    'border-green-100',
-    'border-red-100',
-    'border-yellow-100',
-    'border-orange-100',
-    // Gradient colors (from-{color}-50, from-{color}-600, etc.)
-    'from-indigo-50', 'from-blue-50', 'from-purple-50', 'from-green-50', 'from-red-50', 'from-yellow-50', 'from-orange-50',
-    'from-indigo-600', 'from-blue-600', 'from-purple-600', 'from-green-600', 'from-red-600', 'from-yellow-600', 'from-orange-600',
-  ],
   theme: {
     extend: {
+      fontFamily: {
+        sans: ['var(--font-inter)', 'system-ui', '-apple-system', 'sans-serif'],
+        mono: ['var(--font-jetbrains-mono)', 'ui-monospace', 'monospace'],
+      },
       colors: {
-        background: "var(--background)",
-        foreground: "var(--foreground)",
+        cream: {
+          DEFAULT: '#F6F2EF',
+          deep: '#ECE6E0',
+        },
+        card: '#FBF9F7',
+        ink: {
+          DEFAULT: '#000000',
+          soft: '#1A1A1A',
+        },
+        mute: '#6B6760',
+        lime: {
+          DEFAULT: '#D5FE9D',
+          deep: '#BFEA80',
+        },
+        line: 'rgba(0,0,0,0.08)',
+      },
+      maxWidth: {
+        page: '1320px',
+      },
+      transitionTimingFunction: {
+        brand: 'cubic-bezier(.2,.65,.2,1)',
       },
       keyframes: {
         fadeIn: {
@@ -48,13 +42,13 @@ const config: Config = {
           '100%': { opacity: '1' },
         },
         slideUp: {
-          '0%': { transform: 'translateY(20px)', opacity: '0' },
+          '0%': { transform: 'translateY(18px)', opacity: '0' },
           '100%': { transform: 'translateY(0)', opacity: '1' },
         },
       },
       animation: {
-        fadeIn: 'fadeIn 0.2s ease-out',
-        slideUp: 'slideUp 0.3s ease-out',
+        fadeIn: 'fadeIn 0.2s cubic-bezier(.2,.65,.2,1)',
+        slideUp: 'slideUp 0.3s cubic-bezier(.2,.65,.2,1)',
       },
     },
   },

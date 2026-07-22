@@ -2,22 +2,37 @@
 @tailwind components;
 @tailwind utilities;
 
+/* nifty — minds brand tokens (Brand Manual v1.0) */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  color-scheme: light;
+  --cream: #F6F2EF;
+  --cream-deep: #ECE6E0;
+  --card: #FBF9F7;
+  --ink: #000000;
+  --ink-soft: #1A1A1A;
+  --mute: #6B6760;
+  --lime: #D5FE9D;
+  --lime-deep: #BFEA80;
+  --line: rgba(0, 0, 0, 0.08);
+  --ease-brand: cubic-bezier(.2, .65, .2, 1);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+::selection {
+  background: var(--lime);
+  color: var(--ink);
+}
+
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 4rem;
 }
 
 body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+  color: var(--ink-soft);
+  background: var(--cream);
+  font-family: var(--font-inter), system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 /* Date input placeholder styling - make placeholders more visible */
@@ -25,7 +40,7 @@ input[type="date"]::-webkit-datetime-edit-text,
 input[type="date"]::-webkit-datetime-edit-month-field,
 input[type="date"]::-webkit-datetime-edit-day-field,
 input[type="date"]::-webkit-datetime-edit-year-field {
-  color: rgb(75, 85, 99); /* gray-600 - matches other placeholders */
+  color: var(--mute);
 }
 
 input[type="date"]::-webkit-calendar-picker-indicator {
@@ -36,44 +51,52 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover {
   opacity: 1;
 }
 
+@layer components {
+  /* Mono eyebrow label — section openers, small labels */
+  .eyebrow {
+    @apply font-mono text-[0.72rem] font-medium uppercase tracking-[0.14em] text-mute;
+  }
+
+  /* Display headings — Inter Black, UPPERCASE, tight */
+  .display-heading {
+    @apply font-black uppercase tracking-[-0.025em] leading-[1.0] text-ink;
+  }
+
+  /* Buttons — sharp corners, Black UPPERCASE, tracking 0.1em, lift on hover */
+  .btn-brand {
+    @apply inline-flex items-center justify-center gap-2 font-black uppercase tracking-[0.1em] text-sm px-6 py-[0.9rem] transition-all duration-200 ease-brand hover:-translate-y-0.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-ink focus-visible:ring-offset-2;
+  }
+
+  .btn-lime {
+    @apply bg-lime text-ink hover:bg-lime-deep;
+  }
+
+  .btn-ink {
+    @apply bg-ink text-lime hover:bg-ink-soft;
+  }
+
+  .btn-outline-ink {
+    @apply border border-ink text-ink hover:bg-ink hover:text-cream;
+  }
+
+  /* Mono chip — 11px UPPERCASE, tracking 0.16em */
+  .chip-mono {
+    @apply inline-flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.16em] px-3 py-1.5 border border-black/10;
+  }
+
+  /* Content card — sharp corners, hairline border, no shadow */
+  .card-brand {
+    @apply bg-card border border-black/10;
+  }
+}
+
 @layer utilities {
   .text-balance {
     text-wrap: balance;
   }
 }
 
-/* Landing Page Animations */
-@keyframes float {
-  0%, 100% {
-    transform: translateY(0px);
-  }
-  50% {
-    transform: translateY(-10px);
-  }
-}
-
-.animate-float {
-  animation: float 3s ease-in-out infinite;
-}
-
-.animate-float-delayed {
-  animation: float 3s ease-in-out infinite;
-  animation-delay: 1s;
-}
-
-/* Grid background pattern */
-.bg-grid-white {
-  background-image:
-    linear-gradient(white 1px, transparent 1px),
-    linear-gradient(90deg, white 1px, transparent 1px);
-}
-
-/* Smooth scroll behavior */
-html {
-  scroll-behavior: smooth;
-}
-
-/* Export Modal Animations */
+/* Modal animations */
 @keyframes fadeIn {
   from { opacity: 0; }
   to { opacity: 1; }
@@ -82,7 +105,7 @@ html {
 @keyframes slideUp {
   from {
     opacity: 0;
-    transform: translateY(20px);
+    transform: translateY(18px);
   }
   to {
     opacity: 1;
@@ -91,9 +114,24 @@ html {
 }
 
 .animate-fadeIn {
-  animation: fadeIn 0.2s ease-out;
+  animation: fadeIn 0.2s var(--ease-brand);
 }
 
 .animate-slideUp {
-  animation: slideUp 0.3s ease-out;
+  animation: slideUp 0.3s var(--ease-brand);
+}
+
+/* Motion respects reduced-motion preference */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }

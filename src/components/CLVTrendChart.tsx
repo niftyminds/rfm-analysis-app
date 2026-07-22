@@ -7,6 +7,8 @@ interface CLVTrendChartProps {
   customers: Customer[];
 }
 
+const MONO_TICK = { fill: '#6B6760', fontSize: 11, fontFamily: 'var(--font-jetbrains-mono), monospace' };
+
 export default function CLVTrendChart({ customers }: CLVTrendChartProps) {
   // Group customers by lifetime cohorts
   const cohortData = new Map<string, { total: number; count: number; predicted: number; historical: number }>();
@@ -50,19 +52,20 @@ export default function CLVTrendChart({ customers }: CLVTrendChartProps) {
     });
 
   return (
-    <div className="bg-white rounded-2xl shadow-xl p-6 sm:p-8">
-      <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-6">CLV Trend podle délky vztahu</h2>
+    <div className="card-brand p-6 sm:p-8">
+      <h2 className="text-xl sm:text-2xl font-black uppercase tracking-tight text-ink mb-6">CLV Trend podle délky vztahu</h2>
 
       {/* Chart */}
       <div className="h-80 sm:h-96 mb-8">
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={chartData}>
-            <CartesianGrid strokeDasharray="3 3" />
+            <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.08)" />
             <XAxis
               dataKey="cohort"
-              style={{ fontSize: '12px' }}
+              tick={MONO_TICK}
             />
             <YAxis
+              tick={MONO_TICK}
               tickFormatter={(value) => `${(value / 1000).toFixed(0)}k`}
             />
             <Tooltip
@@ -70,19 +73,26 @@ export default function CLVTrendChart({ customers }: CLVTrendChartProps) {
                 if (active && payload && payload.length) {
                   const data = payload[0].payload;
                   return (
-                    <div className="bg-white p-4 rounded-lg shadow-lg border border-gray-200">
-                      <p className="font-semibold text-gray-900 mb-2">{data.cohort}</p>
-                      <p className="text-gray-600">Počet zákazníků: {data.customerCount.toLocaleString('cs-CZ')}</p>
-                      <p className="text-emerald-600 font-semibold">Prům. CLV: {data.avgCLV.toLocaleString('cs-CZ')} Kč</p>
-                      <p className="text-teal-600 text-sm">Historické: {data.avgHistorical.toLocaleString('cs-CZ')} Kč</p>
-                      <p className="text-indigo-600 text-sm">Predikované: {data.avgPredicted.toLocaleString('cs-CZ')} Kč</p>
+                    <div className="bg-card p-4 border border-black/10">
+                      <p className="font-bold text-ink mb-2">{data.cohort}</p>
+                      <p className="text-ink-soft font-mono text-sm">Počet zákazníků: {data.customerCount.toLocaleString('cs-CZ')}</p>
+                      <p className="font-mono text-sm font-semibold" style={{ color: '#10b981' }}>Prům. CLV: {data.avgCLV.toLocaleString('cs-CZ')} Kč</p>
+                      <p className="font-mono text-sm" style={{ color: '#14b8a6' }}>Historické: {data.avgHistorical.toLocaleString('cs-CZ')} Kč</p>
+                      <p className="font-mono text-sm" style={{ color: '#6366f1' }}>Predikované: {data.avgPredicted.toLocaleString('cs-CZ')} Kč</p>
                     </div>
                   );
                 }
                 return null;
               }}
             />
-            <Legend />
+            <Legend
+              wrapperStyle={{
+                fontFamily: 'var(--font-jetbrains-mono), monospace',
+                fontSize: 11,
+                textTransform: 'uppercase',
+                letterSpacing: '0.08em'
+              }}
+            />
             <Line
               type="monotone"
               dataKey="avgCLV"
@@ -119,13 +129,13 @@ export default function CLVTrendChart({ customers }: CLVTrendChartProps) {
         {chartData.map((cohort, index) => (
           <div
             key={cohort.cohort}
-            className="bg-gradient-to-br from-emerald-50 to-emerald-100 rounded-lg p-3 sm:p-4 border border-emerald-200"
+            className="bg-cream-deep p-3 sm:p-4 border border-black/10"
           >
-            <p className="text-xs font-medium text-emerald-700 mb-1">{cohort.cohort}</p>
-            <p className="text-lg sm:text-xl font-bold text-emerald-900">
+            <p className="font-mono text-xs uppercase tracking-wide text-mute mb-1">{cohort.cohort}</p>
+            <p className="text-lg sm:text-xl font-black tracking-tight text-ink">
               {(cohort.avgCLV / 1000).toFixed(0)}k
             </p>
-            <p className="text-[10px] sm:text-xs text-emerald-600 mt-1">
+            <p className="font-mono text-[10px] sm:text-xs text-mute mt-1">
               {cohort.customerCount} zákazníků
             </p>
           </div>
@@ -133,14 +143,14 @@ export default function CLVTrendChart({ customers }: CLVTrendChartProps) {
       </div>
 
       {/* Info box */}
-      <div className="mt-6 p-4 bg-teal-50 border border-teal-200 rounded-lg">
+      <div className="mt-6 p-4 bg-cream-deep border border-line">
         <div className="flex items-start gap-3">
-          <div className="text-teal-600 text-xl">📈</div>
+          <div className="text-xl">📈</div>
           <div>
-            <p className="text-sm text-teal-900 font-medium">
+            <p className="text-sm text-ink font-medium">
               CLV trend ukazuje, jak se mění průměrná hodnota zákazníků podle délky jejich vztahu
             </p>
-            <p className="text-xs text-teal-700 mt-1">
+            <p className="text-xs text-mute mt-1">
               Delší vztah obvykle znamená vyšší CLV díky opakovaným nákupům a nižšímu churn riziku
             </p>
           </div>
